@@ -1,10 +1,12 @@
 #root {
   width: 100%;
-  height: 100%;
+  height: 100vh;
   margin: 0;
   padding: 0;
   /* Background color is controlled by darkTheme.css */
   overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .logo {
@@ -41,4 +43,25 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* App layout specific fixes */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+body {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100vh;
+}
+
+/* Ensure main content is properly offset from sidebar */
+main.main-content {
+  height: 100vh;
+  overflow-y: hidden;
 }

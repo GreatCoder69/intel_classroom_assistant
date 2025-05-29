@@ -4,9 +4,6 @@ import queue
 import sounddevice as sd
 import json
 import time
-import signal
-import os
-import sys
 import gc
 import logging
 import threading
@@ -65,25 +62,62 @@ class ConversationState:
 # Global conversation state
 conversation_state = ConversationState()
 
-# Base system prompt that will be initialized once
-BASE_SYSTEM_PROMPT = """You are a helpful classroom assistant named Intel Assistant. 
-Your purpose is to help students and teachers with their questions about classroom topics.
-You specialize in the following subjects:
-- Mathematics (algebra, calculus, geometry, statistics)
+# Role-specific system prompts
+STUDENT_SYSTEM_PROMPT = """You are EduAI, a knowledgeable and friendly classroom assistant designed to help students with academic questions.
+You accept both text and voice input and provide accurate, concise answers that are easy to understand.
+Purpose:
+To support students in learning by offering clear explanations, step-by-step problem solving, and reinforcing concepts across subjects.
+Subjects Covered:
+- Mathematics (arithmetic, algebra, geometry, calculus, statistics)
 - Science (physics, chemistry, biology, earth sciences)
-- Language Arts (grammar, literature, writing)
-- History (world history, civics, geography)
-- Computer Science (programming, algorithms, data structures)
+- Language Arts (grammar, literature, writing skills)
+- History and Civics (world history, geography, social studies)
+- Computer Science (coding, data structures, algorithms)
+How You Help:
+- Explain topics in clear, simple language
+- Break down problems step-by-step
+- Provide study strategies and learning tips
+- Answer specific questions related to schoolwork and assignments
+Guidelines:
+- Respond directly to the student's query without repeating or rephrasing it unnecessarily
+- Never guess or express uncertainty—always provide accurate and confident answers
+- Avoid technical jargon unless the student is at an advanced level
+- Keep explanations concise, focused, and supportive
+- Maintain a respectful, professional, and educational tone
+- Focus strictly on the subject matter
+- Use correct terminology and logic when explaining academic processes (e.g. algorithms, equations, etc.)
+- Do not use filler phrases like “I think” or “I believe”
+- Ensure all responses are free of doubt, confusion, or hesitation
+- Keep the answers under 2048 characters"""
 
-You can help with:
-- Explaining concepts clearly and concisely
-- Providing step-by-step solutions to problems
-- Offering study tips and learning strategies
-- Suggesting classroom activities and exercises
-- Answering questions about academic topics
+TEACHER_SYSTEM_PROMPT = """You are EduAI, an efficient and knowledgeable assistant designed to support teachers in academic planning, student engagement, and content delivery.
+You understand both text and voice input and provide practical, accurate, and actionable responses.
+Purpose:
+To assist teachers with lesson planning, instructional support, and classroom strategies by delivering subject-specific guidance and pedagogical recommendations.
+Subjects Covered:
+- Mathematics (arithmetic, algebra, geometry, calculus, statistics)
+- Science (physics, chemistry, biology, earth sciences)
+- Language Arts (grammar, writing, literature analysis)
+- History and Civics (global history, political science, geography)
+- Computer Science (coding principles, algorithms, curriculum development)
+How You Help:
+- Provide explanations appropriate for various student learning levels
+- Recommend exercises, assignments, and classroom activities
+- Summarize and break down complex topics for instructional use
+- Support differentiated instruction with adaptive teaching suggestions
+- Answer curriculum-related and subject-specific questions directly
+Guidelines:
+- Prioritize clarity, instructional relevance, and precision
+- Offer recommendations that are ready to use or easy to adapt
+- Respond strictly to the question asked—avoid making assumptions
+- Maintain a professional, respectful, and helpful tone
+- Avoid filler phrases and ensure responses are confident and well-structured
+- Use pedagogically sound language suitable for educators
+- Focus on subject accuracy, teaching strategy, and classroom applicability
+- Keep the answers under 2048 characters"""
 
-Always respond directly to the user's query without making assumptions about its context.
-Be encouraging, patient, and supportive, as you would expect from an educational assistant."""
+# Default system prompt as fallback
+BASE_SYSTEM_PROMPT = STUDENT_SYSTEM_PROMPT
 
 # LLM setup
 try:
@@ -91,15 +125,24 @@ try:
     logger.info(f"Loading model: {model_id}")
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = OVModelForCausalLM.from_pretrained(model_id)
-      # Initialize the model with the base system prompt
-    logger.info("Initializing model with base system prompt")
-    # Store the tokenized system prompt for later use
-    system_prompt_ids = tokenizer(BASE_SYSTEM_PROMPT, return_tensors="pt").input_ids
-    # Run a "dummy" generation to initialize the model with the system prompt
-    _ = model.generate(system_prompt_ids, max_length=len(system_prompt_ids[0]) + 1)
+    
+    # Store tokenized system prompts for different roles
+    logger.info("Tokenizing role-specific system prompts")
+    student_prompt_ids = tokenizer(STUDENT_SYSTEM_PROMPT, return_tensors="pt").input_ids
+    teacher_prompt_ids = tokenizer(TEACHER_SYSTEM_PROMPT, return_tensors="pt").input_ids
+    
+    # Store them in a dictionary for easy access
+    system_prompt_ids = {
+        "student": student_prompt_ids,
+        "teacher": teacher_prompt_ids
+    }
+    
+    # Initialize the model with the base (student) system prompt as default
+    logger.info("Initializing model with default system prompt")
+    _ = model.generate(student_prompt_ids, max_length=len(student_prompt_ids[0]) + 1)
     logger.info("Model initialized with system prompt")
     
-    logger.info(f"Model loaded successfully and initialized with system prompt: {model_id}")
+    logger.info(f"Model loaded successfully and initialized with system prompts: {model_id}")
 except Exception as e:
     logger.error(f"Error loading the model: {str(e)}")
 
@@ -115,10 +158,11 @@ def extract_assistant_response(full_text):
         
         # Remove any blank lines at the beginning
         response = response.lstrip("\n")
-        
-        # Remove any system prompt parts that might have leaked into the response
+          # Remove any system prompt parts that might have leaked into the response
         system_prompt_fragments = [
             "You are a helpful classroom assistant",
+            "Your purpose is to help students learn",
+            "Your purpose is to help teachers improve",
             "Current date:", 
             "Current time:", 
             "Current semester:",
@@ -225,36 +269,58 @@ def query():
     
     data = request.get_json()
     question = data.get("question", "")
-    logger.info(f"[{request_id}] Received question from frontend: '{question}'")
+    # Get user role from request, default to "student" if not provided
+    user_role = data.get("role", "student")
+    
+    logger.info(f"[{request_id}] Received question from frontend, role: {user_role}, question: '{question}'")
     if not question:
         logger.warning(f"[{request_id}] No question provided in request")
         return jsonify({"error": "No question provided"}), 400
-        
-    logger.info(f"[{request_id}] Tokenizing input and preparing LLM")
-      # Only add dynamic context with the user question, not the full system prompt
-    context_and_question = f"{get_current_dynamic_context()}\n\nUser: {question}\n\nIntel Assistant:"
-    logger.info(f"[{request_id}] Using dynamic context with user query")
     
-    # Use the stored system encoding as a prefix 
+    # Validate role
+    if user_role not in ["student", "teacher"]:
+        logger.warning(f"[{request_id}] Invalid role provided: {user_role}, defaulting to student")
+        user_role = "student"
+        
+    logger.info(f"[{request_id}] Tokenizing input and preparing LLM for {user_role} role")
+    # Only add dynamic context with the user question, not the full system prompt
+    context_and_question = f"{get_current_dynamic_context()}\n\nUser: {question}\n\nIntel Assistant:"
+    logger.info(f"[{request_id}] Using dynamic context with user query for {user_role} role")
+      # Prepare input text based on user's role
     input_text = context_and_question
     inputs = tokenizer(input_text, return_tensors="pt")
-    # Apply the system encoding as a prefix (this is done implicitly through model.generate)
     
-    logger.info(f"[{request_id}] Starting LLM generation")
+    # Get the appropriate system prompt based on user role
+    role_prompt_ids = system_prompt_ids.get(user_role, system_prompt_ids["student"])
+    
+    logger.info(f"[{request_id}] Starting LLM generation with {user_role} role system prompt")
     start = time.time()
     
     # Set a timeout for LLM generation (30 seconds)
-    timeout_seconds = 30
+    timeout_seconds = 60
     answer = None
     
-    try:
-        # Use threading with timeout for generation
+    try:        # Use threading with timeout for generation
         def generate_response():
             nonlocal answer
             try:                # Increased max_length and added min_length for longer responses
+                # Use the appropriate system prompt based on user role
+                logger.info(f"[{request_id}] Generating response with {user_role} system prompt")
+                
+                # Determine which system prompt to use based on role
+                current_prompt_ids = role_prompt_ids
+                  # Combine the system prompt prefix with the input
+                # For OpenVINO models, we need to handle this with the tokenizer
+                # First get the tokenized system prompt for the role
+                role_system_prompt = STUDENT_SYSTEM_PROMPT if user_role == "student" else TEACHER_SYSTEM_PROMPT
+                
+                # Create combined input with role-specific system prompt
+                combined_input = f"{role_system_prompt}\n\n{input_text}"
+                combined_inputs = tokenizer(combined_input, return_tensors="pt")
+                
                 outputs = model.generate(
-                    **inputs,
-                    max_length=512,       # Increased from 200
+                    **combined_inputs,
+                    max_length=2048,       # Increased from 200
                     min_length=20,        # Ensure minimum output length
                     do_sample=True,       # Enable sampling for more diverse outputs
                     temperature=0.7,      # Control randomness (lower = more deterministic)

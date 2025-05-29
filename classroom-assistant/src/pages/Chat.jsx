@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Button } from 'react-bootstrap';
 import { FaMicrophone } from 'react-icons/fa';
 import './Chat.css';
+import { useAuth } from '../context/AuthContext';
 
 function Chat() {
   const [messages, setMessages] = useState([
@@ -12,6 +13,7 @@ function Chat() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
+  const { userRole } = useAuth(); // Get user role from auth context
   const handleSend = async () => {
     if (!input.trim()) return;
     const userInput = input.trim();
@@ -25,12 +27,13 @@ function Chat() {
       const loadingId = Date.now() + 1;
       setMessages((prev) => [...prev, 
         { id: loadingId, sender: 'bot', text: '...', isLoading: true }
-      ]);
-
-      const res = await fetch('http://localhost:8000/query', {
+      ]);      const res = await fetch('http://localhost:8000/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: userInput })
+        body: JSON.stringify({ 
+          question: userInput,
+          role: userRole || 'student' // Pass user role, default to student if not available
+        })
       });
       const data = await res.json();
       
@@ -67,12 +70,13 @@ function Chat() {
         setIsLoading(true);
         setMessages((prev) => [...prev, 
           { id: loadingId, sender: 'bot', text: '...', isLoading: true }
-        ]);
-
-        const response = await fetch('http://localhost:8000/query', {
+        ]);        const response = await fetch('http://localhost:8000/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ question: data.transcript })
+          body: JSON.stringify({ 
+            question: data.transcript,
+            role: userRole || 'student' // Pass user role, default to student if not available
+          })
         });
         const result = await response.json();
 
@@ -128,12 +132,14 @@ function Chat() {
     if (!isLoading && inputRef.current) {
       inputRef.current.focus();
     }
-  }, [isLoading]);return (
-    <div className="h-100 w-100 d-flex flex-column p-4">
-      <h2 className="mb-4">AI Assistant</h2>
+  }, [isLoading]);  return (
+    <div className="h-100 w-100 d-flex flex-column p-3">
+      <h2 className="mb-3">AI Assistant</h2>
       
-      <div className="chat-container flex-grow-1 d-flex flex-column p-3">
-        <div className="message-list mb-3" id="chat-messages-container">{messages.map((msg) => (
+      <div className="chat-container flex-grow-1 d-flex flex-column">
+        {/* Message List Container - Scrollable Area */}
+        <div className="message-list" id="chat-messages-container">
+          {messages.map((msg) => (
             <div
               key={msg.id}
               className={`d-flex w-100 ${
@@ -163,36 +169,40 @@ function Chat() {
             </div>
           ))}
           <div ref={messagesEndRef} className="scroll-anchor" />
-        </div>        {/* Input Area */}
-        <div className="input-group mt-2">          <input
-            ref={inputRef}
-            type="text"
-            className="form-control bg-light text-dark border rounded-start"
-            placeholder="Type your message..."
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            disabled={isLoading}
-          />
-          <Button 
-            variant={listening ? 'danger' : 'outline-secondary'} 
-            onClick={handleMicClick}
-            disabled={isLoading}
-          >
-            <FaMicrophone />
-          </Button>
-          <Button 
-            variant="primary" 
-            onClick={handleSend}
-            disabled={isLoading || !input.trim()}
-          >
-            {isLoading ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
-                Sending...
-              </>
-            ) : 'Send'}
-          </Button>
+        </div>
+          {/* Input Area - Fixed at Bottom */}
+        <div className="input-area px-3 py-2">
+          <div className="input-group">
+            <input
+              ref={inputRef}
+              type="text"
+              className="form-control bg-light text-dark border rounded-start"
+              placeholder="Type your message..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+              disabled={isLoading}
+            />
+            <Button 
+              variant={listening ? 'danger' : 'outline-secondary'} 
+              onClick={handleMicClick}
+              disabled={isLoading}
+            >
+              <FaMicrophone />
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={handleSend}
+              disabled={isLoading || !input.trim()}
+            >
+              {isLoading ? (
+                <>
+                  <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                  Sending...
+                </>
+              ) : 'Send'}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

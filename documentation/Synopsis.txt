@@ -3,7 +3,8 @@ Because opening docx is annoying,
 TO DOs :
 - Authentication -> encrypt passwords i guess
 - Optimize the Models and imporve efficiency 
-
+- Modify the base prompt run time -> run it once and load the model only once,
+everytime the chat page is opened, then continous promptimg
 
 
 Goals:

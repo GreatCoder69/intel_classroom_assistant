@@ -72,9 +72,9 @@ const AppSidebar = () => {
 // Main layout that includes the sidebar and main content
 const AppLayout = () => {
   return (
-    <div className="d-flex min-vh-100 bg-dark text-light">
+    <div className="app-container bg-dark text-light">
       <AppSidebar />
-      <main className="flex-grow-1 d-flex flex-column">
+      <main className="main-content d-flex flex-column">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/subjects" element={<Subjects />} />
