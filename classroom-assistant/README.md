@@ -1,11 +1,28 @@
-# React + Vite
+# Intel Classroom Assistant Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React-based frontend for the Intel Classroom Assistant application. Built with Vite, React, and Bootstrap.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Modern UI**: Clean, responsive interface built with React and Bootstrap
+- **Authentication**: Simple login with role-based access control for students and teachers
+- **Voice Recognition**: Integration with voice recognition for hands-free interaction
+- **AI Assistant**: Integration with LLM for intelligent responses
+
+## Login Credentials
+
+- **Student Access**: Username `student`, Password `student`
+- **Teacher Access**: Username `teacher`, Password `teacher`
+
+## Running the Application
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
 
 ## Expanding the ESLint configuration
 

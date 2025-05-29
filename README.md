@@ -7,15 +7,18 @@ AI-powered classroom assistant using OpenVINO™ for LLM optimization and Vosk f
 - **Voice & Text Input**: Ask questions verbally or through text
 - **OpenVINO™ Optimization**: Efficient AI inference on standard hardware
 - **Multi-subject Support**: Assistance across mathematics, science, language arts, history, and computer science
+- **Role-Based Access**: Separate interfaces for students and teachers
+- **Secure Authentication**: Password-based login system
 - **Responsive UI**: Modern React-based interface
 
 ## Tech Stack
 
-**Backend**: Python, Flask, Vosk, OpenVINO™, Threading
-**Frontend**: React, Bootstrap, Vite
+**Backend**: Python, Flask, Vosk, OpenVINO™, Threading  
+**Frontend**: React, Bootstrap, Vite, React Router
 
 ## Architecture
 
+- **Authentication**: Role-based user authentication system
 - **Speech Recognition**: Vosk model converts speech to text
 - **LLM Processing**: OpenVINO-optimized model generates educational responses
 - **Memory Management**: Optimized for efficiency with timeout handling
@@ -54,8 +57,12 @@ AI-powered classroom assistant using OpenVINO™ for LLM optimization and Vosk f
 ## Usage
 
 1. Launch both backend server and frontend application
-2. Use microphone button or text input to ask questions
-3. Receive educational responses powered by LLM
+2. On the login page, use the following credentials:
+   - For Student access: Username `student`, Password `student`
+   - For Teacher access: Username `teacher`, Password `teacher`
+3. After login, navigate through the application using the sidebar
+4. Use microphone button or text input to ask questions
+5. Receive educational responses powered by LLM
 
 ## License
 [Specify license information]

@@ -150,6 +150,32 @@ def extract_assistant_response(full_text):
 def audio_callback(indata, frames, time_info, status):
     q.put(bytes(indata))
 
+# User credentials (in a real application, this would be in a database with hashed passwords)
+users = {
+    "student": {"password": "student", "role": "student"},
+    "teacher": {"password": "teacher", "role": "teacher"}
+}
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.get_json()
+    username = data.get("username")
+    password = data.get("password")
+    
+    if not username or not password:
+        return jsonify({"message": "Username and password are required"}), 400
+    
+    user = users.get(username)
+    if user and user["password"] == password:
+        # In a real app, you would create a JWT or session token here
+        return jsonify({
+            "username": username,
+            "role": user["role"],
+            "message": "Login successful"
+        })
+    
+    return jsonify({"message": "Invalid credentials"}), 401
+
 @app.route("/listen", methods=["GET"])
 def listen():
     request_id = datetime.now().strftime("%Y%m%d%H%M%S")

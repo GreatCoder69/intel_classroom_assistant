@@ -1,5 +1,11 @@
 Because opening docx is annoying,
 
+TO DOs :
+- Authentication -> encrypt passwords i guess
+- Optimize the Models and imporve efficiency 
+
+
+
 Goals:
 
 For student:

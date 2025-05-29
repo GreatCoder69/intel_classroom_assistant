@@ -3,6 +3,8 @@
   height: 100%;
   margin: 0;
   padding: 0;
+  /* Background color is controlled by darkTheme.css */
+  overflow-x: hidden;
 }
 
 .logo {
