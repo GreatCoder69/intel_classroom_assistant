@@ -4,6 +4,15 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const ProtectedRoute = ({ requiredRole }) => {
+  /**
+   * Protected route component that checks authentication and role permissions.
+   * 
+   * Args:
+   *   requiredRole (string): Required user role to access the route
+   * 
+   * Returns:
+   *   JSX.Element: Route outlet or redirect component
+   */
   const { currentUser, loading, userRole } = useAuth();
 
   // If auth is still loading, show nothing or a loading spinner

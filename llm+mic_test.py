@@ -1,3 +1,10 @@
+"""
+Combined LLM and Microphone Testing Module
+
+This module tests the integration of Vosk speech recognition with OpenVINO LLM.
+Captures voice input, converts to text, and generates AI responses.
+"""
+
 import queue
 import sounddevice as sd
 import sys
@@ -15,6 +22,15 @@ asr_model = Model(model_path)
 rec = KaldiRecognizer(asr_model, 16000)
 
 def audio_callback(indata, frames, time_info, status):
+    """
+    Audio callback function for speech recognition input stream.
+    
+    Args:
+        indata: Input audio data from microphone
+        frames: Number of audio frames
+        time_info: Timestamp information
+        status: Stream status information
+    """
     q.put(bytes(indata))
 
 # --- OpenVINO LLM Setup ---
@@ -22,7 +38,16 @@ model_id = "OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov"  # <-- changed here
 tokenizer = AutoTokenizer.from_pretrained(model_id)
 model = OVModelForCausalLM.from_pretrained(model_id)
 
-def query_llm(question: str) -> (str, float):
+def query_llm(question: str) -> tuple[str, float]:
+    """
+    Query the LLM model with a text question and return response.
+    
+    Args:
+        question (str): Text question to ask the model
+        
+    Returns:
+        tuple: (response_text, latency_seconds)
+    """
     inputs = tokenizer(question, return_tensors="pt")
     start = time.time()
     outputs = model.generate(**inputs, max_length=200)
@@ -32,6 +57,12 @@ def query_llm(question: str) -> (str, float):
     return answer, latency
 
 def main():
+    """
+    Main function to test combined speech recognition and LLM response.
+    
+    Listens for voice input for 10 seconds, converts to text,
+    and generates an AI response using the LLM model.
+    """
     print("Listening... Speak into your microphone.")
     last_speech_time = time.time()
     timeout_seconds = 10  # Stop listening after 10 sec silence

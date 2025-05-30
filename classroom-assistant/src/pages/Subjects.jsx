@@ -1,6 +1,12 @@
 import React from 'react';
 
 function Subjects() {
+  /**
+   * Subjects page component displaying available subjects with progress tracking.
+   * 
+   * Returns:
+   *   JSX.Element: Subject cards with progress bars and action buttons
+   */
   const subjects = [
     { id: 1, name: 'Mathematics', progress: 45, color: 'primary' },
     { id: 2, name: 'Science', progress: 60, color: 'success' },

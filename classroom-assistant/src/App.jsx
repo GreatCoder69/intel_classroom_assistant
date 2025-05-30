@@ -18,8 +18,13 @@ import Settings from './pages/Settings';
 import Chat from './pages/Chat';
 import Login from './pages/Login';
 
-// Sidebar navigation component
 const AppSidebar = () => {
+  /**
+   * Application sidebar component with navigation menu.
+   * 
+   * Returns:
+   *   JSX.Element: Sidebar with navigation links and user info
+   */
   const { logout, userRole } = useAuth();
   
   const navItems = [
@@ -69,8 +74,13 @@ const AppSidebar = () => {
   );
 };
 
-// Main layout that includes the sidebar and main content
 const AppLayout = () => {
+  /**
+   * Main application layout component with sidebar and content area.
+   * 
+   * Returns:
+   *   JSX.Element: Layout with sidebar navigation and main content routes
+   */
   return (
     <div className="app-container bg-dark text-light">
       <AppSidebar />
@@ -88,6 +98,12 @@ const AppLayout = () => {
 };
 
 function App() {
+  /**
+   * Main application component with routing and authentication setup.
+   * 
+   * Returns:
+   *   JSX.Element: Application router with protected and public routes
+   */
   // Apply scroll fix when component mounts
   useEffect(() => {
     setOverscrollColors();

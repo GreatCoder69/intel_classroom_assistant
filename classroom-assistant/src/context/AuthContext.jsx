@@ -3,6 +3,12 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 const AuthContext = createContext();
 
 export const useAuth = () => {
+  /**
+   * Custom hook to access authentication context.
+   * 
+   * Returns:
+   *   AuthContext: Authentication context values
+   */
   return useContext(AuthContext);
 };
 
@@ -25,6 +31,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (username, password) => {
+    /**
+     * Authenticate user with provided credentials.
+     * 
+     * Args:
+     *   username (string): User's username
+     *   password (string): User's password
+     * 
+     * Returns:
+     *   Object: Login result with success status and user info
+     */
     try {
       // Send login request to backend
       const response = await fetch('http://localhost:8000/login', {
@@ -57,6 +73,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    /**
+     * Log out current user and clear authentication and stored data.
+     */
     setCurrentUser(null);
     setUserRole(null);
     localStorage.removeItem('currentUser');

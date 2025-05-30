@@ -47,8 +47,13 @@ Remember:
 - Do not make up questions or pretend the user is asking about a coding problem unless they explicitly are.
 """
 
-# Function to get updated dynamic context with current time/date
 def get_current_dynamic_context():
+    """
+    Generate dynamic context with current date and time information.
+    
+    Returns:
+        str: Formatted context string with current date/time
+    """
     return DYNAMIC_CONTEXT_TEMPLATE.format(
         date=datetime.now().strftime('%Y-%m-%d'),
         time=datetime.now().strftime('%H:%M:%S')
@@ -56,6 +61,12 @@ def get_current_dynamic_context():
 
 # Model storage for conversation history
 class ConversationState:
+    """
+    Stores conversation history and state.
+    
+    Attributes:
+        history (list): List of conversation messages
+    """
     def __init__(self):
         self.history = []
 
@@ -147,7 +158,15 @@ except Exception as e:
     logger.error(f"Error loading the model: {str(e)}")
 
 def extract_assistant_response(full_text):
-    """Extract only the assistant's response from the full model output."""
+    """
+    Extract only the assistant's response from the full model output.
+    
+    Args:
+        full_text (str): Complete model output text
+    
+    Returns:
+        str: Cleaned assistant response text
+    """
     # Look for the assistant's response after "Intel Assistant:" marker
     if "Intel Assistant:" in full_text:
         response = full_text.split("Intel Assistant:", 1)[1].strip()
@@ -192,6 +211,15 @@ def extract_assistant_response(full_text):
 
 # Audio callback for Vosk
 def audio_callback(indata, frames, time_info, status):
+    """
+    Audio callback function for Vosk speech recognition.
+    
+    Args:
+        indata: Input audio data
+        frames: Number of frames
+        time_info: Time information
+        status: Status information
+    """
     q.put(bytes(indata))
 
 # User credentials (in a real application, this would be in a database with hashed passwords)
@@ -202,6 +230,16 @@ users = {
 
 @app.route("/login", methods=["POST"])
 def login():
+    """
+    Handle user login authentication.
+    
+    Request Body:
+        username (str): User's username
+        password (str): User's password
+    
+    Returns:
+        JSON: Login response with user info or error message
+    """
     data = request.get_json()
     username = data.get("username")
     password = data.get("password")
@@ -222,6 +260,12 @@ def login():
 
 @app.route("/listen", methods=["GET"])
 def listen():
+    """
+    Listen for speech input and return transcribed text.
+    
+    Returns:
+        JSON: Transcribed speech text
+    """
     request_id = datetime.now().strftime("%Y%m%d%H%M%S")
     logger.info(f"[{request_id}] Speech recognition started")
     recognized_text = ""
@@ -254,13 +298,34 @@ def listen():
     return jsonify({"transcript": recognized_text})
 
 class TimeoutException(Exception):
+    """Custom exception for LLM generation timeout."""
     pass
 
 def timeout_handler(signum, frame):
+    """
+    Handle timeout signal for LLM generation.
+    
+    Args:
+        signum: Signal number
+        frame: Current stack frame
+    
+    Raises:
+        TimeoutException: When timeout occurs
+    """
     raise TimeoutException("LLM generation timed out")
 
 @app.route("/query", methods=["POST"])
 def query():
+    """
+    Process user queries using LLM and return AI-generated responses.
+    
+    Request Body:
+        question (str): User's question
+        role (str): User role ('student' or 'teacher')
+    
+    Returns:
+        JSON: AI response with answer and processing latency
+    """
     request_id = datetime.now().strftime("%Y%m%d%H%M%S")
     
     # Monitor initial memory usage

@@ -4,6 +4,12 @@ import { Container, Row, Col, Button } from 'react-bootstrap';
 import { FaGraduationCap } from 'react-icons/fa';
 
 function Landing() {
+  /**
+   * Landing page component with application introduction and login access.
+   * 
+   * Returns:
+   *   JSX.Element: Welcome page with branding and login button
+   */
   return (
     <Container fluid className="d-flex flex-column justify-content-center align-items-center vh-100 bg-dark text-light">
       <Row className="w-100 justify-content-center">

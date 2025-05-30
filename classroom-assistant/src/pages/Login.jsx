@@ -6,6 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import './Login.css';
 
 function Login() {
+  /**
+   * Login page component with authentication form.
+   * 
+   * Returns:
+   *   JSX.Element: Login form with credential validation
+   */
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +26,13 @@ function Login() {
       navigate('/');
     }
   }, [currentUser, navigate]);
-    const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
+    /**
+     * Handle login form submission.
+     * 
+     * Args:
+     *   e (Event): Form submission event
+     */
     e.preventDefault();
     setError('');
     

@@ -1,3 +1,10 @@
+"""
+Microphone Testing Module
+
+This module tests the Vosk speech recognition functionality.
+Captures audio input and converts it to text using the Vosk ASR model.
+"""
+
 import queue
 import sounddevice as sd
 import sys
@@ -12,9 +19,24 @@ model = Model(model_path)
 rec = KaldiRecognizer(model, 16000)
 
 def audio_callback(indata, frames, time_info, status):
+    """
+    Audio callback function for sounddevice input stream.
+    
+    Args:
+        indata: Input audio data from microphone
+        frames: Number of audio frames
+        time_info: Timestamp information
+        status: Stream status information
+    """
     q.put(bytes(indata))
 
 def main():
+    """
+    Main function to test microphone input and speech recognition.
+    
+    Listens to microphone input for 3 seconds of silence, then stops.
+    Displays partial recognition results in real-time and final transcription.
+    """
     print("Listening... Speak into your microphone.")
     last_speech_time = time.time()
     timeout_seconds = 3  # Stop if silence > 3 seconds

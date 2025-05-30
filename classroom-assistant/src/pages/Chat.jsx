@@ -5,6 +5,13 @@ import './Chat.css';
 import { useAuth } from '../context/AuthContext';
 
 function Chat() {
+  /**
+   * Chat interface component for AI assistant interaction.
+   * Supports both text and voice input for educational queries.
+   * 
+   * Returns:
+   *   JSX.Element: Chat interface with message history and input controls
+   */
   const [messages, setMessages] = useState([
     { id: 1, sender: 'bot', text: 'Hello! How can I assist you today?' }
   ]);
@@ -15,6 +22,9 @@ function Chat() {
   const inputRef = useRef(null);
   const { userRole } = useAuth(); // Get user role from auth context
   const handleSend = async () => {
+    /**
+     * Send user message to AI assistant and display response.
+     */
     if (!input.trim()) return;
     const userInput = input.trim();
     const newMessage = { id: Date.now(), sender: 'user', text: userInput };
@@ -56,6 +66,10 @@ function Chat() {
     }
   };
   const handleMicClick = async () => {
+    /**
+     * Handle microphone button click for voice input.
+     * Captures speech and sends it to the AI assistant.
+     */
     setListening(true);
     try {
       const res = await fetch('http://localhost:8000/listen');
@@ -104,8 +118,10 @@ function Chat() {
       setListening(false);
       setIsLoading(false);
     }
-  };  // Function to scroll to bottom
-  const scrollToBottom = () => {
+  };  const scrollToBottom = () => {
+    /**
+     * Scroll chat messages to the bottom to show latest message.
+     */
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }

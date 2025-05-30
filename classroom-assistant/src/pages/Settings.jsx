@@ -1,6 +1,12 @@
 import React from 'react';
 
 function Settings() {
+  /**
+   * Settings page component for user preferences and application configuration.
+   * 
+   * Returns:
+   *   JSX.Element: Settings interface with tabs and form controls
+   */
   return (
     <div className="h-100 w-100 d-flex flex-column p-4">
       <h2 className="mb-4">Settings</h2>

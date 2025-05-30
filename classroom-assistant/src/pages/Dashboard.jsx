@@ -1,6 +1,12 @@
 import React from 'react';
 
 function Dashboard() {
+  /**
+   * Main dashboard component showing overview cards for user activity.
+   * 
+   * Returns:
+   *   JSX.Element: Dashboard with activity cards and metrics
+   */
   return (
     <div className="h-100 w-100 d-flex flex-column p-4">
       <h2 className="mb-4">Dashboard</h2>

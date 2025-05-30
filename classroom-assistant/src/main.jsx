@@ -1,3 +1,12 @@
+/**
+ * Main entry point for the Intel Classroom Assistant React application
+ * 
+ * This file initializes the React application by:
+ * - Importing necessary CSS dependencies (Bootstrap and custom dark theme)
+ * - Setting up global dark theme styles for the document
+ * - Creating the React root and rendering the main App component
+ */
+
 import 'bootstrap/dist/css/bootstrap.min.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';

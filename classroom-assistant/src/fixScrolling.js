@@ -5,6 +5,10 @@
  */
 
 const setOverscrollColors = () => {
+  /**
+   * Maintain consistent dark background color when scrolling beyond content boundaries.
+   * Sets up mutation observers and event listeners to enforce dark theme.
+   */
   // Apply background color to all key elements
   document.documentElement.style.backgroundColor = 'var(--dark-bg)';
   document.body.style.backgroundColor = 'var(--dark-bg)';
