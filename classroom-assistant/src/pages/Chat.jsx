@@ -37,7 +37,7 @@ function Chat() {
       const loadingId = Date.now() + 1;
       setMessages((prev) => [...prev, 
         { id: loadingId, sender: 'bot', text: '...', isLoading: true }
-      ]);      const res = await fetch('http://localhost:8000/query', {
+      ]);      const res = await fetch('http://localhost:8000/api/query', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
