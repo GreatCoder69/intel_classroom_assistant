@@ -165,6 +165,9 @@ Current school week: Week 12
 
 Remember:
 - Provide accurate, educational responses
+- Do not display your thinking process we need precise answers
+- If you see that the last sentence is exceeding the word limit, don't leave it incomplete. Summarise and incorporate in the previous sentence itself. 
+- No unfinished sentences
 - Tailor explanations to the user's role and level
 - Be concise and helpful
 - Include relevant examples when appropriate

@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom';
-import { FaHome, FaBook, FaCalendarAlt, FaCog, FaComment, FaSignOutAlt } from 'react-icons/fa';
+import { FaHome, FaBook, FaCalendarAlt, FaCog, FaComment, FaSignOutAlt, FaCamera } from 'react-icons/fa';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { setOverscrollColors } from './fixScrolling';
 
@@ -17,7 +17,7 @@ import Schedule from './pages/Schedule';
 import Settings from './pages/Settings';
 import Chat from './pages/Chat';
 import Login from './pages/Login';
-
+import Camera from './pages/Camera';
 const AppSidebar = () => {
   /**
    * Application sidebar component with navigation menu.
@@ -32,7 +32,8 @@ const AppSidebar = () => {
     { id: 'subjects', name: 'Subjects', icon: <FaBook />, path: '/subjects' },
     { id: 'chat', name: 'AI Assistant', icon: <FaComment />, path: '/chat' },
     { id: 'schedule', name: 'Schedule', icon: <FaCalendarAlt />, path: '/schedule' },
-    { id: 'settings', name: 'Settings', icon: <FaCog />, path: '/settings' }
+    { id: 'settings', name: 'Settings', icon: <FaCog />, path: '/settings' },
+    { id: 'camera', name: 'Camera', icon: <FaCamera />, path: '/camera' }
   ];  return (
     <aside className="bg-secondary p-4 d-flex flex-column app-sidebar" style={{ width: '250px' }}>
       <h3 className="mb-4">Classroom Assistant</h3>
@@ -91,6 +92,7 @@ const AppLayout = () => {
           <Route path="/chat" element={<Chat />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/settings" element={<Settings />} />
+          <Route path="/camera" element={<Camera />} />
         </Routes>
       </main>
     </div>

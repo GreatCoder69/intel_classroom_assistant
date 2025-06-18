@@ -72,7 +72,7 @@ function Chat() {
      */
     setListening(true);
     try {
-      const res = await fetch('http://localhost:8000/listen');
+      const res = await fetch('http://localhost:8000/api/listen');
       const data = await res.json();
 
       if (data.transcript) {
@@ -84,7 +84,7 @@ function Chat() {
         setIsLoading(true);
         setMessages((prev) => [...prev, 
           { id: loadingId, sender: 'bot', text: '...', isLoading: true }
-        ]);        const response = await fetch('http://localhost:8000/query', {
+        ]);        const response = await fetch('http://localhost:8000/api/query', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
