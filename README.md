@@ -1,31 +1,43 @@
+
 # Intel Classroom Assistant
 
-AI-powered classroom assistant using OpenVINO™ for LLM optimization and Vosk for speech recognition.
+An AI-powered classroom assistant with a React frontend and a Python backend, optimized for fast and efficient LLM inference using OpenVINO and optional Vosk speech recognition.
 
-## Key Features
+## Features
 
-- **Voice & Text Input**: Ask questions verbally or through text
-- **OpenVINO™ Optimization**: Efficient AI inference on standard hardware
-- **Multi-subject Support**: Assistance across mathematics, science, language arts, history, and computer science
-- **Role-Based Access**: Separate interfaces for students and teachers
-- **Secure Authentication**: Password-based login system
-- **Responsive UI**: Modern React-based interface
+- Voice & text input (if Vosk model is present)
+- OpenVINO-optimized LLM for fast, efficient responses
+- Multi-subject support
+- Role-based access for students and teachers
+- Secure authentication
+- Responsive, modern UI
 
 ## Tech Stack
 
-**Backend**: Python, Flask, Vosk, OpenVINO™, Threading, psutil  
-**Frontend**: React, Bootstrap, Vite, React Router, React Icons  
-**AI Models**: DeepSeek-R1-Distill-Qwen-1.5B (OpenVINO optimized), Vosk ASR  
-**Development**: ESLint, Vite development server, Hot module replacement
+- Backend: Python, Flask, OpenVINO, (optional: Vosk for speech)
+- Frontend: React, Vite, Bootstrap
+- AI Models: DeepSeek-R1-Distill-Qwen-1.5B (OpenVINO), Vosk ASR (optional)
 
-## Architecture
+## Cleaned Project Structure
 
-- **Authentication**: Role-based user authentication with localStorage persistence
-- **Speech Recognition**: Vosk model for accurate speech-to-text conversion
-- **LLM Processing**: OpenVINO-optimized language model for educational responses
-- **Memory Management**: Efficient resource usage with garbage collection and timeout handling
-- **Frontend Routing**: Protected routes with role-based access control
-- **State Management**: React Context API for authentication and user state
+```
+intel_classroom_assistant/
+├── backend/                  # Flask backend (API, LLM, speech)
+│   ├── server.py             # Main backend server
+│   ├── server_optimized.py   # Optimized backend server
+│   ├── optimized_model_manager.py
+│   ├── performance_monitor.py
+│   └── ...
+├── frontend/                 # React frontend
+│   ├── src/
+│   └── ...
+├── vosk-model-small-en-us-0.15/ # (Optional, remove if not using voice features)
+├── dev_utils/                # Dev/test scripts (not in production)
+├── archive/                  # Old/unused scripts (not in production)
+├── requirements_optimization.txt
+├── README.md
+└── ...
+```
 
 ## Setup
 
@@ -69,45 +81,37 @@ AI-powered classroom assistant using OpenVINO™ for LLM optimization and Vosk f
    - Open `http://localhost:5173` in your browser
    - Backend API runs on `http://localhost:8000`
 
-## Usage Guide
 
-### Getting Started
-1. **Launch Services**: Start both backend server (`python server.py`) and frontend (`npm run dev`)
-2. **Login**: Access the application and use demo credentials:
-   - **Student Access**: Username `student`, Password `student`
-   - **Teacher Access**: Username `teacher`, Password `teacher`
-3. **Navigate**: Use the sidebar to access different features:
-   - **Dashboard**: Overview of activities and schedule
-   - **Subjects**: Browse available subjects with progress tracking
-   - **AI Assistant**: Interactive chat with voice/text input
-   - **Schedule**: View and manage class timetables
-   - **Settings**: Configure preferences and system options
+## Usage
 
-### Using the AI Assistant
-- **Text Input**: Type questions directly in the chat interface
-- **Voice Input**: Click the microphone button and speak your question
-- **Educational Topics**: Ask about mathematics, science, history, literature, computer science
-- **Role-Specific Responses**: Receive answers tailored to your role (student/teacher)
+1. Start the backend server (see Setup above)
+2. Start the frontend (`npm run dev` in `frontend`)
+3. Login with demo credentials:
+   - Student: `student` / `student`
+   - Teacher: `teacher` / `teacher`
+4. Use the sidebar to access Dashboard, Subjects, AI Assistant, Schedule, and Settings
 
-## Project Structure
+## For Developers
 
-```
-intel_classroom_assistant/
-├── server.py                 # Flask backend server with LLM and speech processing
-├── classroom-assistant/       # React frontend application
-│   ├── src/
-│   │   ├── components/        # Reusable React components
-│   │   ├── context/           # Authentication and state management
-│   │   ├── pages/             # Application pages (Dashboard, Chat, etc.)
-│   │   └── ...
-├── content/                   # Additional content and configurations
-├── documentation/             # Project documentation
-├── vosk-model-small-en-us-0.15/ # Speech recognition model
-├── mictest.py                 # Microphone functionality test
-├── llmtest.py                 # LLM model test
-├── llm+mic_test.py           # Combined speech and LLM test
-└── README.md                  # This file
-```
+- All utility scripts and experimental code are now in `dev_utils/` or `archive/` (if present)
+- Only keep `vosk-model-small-en-us-0.15` if you use voice features
+- All function docstrings follow this format:
+  """
+  Description
+
+  Args:
+      ...
+  Returns:
+      ...
+  """
+
+## Performance Optimization
+
+See `optimization_guide.md` for details on model caching, batching, memory management, and other improvements.
+
+## License
+
+MIT License
 
 ## Features by Role
 
