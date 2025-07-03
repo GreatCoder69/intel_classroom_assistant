@@ -1,0 +1,57 @@
+.schedule-table {
+  background: #23272b;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+.schedule-table th, .schedule-table td {
+  border: 1px solid #444;
+  vertical-align: middle;
+}
+.schedule-table th {
+  background: #181a1b;
+  color: #e0e0e0;
+  font-weight: 600;
+  text-align: center;
+}
+.schedule-table td {
+  background: #23272b;
+  color: #bfc4c9;
+  min-width: 110px;
+  text-align: center;
+  transition: background 0.2s;
+}
+.schedule-table .fw-bold {
+  color: #fff !important;
+  font-size: 1.08em;
+}
+.schedule-table .bg-primary.bg-opacity-50 {
+  background: linear-gradient(90deg, #3a7bd5 0%, #00d2ff 100%) !important;
+  color: #fff !important;
+  border-radius: 8px;
+  box-shadow: 0 1px 6px rgba(58,123,213,0.12);
+}
+.schedule-table .p-2 {
+  padding: 0.5rem 0.25rem !important;
+}
+.schedule-table small {
+  color: #e0e0e0;
+}
+.schedule-action-btns .btn {
+  border-radius: 20px;
+  font-weight: 500;
+  margin-left: 0.5rem;
+}
+.schedule-action-btns .btn-primary {
+  background: linear-gradient(90deg, #3a7bd5 0%, #00d2ff 100%);
+  border: none;
+}
+.schedule-action-btns .btn-outline-secondary {
+  border: 1.5px solid #3a7bd5;
+  color: #3a7bd5;
+  background: transparent;
+}
+.schedule-action-btns .btn-outline-secondary:hover {
+  background: #3a7bd5;
+  color: #fff;
+}

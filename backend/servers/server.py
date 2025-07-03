@@ -228,7 +228,7 @@ users = {
     "teacher": {"password": "teacher", "role": "teacher"}
 }
 
-@app.route("/login", methods=["POST"])
+@app.route("/api/login", methods=["POST"])
 def login():
     """
     Handle user login authentication.
@@ -258,7 +258,7 @@ def login():
     
     return jsonify({"message": "Invalid credentials"}), 401
 
-@app.route("/listen", methods=["GET"])
+@app.route("/api/listen", methods=["GET"])
 def listen():
     """
     Listen for speech input and return transcribed text.
@@ -314,7 +314,7 @@ def timeout_handler(signum, frame):
     """
     raise TimeoutException("LLM generation timed out")
 
-@app.route("/query", methods=["POST"])
+@app.route("/api/query", methods=["POST"])
 def query():
     """
     Process user queries using LLM and return AI-generated responses.
