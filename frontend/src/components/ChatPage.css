@@ -1,0 +1,30 @@
+/* ChatPage.css  ── DARK MODE OVERRIDE  */
+body, .vh-100 { background:#000 !important; color:#fff !important; }
+
+.sidebar-dark,            /* sidebar column                         */
+.border-end, .border-top, /* thin separators – subtle dark grey     */
+.border-bottom            /*                                        */
+{
+  border-color:#2b2b2b !important;
+}
+
+.topic-item.bg-light      { background:#222 !important; color:#fff; }
+.topic-item.bg-primary    { background:#0d6efd !important; }
+
+.chat-card, .modal-content {
+  background:#1a1a1a;       /* grey card‑like areas                 */
+  color:#fff;
+}
+
+/* message bubbles */
+.user-bubble  { background:#0d6efd; color:#fff; }
+.bot-bubble   { background:#2e7d32; color:#fff; }
+
+/* align helpers */
+.msg-row      { display:flex; width:100%; }
+.user-left    { justify-content:flex-start; }
+.bot-right    { justify-content:flex-end; }
+
+/* spinner (bootstrp utility already white) */
+.spinner-border, .spinner-grow { filter:brightness(1.8); }
+
