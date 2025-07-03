@@ -92,10 +92,6 @@ function Settings() {
                   <label htmlFor="language" className="form-label">Language</label>
                   <select className="form-select" id="language">
                     <option selected>English</option>
-                    <option>Spanish</option>
-                    <option>French</option>
-                    <option>German</option>
-                    <option>Chinese</option>
                   </select>
                 </div>
                 <div className="mb-3">
@@ -103,13 +99,9 @@ function Settings() {
                   <select className="form-select" id="theme">
                     <option selected>Dark</option>
                     <option>Light</option>
-                    <option>System Default</option>
                   </select>
                 </div>
-                <div className="mb-3 form-check">
-                  <input type="checkbox" className="form-check-input" id="notifications" checked />
-                  <label className="form-check-label settings-label-highlight" htmlFor="notifications">Enable Notifications</label>
-                </div>
+          
                 <div className="mb-3 form-check">
                   <input type="checkbox" className="form-check-input" id="voiceInput" checked />
                   <label className="form-check-label settings-label-highlight" htmlFor="voiceInput">Enable Voice Input</label>

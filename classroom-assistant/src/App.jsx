@@ -82,13 +82,14 @@ const AppLayout = () => {
    * Returns:
    *   JSX.Element: Layout with sidebar navigation and main content routes
    */
+  const { userRole } = useAuth();
   return (
     <div className="app-container bg-dark text-light">
       <AppSidebar />
       <main className="main-content d-flex flex-column">
         <Routes>
           <Route path="/" element={<Dashboard />} />
-          <Route path="/subjects" element={<Subjects />} />
+          <Route path="/subjects" element={<Subjects isTeacher={userRole === 'teacher'} />} />
           <Route path="/chat" element={<Chat />} />
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/settings" element={<Settings />} />

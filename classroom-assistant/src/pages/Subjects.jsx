@@ -1,7 +1,7 @@
 import React from 'react';
 import '../Subjects.css';
 
-function Subjects() {
+function Subjects({ isTeacher }) {
   /**
    * Subjects page component displaying available subjects with progress tracking.
    * 
@@ -15,6 +15,8 @@ function Subjects() {
     { id: 4, name: 'Literature', progress: 75, color: 'warning' },
     { id: 5, name: 'Computer Science', progress: 90, color: 'danger' },
   ];
+
+  console.log('isTeacher:', isTeacher);
 
   return (
     <div className="subjects-container">
@@ -35,14 +37,15 @@ function Subjects() {
                 {subject.progress}%
               </div>
             </div>
-            <div className="d-flex justify-content-end">
+            <div className="d-flex justify-content-center">
               <button className="btn btn-sm btn-outline-secondary me-2">Resources</button>
-              <button className="btn btn-sm btn-outline-primary">Start Learning</button>
             </div>
           </div>
         ))}
       </div>
-      <button className="subjects-add-btn">Add Subject</button>
+      {isTeacher && (
+        <button className="subjects-add-btn">Add Subject</button>
+      )}
     </div>
   );
 }
