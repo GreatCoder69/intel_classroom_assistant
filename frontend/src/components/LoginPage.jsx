@@ -8,7 +8,7 @@ const Login = () => {
 
   const handleLogin = async (values) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/login`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -21,7 +21,7 @@ const Login = () => {
         if (data.user.isAdmin) {
           navigate("/admin");
         } else {
-          navigate("/chat");
+          navigate("/dashboard");
         }
       } else {
         alert("Login failed.");
