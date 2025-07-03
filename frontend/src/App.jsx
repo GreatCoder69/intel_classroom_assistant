@@ -12,6 +12,7 @@ import ChatDetail from "./components/ChatDetail";
 import AdminErrorLogs from "./components/AdminErrorLogs";
 import Dashboard from "./pages/Dashboard";
 import Layout from "./components/Layout";
+import Settings from "./pages/Settings";
 
 // A wrapper component that adds the Layout to a component
 const WithLayout = ({ Component }) => (
@@ -32,6 +33,7 @@ const App = () => (
     <Route path="/general-chat" element={<WithLayout Component={GeneralChat} />} />
     <Route path="/history" element={<WithLayout Component={ChatHistory} />} />
     <Route path="/chat-detail" element={<WithLayout Component={ChatDetail} />} />
+    <Route path="/settings" element={<WithLayout Component={Settings} />} />
     
     {/* Admin routes */}
     <Route path="/admin" element={<AdminPage />} />

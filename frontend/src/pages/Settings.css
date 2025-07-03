@@ -1,0 +1,88 @@
+/* Make General Settings header lighter */
+.card-header h5 {
+  color: #e0e0e0;
+  font-weight: 500;
+}
+
+/* Make Language and Theme labels lighter */
+label[for="language"],
+label[for="theme"],
+.form-label {
+  color: #d0d0d0;
+  font-weight: 500;
+}
+/* Settings page specific styles */
+.settings-label-highlight {
+  color: #3a7bd5; /* Example: blue shade, change as needed */
+  font-weight: 600;
+}
+
+/* Ensure card backgrounds are visible in dark theme */
+.card {
+  background-color: #2a2a2a !important;
+  border: 1px solid #444 !important;
+}
+
+.card-header {
+  background-color: #333 !important;
+  border-bottom: 1px solid #444 !important;
+}
+
+.card-body {
+  background-color: #2a2a2a !important;
+}
+
+/* Form controls for dark theme */
+.form-select,
+.form-control {
+  background-color: #333 !important;
+  border-color: #555 !important;
+  color: #e0e0e0 !important;
+}
+
+.form-select:focus,
+.form-control:focus {
+  background-color: #3a3a3a !important;
+  border-color: #3a7bd5 !important;
+  box-shadow: 0 0 0 0.25rem rgba(58, 123, 213, 0.25) !important;
+}
+
+/* Form check elements */
+.form-check-input {
+  background-color: #333 !important;
+  border-color: #555 !important;
+}
+
+.form-check-input:checked {
+  background-color: #3a7bd5 !important;
+  border-color: #3a7bd5 !important;
+}
+
+/* Tabs styling */
+.nav-pills .nav-link {
+  color: #d0d0d0;
+}
+
+.nav-pills .nav-link.active {
+  background-color: #3a7bd5 !important;
+}
+
+.nav-pills .nav-link:hover:not(.active) {
+  background-color: rgba(58, 123, 213, 0.15) !important;
+}
+
+/* Add specific wrapper styling */
+.settings-wrapper {
+  color: #e0e0e0 !important;
+  background-color: #1a1a1a !important;
+}
+
+/* Make headers more visible */
+h2, h5 {
+  color: #ffffff !important;
+}
+
+/* Ensure nav pills are visible */
+.nav-pills .nav-link {
+  color: #ffffff !important;
+}
