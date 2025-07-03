@@ -23,11 +23,11 @@ const WithLayout = ({ Component }) => (
 
 const App = () => (
   <Routes>
-    <Route path="/" element={<Navigate to="/login" />} />
+    {/* Public Routes */}
     <Route path="/login" element={<LoginPage />} />
     <Route path="/signup" element={<SignupPage />} />
     
-    {/* Protected routes with Layout */}
+    {/* Protected Routes with Layout */}
     <Route path="/dashboard" element={<WithLayout Component={Dashboard} />} />
     <Route path="/chat" element={<WithLayout Component={ChatPage} />} />
     <Route path="/general-chat" element={<WithLayout Component={GeneralChat} />} />
@@ -40,6 +40,9 @@ const App = () => (
     <Route path="/manage-user" element={<EditProfile />} />
     <Route path="/edit-user/:email" element={<EditUser />} />
     <Route path="/error-logs" element={<AdminErrorLogs />} />
+    
+    {/* Default redirect to login */}
+    <Route path="*" element={<Navigate to="/login" replace />} />
   </Routes>
 );
 

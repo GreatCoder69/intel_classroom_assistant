@@ -1,0 +1,387 @@
+/* Login Page Styles */
+
+/* Override dark theme for login page */
+.login-container {
+  background: linear-gradient(135deg, #1e3a5f, #2c5282, #3a7ca5);
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+  color: white;
+}
+
+/* Override bootstrap and darkTheme settings specifically for login page */
+/* These !important declarations are necessary to override the dark theme */
+.login-container .card {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  color: #333 !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25) !important;
+}
+
+.login-container .card-body {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #333 !important;
+}
+
+.login-container .login-card-header {
+  background: rgba(13, 110, 253, 0.1) !important;
+  border-bottom: 1px solid rgba(13, 110, 253, 0.2) !important;
+}
+
+.login-container .login-card-header h2 {
+  color: #0d6efd !important;
+  font-weight: 600 !important;
+}
+
+.login-container .login-card-header p {
+  color: #0d6efd !important;
+}
+
+.login-container .form-control,
+.login-container .login-input {
+  background-color: rgba(245, 245, 250, 0.95) !important;
+  color: #000000 !important; /* Changed to solid black for better visibility */
+  border-color: rgba(0, 0, 0, 0.1) !important;
+  font-weight: 500 !important;
+}
+
+.login-container .form-label {
+  color: #333 !important;
+  font-weight: 600 !important;
+}
+
+.login-container .text-muted {
+  color: #555 !important;
+}
+
+/* Style for alerts inside login form */
+.login-container .alert {
+  background-color: #f8d7da !important;
+  color: #842029 !important;
+  border-color: #f5c2c7 !important;
+}
+
+.login-container .alert-danger {
+  background-color: #f8d7da !important;
+  color: #842029 !important;
+  border-color: #f5c2c7 !important;
+}
+
+/* Animated circles for background */
+.floating-circle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  animation: float 15s infinite ease-in-out;
+}
+
+.circle-1 {
+  width: 300px;
+  height: 300px;
+  top: -100px;
+  right: -50px;
+  animation-delay: 0s;
+}
+
+.circle-2 {
+  width: 200px;
+  height: 200px;
+  bottom: 10%;
+  left: 10%;
+  animation-delay: 2s;
+}
+
+.circle-3 {
+  width: 150px;
+  height: 150px;
+  bottom: 20%;
+  right: 20%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+    opacity: 0.7;
+  }
+}
+
+/* Intel logo styling */
+.intel-logo {
+  max-width: 120px;
+  margin-bottom: 1rem;
+}
+
+.login-brand {
+  margin-bottom: 2rem;
+  animation: fade-in-down 0.8s ease-out;
+}
+
+.login-brand h1 {
+  font-weight: 700;
+  letter-spacing: -1px;
+  color: white;
+  margin-bottom: 0.5rem;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.login-brand p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes fade-in-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Login card styling */
+.login-card {
+  border: none !important;
+  border-radius: 16px !important;
+  backdrop-filter: blur(10px) !important;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2) !important;
+  background: rgba(255, 255, 255, 0.95) !important; /* Lighter background for better readability */
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+  color: #333 !important; /* Dark text for contrast */
+  animation: fade-in-up 0.8s ease-out 0.3s !important;
+  animation-fill-mode: both !important;
+}
+
+.login-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+.login-card-header {
+  background: rgba(13, 110, 253, 0.1); /* Light blue header */
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(13, 110, 253, 0.2);
+  color: #0d6efd; /* Blue text for header */
+}
+
+.login-card-body {
+  padding: 1.5rem;
+}
+
+/* Form styling */
+.login-input {
+  background-color: rgba(245, 245, 250, 0.9) !important;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #333 !important;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.login-input:focus,
+.login-container .form-control:focus {
+  background-color: #ffffff !important;
+  border-color: #0d6efd !important;
+  box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25) !important;
+  outline: none !important;
+  color: #000000 !important; /* Keep text black when focused */
+  caret-color: #000000 !important; /* Make cursor visible */
+}
+
+.login-input::placeholder,
+.login-container .form-control::placeholder {
+  color: rgba(100, 100, 100, 0.6) !important;
+}
+
+.login-btn {
+  padding: 0.8rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  transition: all 0.3s ease !important;
+  background: linear-gradient(90deg, #0d6efd, #0099ff) !important;
+  border: none !important;
+  font-size: 1rem !important;
+  color: white !important;
+  box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2) !important;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: linear-gradient(90deg, #0958ca, #0088e8) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 15px rgba(13, 110, 253, 0.4) !important;
+}
+
+.login-btn:active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 5px rgba(13, 110, 253, 0.3) !important;
+}
+
+.form-icon {
+  font-size: 1.2rem !important;
+  color: #0d6efd !important;
+}
+
+/* Ensure all icons in the login container have proper styling */
+.login-container .form-icon,
+.login-container svg {
+  color: #0d6efd !important; 
+}
+
+/* Specific color for info icon in credentials hint */
+.login-container .credentials-hint svg {
+  color: #f7b924 !important;
+}
+
+/* Form label styling for better visibility */
+.form-label {
+  font-weight: 600;
+  color: #444;
+  margin-bottom: 0.5rem;
+}
+
+/* Footer styling */
+.login-footer {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 0.85rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.intel-powered {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.intel-powered img {
+  height: 15px;
+}
+
+/* Credentials hint styling */
+.credentials-hint {
+  background-color: rgba(255, 244, 213, 0.95) !important;
+  border-left: 3px solid #f7b924 !important;
+  padding: 0.75rem 1rem !important;
+  border-radius: 0 6px 6px 0 !important;
+  margin-top: 1.5rem !important;
+  color: #855100 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+}
+
+.credentials-hint strong {
+  color: #855100 !important;
+  font-weight: 600 !important;
+}
+
+.credentials-hint p {
+  color: #855100 !important;
+}
+
+/* Role selector styling */
+.role-selector .btn {
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.role-selector .active-role,
+.role-selector .btn-primary {
+  background: linear-gradient(90deg, #0d6efd, #0099ff) !important;
+  border-color: transparent !important;
+  box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3) !important;
+}
+
+.role-selector .btn-outline-primary {
+  color: #0d6efd !important;
+  border: 1px solid #0d6efd !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+}
+
+.role-selector .btn-outline-primary:hover {
+  background: rgba(13, 110, 253, 0.1) !important;
+  border-color: #0d6efd !important;
+}
+
+/* Additional signup page styling */
+.login-card .text-muted {
+  color: #6c757d !important;
+  font-size: 0.85rem;
+}
+
+/* Password strength indicator - can be implemented later */
+.password-strength {
+  height: 4px;
+  background-color: #e9ecef;
+  margin-top: 8px;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.password-strength-meter {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.password-weak {
+  width: 33.33%;
+  background-color: #dc3545;
+}
+
+.password-medium {
+  width: 66.66%;
+  background-color: #ffc107;
+}
+
+.password-strong {
+  width: 100%;
+  background-color: #28a745;
+}
+
+/* Success alert styling */
+.login-container .alert-success {
+  background-color: rgba(40, 167, 69, 0.15) !important;
+  border-color: rgba(40, 167, 69, 0.5) !important;
+  color: #28a745 !important;
+}
+
+/* Make signup form elements slightly more compact */
+.login-card-body .mb-3:not(:last-child) {
+  margin-bottom: 1rem !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .login-container {
+    padding: 1rem;
+  }
+  
+  .login-brand h1 {
+    font-size: 2rem;
+  }
+  
+  .login-brand p {
+    font-size: 1rem;
+  }
+}
+
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

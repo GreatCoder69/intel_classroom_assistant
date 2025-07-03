@@ -1,222 +1,244 @@
 import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useFormik } from "formik";
+import { Link, useNavigate } from "react-router-dom";
+import { Form, Button, Container, Row, Col, Card, Alert } from "react-bootstrap";
+import { Formik } from "formik";
+import { 
+  FaUser, 
+  FaLock, 
+  FaEnvelope, 
+  FaGraduationCap, 
+  FaInfoCircle, 
+  FaUserGraduate, 
+  FaChalkboardTeacher,
+  FaCheckCircle
+} from "react-icons/fa";
+import "../styles/Login.css";
 
-const SignupPage = () => {
+const Signup = () => {
   const navigate = useNavigate();
-  const [successMessage, setSuccessMessage] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const [selectedRole, setSelectedRole] = useState("student");
+  const [signupError, setSignupError] = useState("");
+  const [signupSuccess, setSignupSuccess] = useState(false);
 
-  const formik = useFormik({
-    initialValues: {
-      name: "",
-      phone: "",
-      email: "",
-      password: "",
-    },
-    onSubmit: async (values) => {
-      setErrorMessage("");
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          setSuccessMessage("Sign Up successful. Please login.");
-          setTimeout(() => navigate("/login"), 1500);
-        } else {
-          setErrorMessage(data.message || "Signup failed");
-        }
-      } catch (err) {
-        setErrorMessage("An error occurred during signup");
+  const handleSignup = async (values, { setSubmitting }) => {
+    try {
+      if (values.password !== values.confirmPassword) {
+        setSignupError("Passwords do not match");
+        return;
       }
-    },
-  });
+
+      // Include the selected role in the request
+      const payload = { 
+        name: values.name,
+        email: values.email,
+        password: values.password,
+        role: selectedRole 
+      };
+      
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      
+      if (res.ok) {
+        setSignupSuccess(true);
+        setSignupError("");
+        // Redirect to login after 2 seconds
+        setTimeout(() => navigate("/login"), 2000);
+      } else {
+        setSignupError(data.message || "Registration failed. Please try again.");
+      }
+    } catch (err) {
+      console.error("Signup error:", err);
+      setSignupError("A network error occurred. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
-    <div
-      className="d-flex align-items-center auth px-0"
-      style={{ minHeight: "100vh", background: "#f6f3fa" }}
-    >
-      <div className="row w-100 mx-0 justify-content-center">
-        <div className="col-lg-4 mx-auto">
-          <div
-            className="auth-form-light text-left py-5 px-4 px-sm-5"
-            style={{
-              borderRadius: 12,
-              background: "#ffffff",
-              boxShadow: "0 8px 20px rgba(0,0,0,0.05)",
-            }}
-          >
-            <div className="brand-logo text-center mb-4">
-              <img
-                src="/logo.png"
-                alt="logo"
-                style={{ height: "15vh", marginBottom: 8 }}
-              />
-            </div>
-            <h4
-              style={{
-                fontWeight: 600,
-                marginBottom: 6,
-                color: "#222",
-                fontSize: 22,
-              }}
-            >
-              New here?
-            </h4>
-            <h6
-              className="font-weight-light"
-              style={{
-                color: "#777",
-                fontWeight: 400,
-                fontSize: 15,
-                marginBottom: 28,
-              }}
-            >
-              Signing up is easy. It only takes a few steps
-            </h6>
-            <form className="pt-3" onSubmit={formik.handleSubmit}>
-              <div className="form-group mb-3">
-                <input
-                  type="text"
-                  className="form-control form-control-lg"
-                  name="name"
-                  placeholder="Name"
-                  value={formik.values.name}
-                  onChange={formik.handleChange}
-                  required
-                  style={{
-                    background: "#faf8fc",
-                    borderColor: "#f0e9ff",
-                    fontWeight: 500,
-                    fontSize: 15,
-                    color: "#222",
-                    padding: "18px 14px",
-                    borderRadius: 6,
-                  }}
-                />
+    <div className="login-container d-flex align-items-center auth px-0">
+      {/* Animated background elements */}
+      <div className="floating-circle circle-1"></div>
+      <div className="floating-circle circle-2"></div>
+      <div className="floating-circle circle-3"></div>
+      
+      <Container fluid className="d-flex flex-column justify-content-center align-items-center min-vh-100">
+        <Row className="w-100 justify-content-center mb-4">
+          <Col md={8} className="text-center login-brand">
+            <h1 className="display-4 mb-2">Intel Classroom Assistant</h1>
+            <p className="lead">
+              Join our AI-powered educational platform today
+            </p>
+          </Col>
+        </Row>
+        
+        <Row className="w-100 justify-content-center">
+          <Col md={6} lg={4}>
+            <Card className="login-card">
+              <div className="login-card-header text-center py-4">
+                <h2 className="mb-1">Create Account</h2>
+                <p className="mb-0">
+                  <FaGraduationCap className="me-2 form-icon" />
+                  Sign up for a new account
+                </p>
               </div>
-              <div className="form-group mb-3">
-                <input
-                  type="tel"
-                  className="form-control form-control-lg"
-                  name="phone"
-                  placeholder="Phone"
-                  value={formik.values.phone}
-                  onChange={formik.handleChange}
-                  required
-                  style={{
-                    background: "#faf8fc",
-                    borderColor: "#f0e9ff",
-                    fontWeight: 500,
-                    fontSize: 15,
-                    color: "#222",
-                    padding: "18px 14px",
-                    borderRadius: 6,
-                  }}
-                />
-              </div>
-              <div className="form-group mb-3">
-                <input
-                  type="email"
-                  className="form-control form-control-lg"
-                  name="email"
-                  placeholder="Email"
-                  value={formik.values.email}
-                  onChange={formik.handleChange}
-                  required
-                  style={{
-                    background: "#faf8fc",
-                    borderColor: "#f0e9ff",
-                    fontWeight: 500,
-                    fontSize: 15,
-                    color: "#222",
-                    padding: "18px 14px",
-                    borderRadius: 6,
-                  }}
-                />
-              </div>
-              <div className="form-group mb-3">
-                <input
-                  type="password"
-                  className="form-control form-control-lg"
-                  name="password"
-                  placeholder="Password"
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  required
-                  style={{
-                    background: "#faf8fc",
-                    borderColor: "#f0e9ff",
-                    fontWeight: 500,
-                    fontSize: 15,
-                    color: "#222",
-                    padding: "18px 14px",
-                    borderRadius: 6,
-                  }}
-                />
-              </div>
-              {errorMessage && (
-                <div
-                  className="mb-2 text-danger"
-                  style={{ fontWeight: 500, fontSize: 14 }}
+              
+              <Card.Body className="login-card-body">              
+                {signupError && <Alert variant="danger">{signupError}</Alert>}
+                {signupSuccess && (
+                  <Alert variant="success">
+                    <FaCheckCircle className="me-2" /> Registration successful! Redirecting to login...
+                  </Alert>
+                )}
+                
+                <Formik
+                  initialValues={{ name: "", email: "", password: "", confirmPassword: "" }}
+                  onSubmit={handleSignup}
                 >
-                  {errorMessage}
+                  {({ handleSubmit, handleChange, values, isSubmitting }) => (
+                    <Form onSubmit={handleSubmit}>
+                      <Form.Group className="mb-3">
+                        <Form.Label className="d-flex align-items-center">
+                          <FaUser className="me-2 form-icon" />
+                          <span>Full Name</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="text"
+                          name="name"
+                          className="login-input"
+                          placeholder="Enter your full name"
+                          size="lg"
+                          value={values.name}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-3">
+                        <Form.Label className="d-flex align-items-center">
+                          <FaEnvelope className="me-2 form-icon" />
+                          <span>Email Address</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="email"
+                          name="email"
+                          className="login-input"
+                          placeholder="Enter your email"
+                          size="lg"
+                          value={values.email}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-3">
+                        <Form.Label className="d-flex align-items-center">
+                          <FaLock className="me-2 form-icon" />
+                          <span>Password</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="password"
+                          name="password"
+                          className="login-input"
+                          placeholder="Create a password"
+                          size="lg"
+                          value={values.password}
+                          onChange={handleChange}
+                          minLength="6"
+                          required
+                        />
+                        <small className="text-muted d-block mt-1">
+                          Must be at least 6 characters long
+                        </small>
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-4">
+                        <Form.Label className="d-flex align-items-center">
+                          <FaLock className="me-2 form-icon" />
+                          <span>Confirm Password</span>
+                        </Form.Label>
+                        <Form.Control
+                          type="password"
+                          name="confirmPassword"
+                          className="login-input"
+                          placeholder="Confirm your password"
+                          size="lg"
+                          value={values.confirmPassword}
+                          onChange={handleChange}
+                          required
+                        />
+                      </Form.Group>
+                      
+                      <Form.Group className="mb-4">
+                        <Form.Label className="d-flex align-items-center">
+                          <FaGraduationCap className="me-2 form-icon" />
+                          <span>Register As</span>
+                        </Form.Label>
+                        <div className="d-flex role-selector">
+                          <Button 
+                            variant={selectedRole === "student" ? "primary" : "outline-primary"}
+                            className={`flex-grow-1 d-flex align-items-center justify-content-center py-2 ${selectedRole === "student" ? "active-role" : ""}`}
+                            onClick={() => setSelectedRole("student")}
+                            type="button"
+                          >
+                            <FaUserGraduate className="me-2" />
+                            Student
+                          </Button>
+                          <Button 
+                            variant={selectedRole === "teacher" ? "primary" : "outline-primary"}
+                            className={`flex-grow-1 d-flex align-items-center justify-content-center py-2 ms-2 ${selectedRole === "teacher" ? "active-role" : ""}`}
+                            onClick={() => setSelectedRole("teacher")}
+                            type="button"
+                          >
+                            <FaChalkboardTeacher className="me-2" />
+                            Teacher
+                          </Button>
+                        </div>
+                      </Form.Group>
+                      
+                      <div className="mt-4">
+                        <button
+                          type="submit"
+                          className="btn btn-block btn-lg font-weight-medium auth-form-btn login-btn w-100"
+                          disabled={isSubmitting || signupSuccess}
+                        >
+                          {isSubmitting ? (
+                            <>
+                              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                              Creating Account...
+                            </>
+                          ) : "CREATE ACCOUNT"}
+                        </button>
+                      </div>
+                    </Form>
+                  )}
+                </Formik>
+                
+                <div className="text-center mt-4 font-weight-light">
+                  Already have an account?{" "}
+                  <Link to="/login" className="text-primary">
+                    Sign in
+                  </Link>
                 </div>
-              )}
-              {successMessage && (
-                <div
-                  className="mb-2 text-success"
-                  style={{ fontWeight: 500, fontSize: 14 }}
-                >
-                  {successMessage}
-                </div>
-              )}
-              <div className="mt-3">
-                <button
-                  type="submit"
-                  className="btn btn-block btn-lg font-weight-medium auth-form-btn"
-                  style={{
-                    background: "#a259ff",
-                    color: "#fff",
-                    fontWeight: 600,
-                    letterSpacing: 0.5,
-                    border: "none",
-                    borderRadius: 6,
-                    padding: "14px 0",
-                    fontSize: 16,
-                    width: "100%",
-                  }}
-                >
-                  SIGN UP
-                </button>
-              </div>
-              <div
-                className="text-center mt-4 font-weight-light"
-                style={{ fontSize: 15, color: "#888", fontWeight: 400 }}
-              >
-                Already have an account?{" "}
-                <Link
-                  to="/login"
-                  className="text-primary"
-                  style={{
-                    color: "#a259ff",
-                    fontWeight: 500,
-                    textDecoration: "none",
-                  }}
-                >
-                  Login
-                </Link>
-              </div>
-            </form>
-          </div>
-        </div>
-      </div>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+        
+        <Row className="mt-4 w-100">
+          <Col className="text-center">
+            <p className="login-footer intel-powered">
+              © 2025 Intel Classroom Assistant | Powered by OpenVINO™
+            </p>
+          </Col>
+        </Row>
+      </Container>
     </div>
   );
 };
 
-export default SignupPage;
+export default Signup;
