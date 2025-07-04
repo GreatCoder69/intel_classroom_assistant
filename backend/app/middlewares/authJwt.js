@@ -23,8 +23,16 @@ verifyToken = (req, res, next) => {
   });
 };
 
+isTeacher = (req, res, next) => {
+  if (req.userRole !== 'teacher') {
+    return res.status(403).send({ message: "Require Teacher Role!" });
+  }
+  next();
+};
+
 const authJwt = {
   verifyToken,
+  isTeacher
 };
 
 module.exports = authJwt;

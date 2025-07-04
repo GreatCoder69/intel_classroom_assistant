@@ -1,13 +1,11 @@
-// DashboardPage.jsx
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { FaHome, FaComment, FaSignOutAlt, FaBook } from "react-icons/fa";
-import SubjectWiseChart from "../components/ChatStatsChart";
+import { FaHome, FaComment, FaSignOutAlt, FaBook, FaHistory, FaCog } from "react-icons/fa";
 
-const SidebarLayout = () => {
-  const navigate   = useNavigate();
-  const location   = useLocation();
-  const user       = JSON.parse(localStorage.getItem("user") || "{}");
+const StudentNavigation = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const isActive = (path) => location.pathname === path;
 
@@ -24,7 +22,7 @@ const SidebarLayout = () => {
         className="bg-dark text-light d-flex flex-column p-3"
         style={{ width: 220, minHeight: "100vh" }}
       >
-        <h5 className="mb-4">Classroom Assistant</h5>
+        <h5 className="mb-4">Classroom Assistant</h5>
 
         <nav className="flex-grow-1">
           <ul className="list-unstyled">
@@ -54,15 +52,26 @@ const SidebarLayout = () => {
             </li>
 
             <li className="mb-3">
-              {/* 👉 both `to` and active‑check use /chat */}
               <Link
-                to="/teacher-chat"
+                to="/chat"
                 className={`d-flex align-items-center text-decoration-none ${
                   isActive("/chat") ? "text-white fw-bold" : "text-light"
                 }`}
               >
                 <FaComment className="me-2" />
-                Chat Assistant
+                AI Assistant
+              </Link>
+            </li>
+
+            <li className="mb-3">
+              <Link
+                to="/history"
+                className={`d-flex align-items-center text-decoration-none ${
+                  isActive("/history") ? "text-white fw-bold" : "text-light"
+                }`}
+              >
+                <FaHistory className="me-2" />
+                Chat History
               </Link>
             </li>
 
@@ -80,17 +89,18 @@ const SidebarLayout = () => {
         </nav>
 
         <footer className="small text-secondary">
-          © 2025 OpenVINO™ Assistant
+          Welcome, {user.name || user.email}
+          <br />
+          © 2025 OpenVINO™ Assistant
         </footer>
       </aside>
 
-      {/* ───── Main content ───── */}
-      <main className="flex-grow-1 p-4" style={{ background: "#000", color: "#fff" }}>
-        {/* Put <Outlet/> if you want nested routing */}
-        <SubjectWiseChart />
+      {/* ───── Main content area ───── */}
+      <main className="flex-grow-1">
+        {/* This will be filled by the routed component */}
       </main>
     </div>
   );
 };
 
-export default SidebarLayout;
+export default StudentNavigation;

@@ -17,7 +17,6 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to the backend server." });
 });
 
-db.mongoose
 const db = require("./app/models");
 db.mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
@@ -29,6 +28,7 @@ require('./app/routes/user.routes')(app);
 require("./app/routes/chat.routes")(app);
 require("./app/routes/admin.routes")(app);
 require("./app/routes/log.routes")(app);
+require("./app/routes/subjects.routes")(app);
 
 const uploadRoutes = require("./app/routes/upload.routes");
 app.use("/api", uploadRoutes);

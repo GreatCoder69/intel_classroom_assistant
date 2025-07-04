@@ -1,0 +1,68 @@
+.subjects-container {
+  background: #23272b;
+  border-radius: 14px;
+  padding: 2rem 2.5rem;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+  min-height: 80vh;
+}
+.subjects-title {
+  color: #3a7bd5;
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-bottom: 2rem;
+}
+.subjects-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: flex-start;
+}
+.subject-card {
+  background: linear-gradient(120deg, #23272b 60%, #2b3a67 100%);
+  color: #e0e0e0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(58,123,213,0.10);
+  padding: 1.5rem 2rem;
+  min-width: 220px;
+  max-width: 260px;
+  flex: 1 1 220px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  border: 1.5px solid #3a7bd5;
+}
+.subject-card:hover {
+  transform: translateY(-6px) scale(1.03);
+  box-shadow: 0 6px 24px rgba(58,123,213,0.18);
+  border-color: #00d2ff;
+}
+.subject-card .subject-name {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+.subject-card .subject-teacher {
+  color: #bfc4c9;
+  font-size: 1rem;
+  margin-bottom: 0.25rem;
+}
+.subject-card .subject-room {
+  color: #3a7bd5;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.subjects-add-btn {
+  margin-top: 2rem;
+  border-radius: 20px;
+  font-weight: 500;
+  background: linear-gradient(90deg, #3a7bd5 0%, #00d2ff 100%);
+  border: none;
+  color: #fff;
+  padding: 0.6rem 2.2rem;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(58,123,213,0.10);
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.subjects-add-btn:hover {
+  background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%);
+  box-shadow: 0 6px 24px rgba(58,123,213,0.18);
+}

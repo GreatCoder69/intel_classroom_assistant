@@ -99,3 +99,17 @@
 2025-07-04 20:21:25 [ERROR] classroom_assistant: [20250704202025] LLM generation timed out after 60 seconds
 2025-07-04 20:21:25 [INFO] classroom_assistant: [20250704202025] Generation completed in 60.01s
 2025-07-04 20:21:26 [INFO] classroom_assistant: [20250704202025] Response: 'Sorry, it's taking longer than...' (105 chars)
+2025-07-04 22:52:29 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-04 22:52:37 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-04 22:52:38 [INFO] classroom_assistant: Loading model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-04 22:52:44 [INFO] classroom_assistant: Preparing system prompts
+2025-07-04 22:52:44 [INFO] classroom_assistant: Initializing model with system prompt
+2025-07-04 22:52:50 [INFO] classroom_assistant: Model ready for inference
+2025-07-04 22:52:50 [INFO] classroom_assistant: Starting Intel Classroom Assistant server
+2025-07-04 22:52:50 [INFO] classroom_assistant: Running in production mode without auto-reloader
+2025-07-05 00:30:21 [INFO] classroom_assistant: [20250705003021] Chat request - Subject: ok, Role: student, Q: 'what is history'
+2025-07-05 00:30:21 [INFO] classroom_assistant: [20250705003021] Generating response
+2025-07-05 00:30:21 [INFO] classroom_assistant: [20250705003021] Generating response with student system prompt
+2025-07-05 00:30:41 [INFO] classroom_assistant: [20250705003021] Generation completed successfully
+2025-07-05 00:30:41 [INFO] classroom_assistant: [20250705003021] Generation completed in 20.09s
+2025-07-05 00:30:41 [INFO] classroom_assistant: [20250705003021] Response: 'The user is seeking informatio...' (339 chars)

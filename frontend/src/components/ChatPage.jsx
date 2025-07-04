@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Form, InputGroup, Dropdown, Modal } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { toast } from "react-toastify";
 import "./ChatPage.css";
@@ -468,7 +468,15 @@ const ChatPage = () => {
 
       <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
         <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
-          <h5>{selectedTopic}</h5>
+          <div className="d-flex align-items-center gap-3">
+            <h5 className="mb-0">{selectedTopic}</h5>
+            <Link 
+              to="/subjects" 
+              className="btn btn-outline-primary btn-sm"
+            >
+              📚 Subjects
+            </Link>
+          </div>
           <Dropdown align="end">
             <Dropdown.Toggle
               variant="outline-secondary"
