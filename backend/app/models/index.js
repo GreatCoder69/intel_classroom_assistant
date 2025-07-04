@@ -13,5 +13,6 @@ db.userLog = require("./log.model"); // ✅ Register the log model
 db.subject = require("./subject.model"); // ✅ Register the subject model
 db.chat = require("./chat.model"); // ✅ Register the chat model (legacy)
 db.chatMessage = require("./chatMessage.model"); // ✅ Register the new chat message model
+db.resource = require("./resource.model"); // ✅ Register the resource model
 
 module.exports = db;

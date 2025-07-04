@@ -7,8 +7,9 @@ const app = express();
 
 app.use(cors());
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Increase payload size limits for file uploads
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 const uploadDir = process.env.UPLOAD_DIR || "uploads";
 app.use("/uploads", express.static(path.join(__dirname, uploadDir)));
@@ -29,6 +30,7 @@ require("./app/routes/chat.routes")(app);
 require("./app/routes/admin.routes")(app);
 require("./app/routes/log.routes")(app);
 require("./app/routes/subjects.routes")(app);
+require("./app/routes/resources.routes")(app);
 
 const uploadRoutes = require("./app/routes/upload.routes");
 app.use("/api", uploadRoutes);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Modal, Button, Form, Alert } from 'react-bootstrap';
 import './Subjects.css';
 
@@ -136,7 +136,8 @@ function Subjects() {
         // Refresh subjects list
         fetchSubjects(token, user.role);
       } else {
-        setError('Failed to delete subject');
+        const errorData = await response.json();
+        setError(errorData.message || 'Failed to delete subject');
       }
     } catch (err) {
       setError('Network error occurred');
@@ -257,25 +258,36 @@ function Subjects() {
                     {subject.description}
                   </div>
                 )}
-                {/* Edit and Delete buttons for teacher role */}
-                {user?.role === 'teacher' && (
-                  <div className="subject-actions d-flex justify-content-end gap-2">
-                    <Button 
-                      variant="outline-light" 
-                      onClick={() => openEditModal(subject)}
-                      size="sm"
-                    >
-                      Edit
-                    </Button>
-                    <Button 
-                      variant="danger" 
-                      onClick={() => openDeleteModal(subject)}
-                      size="sm"
-                    >
-                      Delete
-                    </Button>
-                  </div>
-                )}
+                
+                {/* Action buttons for all users */}
+                <div className="subject-actions mt-3">
+                  <Link 
+                    to={`/subjects/${subject.id}/resources`}
+                    className="btn btn-primary btn-sm"
+                    style={{ textDecoration: 'none' }}
+                  >
+                    📚 View Resources
+                  </Link>
+                  
+                  {user?.role === 'teacher' && (
+                    <div className="d-flex gap-2 mt-2">
+                      <Button 
+                        variant="outline-light" 
+                        onClick={() => openEditModal(subject)}
+                        size="sm"
+                      >
+                        ✏️ Edit
+                      </Button>
+                      <Button 
+                        variant="danger" 
+                        onClick={() => openDeleteModal(subject)}
+                        size="sm"
+                      >
+                        🗑️ Delete
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             ))
           )}

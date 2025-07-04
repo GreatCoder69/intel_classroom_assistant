@@ -132,7 +132,7 @@
   transform: translateY(-1px);
 }
 
-/* Edit and Delete Button Styles */
+/* Subject Action Styles */
 .subject-actions {
   margin-top: 1.5rem;
   padding-top: 1rem;
@@ -147,10 +147,27 @@
   transition: all 0.3s ease;
 }
 
+.subject-actions .btn-primary {
+  background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
+  border: none;
+  color: white;
+  display: block;
+  width: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.subject-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(58, 123, 213, 0.3);
+  color: white;
+}
+
 .subject-actions .btn-outline-light {
   border-color: #007bff;
   color: #007bff;
   background: transparent;
+  flex: 1;
 }
 
 .subject-actions .btn-outline-light:hover {
@@ -164,6 +181,7 @@
   background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
   border: none;
   color: white;
+  flex: 1;
 }
 
 .subject-actions .btn-danger:hover {

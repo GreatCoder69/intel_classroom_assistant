@@ -12,6 +12,7 @@ import ChatDetail from "./components/ChatDetail";
 import AdminErrorLogs from "./components/AdminErrorLogs";
 import Dashboard from "./pages/Dashboard";
 import Subjects from "./pages/Subjects";
+import Resources from "./pages/Resources";
 import TeacherChat from "./components/TeacherChat";
 const App = () => (
   <Routes>
@@ -22,6 +23,7 @@ const App = () => (
     {/* Main App Routes without Layout */}
     <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/subjects" element={<Subjects />} />
+    <Route path="/subjects/:subjectId/resources" element={<Resources />} />
     <Route path="/chat" element={<ChatPage />} />
     <Route path="/general-chat" element={<GeneralChat />} />
     <Route path="/history" element={<ChatHistory />} />

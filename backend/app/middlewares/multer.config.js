@@ -23,9 +23,20 @@ const diskStorage = multer.diskStorage({
 
 // ✅ Filter to allow only images
 
-// ✅ Export both configurations
-const diskUpload = multer({ storage: diskStorage});
-const memoryUpload = multer({ storage: multer.memoryStorage()});
+// ✅ Export both configurations with size limits
+const diskUpload = multer({ 
+  storage: diskStorage,
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit for general file uploads
+  }
+});
+
+const memoryUpload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024 // 50MB limit for memory uploads
+  }
+});
 
 module.exports = {
   diskUpload,   // Saves file to disk (use in /uploadimg route)

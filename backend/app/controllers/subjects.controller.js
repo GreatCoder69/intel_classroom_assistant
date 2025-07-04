@@ -140,6 +140,20 @@ exports.deleteSubject = async (req, res) => {
       return res.status(404).send({ message: "Subject not found!" });
     }
     
+    // Check if subject has resources
+    const Resource = require("../models").resource;
+    const resourceCount = await Resource.countDocuments({ 
+      subjectId: subjectId,
+      isActive: true 
+    });
+    
+    if (resourceCount > 0) {
+      return res.status(400).send({ 
+        message: `Cannot delete subject. It has ${resourceCount} associated resources. Please delete all resources first.`,
+        resourceCount: resourceCount
+      });
+    }
+    
     await Subject.findByIdAndDelete(subjectId);
     res.status(200).send({ message: "Subject deleted successfully!" });
   } catch (err) {
