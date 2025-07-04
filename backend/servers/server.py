@@ -1,3 +1,4 @@
+import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import queue
@@ -9,9 +10,7 @@ import logging
 import threading
 import psutil
 from datetime import datetime
-from vosk import Model, KaldiRecognizer
-from transformers import AutoTokenizer
-from optimum.intel.openvino import OVModelForCausalLM
+import traceback
 
 # Configure logging
 logging.basicConfig(
@@ -21,14 +20,43 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+# Wrap Vosk import in try-except to handle import errors gracefully
+try:
+    from vosk import Model, KaldiRecognizer
+    VOSK_AVAILABLE = True
+except ImportError:
+    logger.warning("Vosk not available. Speech recognition will be disabled.")
+    VOSK_AVAILABLE = False
+
+from transformers import AutoTokenizer
+from optimum.intel.openvino import OVModelForCausalLM
+
 # Initialize Flask app
 app = Flask(__name__)
-CORS(app)  # Allow requests from your React frontend
+CORS(app, resources={r"/*": {"origins": "*"}})  # Configure CORS to allow requests from any origin
 
-# Vosk setup
+# Vosk setup with proper error handling
 q = queue.Queue()
-asr_model = Model("vosk-model-small-en-us-0.15")
-rec = KaldiRecognizer(asr_model, 16000)
+asr_model = None
+rec = None
+
+# Configure Vosk model path - allow environment variable override
+VOSK_MODEL_PATH = os.environ.get("VOSK_MODEL_PATH", "vosk-model-small-en-us-0.15")
+
+try:
+    if VOSK_AVAILABLE:
+        logger.info(f"Loading Vosk model from: {VOSK_MODEL_PATH}")
+        if os.path.exists(VOSK_MODEL_PATH):
+            asr_model = Model(VOSK_MODEL_PATH)
+            rec = KaldiRecognizer(asr_model, 16000)
+            logger.info("Vosk model loaded successfully")
+        else:
+            logger.error(f"Vosk model not found at: {VOSK_MODEL_PATH}")
+            VOSK_AVAILABLE = False
+except Exception as e:
+    logger.error(f"Error loading Vosk model: {str(e)}")
+    logger.error(traceback.format_exc())
+    VOSK_AVAILABLE = False
 
 # Dynamic context template to be added with each user query
 DYNAMIC_CONTEXT_TEMPLATE = """
@@ -97,7 +125,7 @@ Guidelines:
 - Maintain a respectful, professional, and educational tone
 - Focus strictly on the subject matter
 - Use correct terminology and logic when explaining academic processes (e.g. algorithms, equations, etc.)
-- Do not use filler phrases like “I think” or “I believe”
+- Do not use filler phrases like "I think" or "I believe"
 - Ensure all responses are free of doubt, confusion, or hesitation
 - Keep the answers under 2048 characters"""
 
@@ -222,77 +250,56 @@ def audio_callback(indata, frames, time_info, status):
     """
     q.put(bytes(indata))
 
-# User credentials (in a real application, this would be in a database with hashed passwords)
-users = {
-    "student": {"password": "student", "role": "student"},
-    "teacher": {"password": "teacher", "role": "teacher"}
-}
-
-@app.route("/login", methods=["POST"])
-def login():
-    """
-    Handle user login authentication.
-    
-    Request Body:
-        username (str): User's username
-        password (str): User's password
-    
-    Returns:
-        JSON: Login response with user info or error message
-    """
-    data = request.get_json()
-    username = data.get("username")
-    password = data.get("password")
-    
-    if not username or not password:
-        return jsonify({"message": "Username and password are required"}), 400
-    
-    user = users.get(username)
-    if user and user["password"] == password:
-        # In a real app, you would create a JWT or session token here
-        return jsonify({
-            "username": username,
-            "role": user["role"],
-            "message": "Login successful"
-        })
-    
-    return jsonify({"message": "Invalid credentials"}), 401
-
 @app.route("/listen", methods=["GET"])
 def listen():
     """
     Listen for speech input and return transcribed text.
     
     Returns:
-        JSON: Transcribed speech text
+        JSON: Transcribed speech text or error message
     """
+    # Check if Vosk is available
+    if not VOSK_AVAILABLE or rec is None:
+        logger.error("Speech recognition requested but Vosk is not available")
+        return jsonify({
+            "error": "Speech recognition is not available",
+            "message": "The speech recognition system is not properly configured."
+        }), 503  # Service Unavailable
+    
     request_id = datetime.now().strftime("%Y%m%d%H%M%S")
     logger.info(f"[{request_id}] Speech recognition started")
     recognized_text = ""
     last_speech_time = time.time()
     timeout_seconds = 10
 
-    with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16',
-                           channels=1, callback=audio_callback):
-        while True:
-            if not q.empty():
-                data = q.get()
-                if rec.AcceptWaveform(data):
-                    result = rec.Result()
-                    text = json.loads(result).get("text", "")
-                    if text.strip():
-                        recognized_text = text
-                        logger.info(f"[{request_id}] Speech recognized: '{text}'")
-                        break
-                else:
-                    partial = json.loads(rec.PartialResult()).get("partial", "")
-                    if partial.strip():
-                        last_speech_time = time.time()
-                        logger.debug(f"[{request_id}] Partial recognition: '{partial}'")
+    try:
+        with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16',
+                            channels=1, callback=audio_callback):
+            while True:
+                if not q.empty():
+                    data = q.get()
+                    if rec.AcceptWaveform(data):
+                        result = rec.Result()
+                        text = json.loads(result).get("text", "")
+                        if text.strip():
+                            recognized_text = text
+                            logger.info(f"[{request_id}] Speech recognized: '{text}'")
+                            break
+                    else:
+                        partial = json.loads(rec.PartialResult()).get("partial", "")
+                        if partial.strip():
+                            last_speech_time = time.time()
+                            logger.debug(f"[{request_id}] Partial recognition: '{partial}'")
 
-            if time.time() - last_speech_time > timeout_seconds:
-                logger.warning(f"[{request_id}] Timeout - no speech detected after {timeout_seconds} seconds")
-                break
+                if time.time() - last_speech_time > timeout_seconds:
+                    logger.warning(f"[{request_id}] Timeout - no speech detected after {timeout_seconds} seconds")
+                    break
+    except Exception as e:
+        logger.error(f"[{request_id}] Error during speech recognition: {str(e)}")
+        return jsonify({
+            "error": "Speech recognition failed",
+            "message": str(e)
+        }), 500
 
     logger.info(f"[{request_id}] Sending response back to frontend: '{recognized_text}'")
     return jsonify({"transcript": recognized_text})
@@ -314,133 +321,219 @@ def timeout_handler(signum, frame):
     """
     raise TimeoutException("LLM generation timed out")
 
-@app.route("/query", methods=["POST"])
-def query():
+# Updated to match the Node.js API route structure
+@app.route("/api/chat", methods=["POST"])
+def chat():
     """
     Process user queries using LLM and return AI-generated responses.
-    
-    Request Body:
-        question (str): User's question
-        role (str): User role ('student' or 'teacher')
-    
-    Returns:
-        JSON: AI response with answer and processing latency
+    Designed to match the Node.js API structure.
     """
     request_id = datetime.now().strftime("%Y%m%d%H%M%S")
     
-    # Monitor initial memory usage
-    mem_before = psutil.virtual_memory()
-    logger.info(f"[{request_id}] Memory usage before processing: {mem_before.percent}% (Available: {mem_before.available / (1024*1024):.2f} MB)")
+    # Log the request content type and headers for debugging
+    content_type = request.headers.get('Content-Type', 'unknown')
+    logger.info(f"[{request_id}] Request Content-Type: {content_type}")
+    logger.info(f"[{request_id}] Request Headers: {dict(request.headers)}")
     
-    data = request.get_json()
-    question = data.get("question", "")
-    # Get user role from request, default to "student" if not provided
-    user_role = data.get("role", "student")
-    
-    logger.info(f"[{request_id}] Received question from frontend, role: {user_role}, question: '{question}'")
-    if not question:
-        logger.warning(f"[{request_id}] No question provided in request")
-        return jsonify({"error": "No question provided"}), 400
-    
-    # Validate role
-    if user_role not in ["student", "teacher"]:
-        logger.warning(f"[{request_id}] Invalid role provided: {user_role}, defaulting to student")
-        user_role = "student"
-        
-    logger.info(f"[{request_id}] Tokenizing input and preparing LLM for {user_role} role")
-    # Only add dynamic context with the user question, not the full system prompt
-    context_and_question = f"{get_current_dynamic_context()}\n\nUser: {question}\n\nIntel Assistant:"
-    logger.info(f"[{request_id}] Using dynamic context with user query for {user_role} role")
-      # Prepare input text based on user's role
-    input_text = context_and_question
-    inputs = tokenizer(input_text, return_tensors="pt")
-    
-    # Get the appropriate system prompt based on user role
-    role_prompt_ids = system_prompt_ids.get(user_role, system_prompt_ids["student"])
-    
-    logger.info(f"[{request_id}] Starting LLM generation with {user_role} role system prompt")
-    start = time.time()
-    
-    # Set a timeout for LLM generation (30 seconds)
-    timeout_seconds = 60
-    answer = None
-    
-    try:        # Use threading with timeout for generation
-        def generate_response():
-            nonlocal answer
-            try:                # Increased max_length and added min_length for longer responses
-                # Use the appropriate system prompt based on user role
-                logger.info(f"[{request_id}] Generating response with {user_role} system prompt")
-                
-                # Determine which system prompt to use based on role
-                current_prompt_ids = role_prompt_ids
-                  # Combine the system prompt prefix with the input
-                # For OpenVINO models, we need to handle this with the tokenizer
-                # First get the tokenized system prompt for the role
-                role_system_prompt = STUDENT_SYSTEM_PROMPT if user_role == "student" else TEACHER_SYSTEM_PROMPT
-                
-                # Create combined input with role-specific system prompt
-                combined_input = f"{role_system_prompt}\n\n{input_text}"
-                combined_inputs = tokenizer(combined_input, return_tensors="pt")
-                
-                outputs = model.generate(
-                    **combined_inputs,
-                    max_length=2048,       # Increased from 200
-                    min_length=20,        # Ensure minimum output length
-                    do_sample=True,       # Enable sampling for more diverse outputs
-                    temperature=0.7,      # Control randomness (lower = more deterministic)
-                    no_repeat_ngram_size=3 # Prevent repetition of n-grams
-                )
-                full_response = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
-                # Extract only the actual assistant response
-                answer = extract_assistant_response(full_response)
-                logger.debug(f"[{request_id}] Raw model output: '{full_response[:100]}...'")
-            except Exception as e:
-                logger.error(f"[{request_id}] Error during model generation: {str(e)}")
-                answer = "Sorry, I encountered an issue processing your request."
-        
-        # Create and start the generation thread
-        generation_thread = threading.Thread(target=generate_response)
-        generation_thread.start()
-        
-        # Wait for the thread with timeout
-        generation_thread.join(timeout=timeout_seconds)
-        
-        if generation_thread.is_alive():
-            logger.error(f"[{request_id}] LLM generation timed out after {timeout_seconds} seconds")
-            # We don't kill the thread, but let the user know
-            answer = "Sorry, it's taking longer than expected to process your request. Please try again or use a simpler query."
-            end = time.time()
+    # Handle different content types
+    try:
+        if content_type and 'application/json' in content_type:
+            data = request.get_json(silent=True) or {}
+        elif content_type and 'multipart/form-data' in content_type:
+            # Handle multipart form data (file uploads)
+            data = request.form.to_dict()
+            # Handle file if present
+            if 'file' in request.files:
+                file = request.files['file']
+                # Process file here if needed
         else:
-            end = time.time()
-            logger.info(f"[{request_id}] Generation completed successfully")
+            # Fallback to parse data from request body
+            try:
+                data = request.get_json(silent=True) or {}
+            except:
+                data = {}
+                
+        # Log received data for debugging
+        logger.info(f"[{request_id}] Received data: {data}")
+        
+        # Extract parameters from request
+        question = data.get("question", "")
+        subject = data.get("subject", "General")
+        
+        # Get user role from request or header
+        user_role = data.get("role", "student")
+        if "X-User-Role" in request.headers:
+            user_role = request.headers.get("X-User-Role")
+        
+        # Get user email from request or header
+        user_email = data.get("email", None)
+        if "X-User-Email" in request.headers:
+            user_email = request.headers.get("X-User-Email")
+        
+        logger.info(f"[{request_id}] Received chat request - Subject: {subject}, Role: {user_role}, Email: {user_email}, Question: '{question}'")
+        
+        # Monitor initial memory usage
+        mem_before = psutil.virtual_memory()
+        logger.info(f"[{request_id}] Memory usage before processing: {mem_before.percent}% (Available: {mem_before.available / (1024*1024):.2f} MB)")
+        
+        if not question:
+            logger.warning(f"[{request_id}] No question provided in request")
+            return jsonify({"error": "No question provided"}), 400
+        
+        # Validate role
+        if user_role not in ["student", "teacher"]:
+            logger.warning(f"[{request_id}] Invalid role provided: {user_role}, defaulting to student")
+            user_role = "student"
             
+        logger.info(f"[{request_id}] Tokenizing input and preparing LLM for {user_role} role")
+        # Add subject context to enhance the response
+        context_and_question = f"{get_current_dynamic_context()}\n\nSubject: {subject}\nUser: {question}\n\nIntel Assistant:"
+        logger.info(f"[{request_id}] Using dynamic context with subject and user query for {user_role} role")
+        
+        # Prepare input text
+        input_text = context_and_question
+        inputs = tokenizer(input_text, return_tensors="pt")
+        
+        # Get the appropriate system prompt based on user role
+        role_prompt_ids = system_prompt_ids.get(user_role, system_prompt_ids["student"])
+        
+        logger.info(f"[{request_id}] Starting LLM generation with {user_role} role system prompt")
+        start = time.time()
+        
+        # Set a timeout for LLM generation
+        timeout_seconds = 60
+        answer = None
+        file_url = None
+        
+        try:
+            # Use threading with timeout for generation
+            def generate_response():
+                nonlocal answer
+                try:
+                    # Use the appropriate system prompt based on user role
+                    logger.info(f"[{request_id}] Generating response with {user_role} system prompt")
+                    
+                    # Determine which system prompt to use based on role
+                    current_prompt_ids = role_prompt_ids
+                    
+                    # Combine the system prompt prefix with the input
+                    # For OpenVINO models, we need to handle this with the tokenizer
+                    # First get the tokenized system prompt for the role
+                    role_system_prompt = STUDENT_SYSTEM_PROMPT if user_role == "student" else TEACHER_SYSTEM_PROMPT
+                    
+                    # Create combined input with role-specific system prompt
+                    combined_input = f"{role_system_prompt}\n\n{input_text}"
+                    combined_inputs = tokenizer(combined_input, return_tensors="pt")
+                    
+                    outputs = model.generate(
+                        **combined_inputs,
+                        max_length=2048,      
+                        min_length=20,        
+                        do_sample=True,       
+                        temperature=0.7,      
+                        no_repeat_ngram_size=3 
+                    )
+                    full_response = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
+                    # Extract only the actual assistant response
+                    answer = extract_assistant_response(full_response)
+                    logger.debug(f"[{request_id}] Raw model output: '{full_response[:100]}...'")
+                except Exception as e:
+                    logger.error(f"[{request_id}] Error during model generation: {str(e)}")
+                    answer = "Sorry, I encountered an issue processing your request."
+        
+            # Create and start the generation thread
+            generation_thread = threading.Thread(target=generate_response)
+            generation_thread.start()
+        
+            # Wait for the thread with timeout
+            generation_thread.join(timeout=timeout_seconds)
+        
+            if generation_thread.is_alive():
+                logger.error(f"[{request_id}] LLM generation timed out after {timeout_seconds} seconds")
+                # We don't kill the thread, but let the user know
+                answer = "Sorry, it's taking longer than expected to process your request. Please try again or use a simpler query."
+                end = time.time()
+            else:
+                end = time.time()
+                logger.info(f"[{request_id}] Generation completed successfully")
+            
+        except Exception as e:
+            end = time.time()
+            logger.error(f"[{request_id}] Error during LLM generation: {str(e)}")
+            answer = "Sorry, an unexpected error occurred while processing your request."
+    
+        process_time = round(end - start, 2)
+        logger.info(f"[{request_id}] LLM generation took {process_time} seconds")
+    
+        # Force garbage collection to free memory
+        gc.collect()
+    
+        # Monitor final memory usage
+        mem_after = psutil.virtual_memory()
+        logger.info(f"[{request_id}] Memory usage after processing: {mem_after.percent}% (Available: {mem_after.available / (1024*1024):.2f} MB)")
+    
+        if answer:
+            logger.info(f"[{request_id}] Sending response: '{answer[:100]}...' ({len(answer)} chars)")
+        else:
+            answer = "Sorry, I couldn't generate a response. Please try again."
+            logger.warning(f"[{request_id}] No response was generated")
+    
+        # Return the response
+        return jsonify({
+            "answer": answer,
+            "file": file_url,
+            "chatCategory": "general",
+            "latency": process_time
+        })
+        
     except Exception as e:
-        end = time.time()
-        logger.error(f"[{request_id}] Error during LLM generation: {str(e)}")
-        answer = "Sorry, an unexpected error occurred while processing your request."
+        logger.error(f"[{request_id}] Error processing request: {str(e)}")
+        logger.error(traceback.format_exc())
+        return jsonify({"error": "Server error", "message": str(e)}), 500
+
+# Add a compatible endpoint for the original /api/query endpoint
+@app.route("/api/query", methods=["POST"])
+def query():
+    """
+    Alias of the chat function for compatibility with Node.js API.
+    """
+    return chat()
+
+@app.route("/api/listen", methods=["GET"])
+def api_listen():
+    """
+    Alias of the listen function with /api prefix for compatibility.
+    """
+    return listen()
+
+@app.route("/api/health", methods=["GET"])
+def health_check():
+    """
+    Check the health status of the server and its components.
     
-    process_time = round(end - start, 2)
-    logger.info(f"[{request_id}] LLM generation took {process_time} seconds")
+    Returns:
+        JSON: Health status information
+    """
+    status = {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "components": {
+            "server": "up",
+            "speech_recognition": "up" if VOSK_AVAILABLE and rec is not None else "down",
+            "llm": "up" if 'model' in globals() and model is not None else "down"
+        },
+        "memory": {
+            "percent_used": psutil.virtual_memory().percent,
+            "available_mb": round(psutil.virtual_memory().available / (1024*1024), 2)
+        }
+    }
     
-    # Force garbage collection to free memory
-    gc.collect()
+    # Overall status determination
+    if not status["components"]["llm"] == "up":
+        status["status"] = "degraded"
     
-    # Monitor final memory usage
-    mem_after = psutil.virtual_memory()
-    logger.info(f"[{request_id}] Memory usage after processing: {mem_after.percent}% (Available: {mem_after.available / (1024*1024):.2f} MB)")
-    
-    if answer:
-        logger.info(f"[{request_id}] Sending response to frontend: '{answer[:100]}...' ({len(answer)} chars)")
-    else:
-        answer = "Sorry, I couldn't generate a response. Please try again."
-        logger.warning(f"[{request_id}] No response was generated")
-    
-    return jsonify({"answer": answer, "latency": process_time})
+    return jsonify(status)
 
 if __name__ == "__main__":
     logger.info("Starting Intel Classroom Assistant server")
-    # logger.info(f"Speech model: vosk-model-small-en-us-0.15")
-    # logger.info(f"LLM model: {model_id}")
-    # logger.info(f"Server running at http://localhost:8000")
     app.run(debug=True, port=8000)

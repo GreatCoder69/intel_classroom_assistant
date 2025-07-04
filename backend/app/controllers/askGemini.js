@@ -7,7 +7,9 @@ if (!GEMINI_API_KEY) {
   throw new Error("GEMINI_API_KEY is not set.");
 }
 
-const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+// Use the latest model version (gemini-1.5-flash)
+const MODEL_NAME = "gemini-1.5-flash";
+const endpoint = `https://generativelanguage.googleapis.com/v1/models/${MODEL_NAME}:generateContent?key=${GEMINI_API_KEY}`;
 
 /**
  * Calls Gemini API with optional image.
@@ -29,11 +31,20 @@ const askGemini = async (modelName, prompt, mimeType = null, base64Image = null)
 
   const body = {
     contents: [{ role: "user", parts }],
+    generationConfig: {
+      temperature: 0.7,
+      topP: 0.8,
+      topK: 40,
+      maxOutputTokens: 2048
+    }
   };
 
   try {
+    console.log(`Calling Gemini API (${MODEL_NAME}) with prompt: "${prompt.substring(0, 50)}..."`);
+    
     const response = await axios.post(endpoint, body, {
       headers: { "Content-Type": "application/json" },
+      timeout: 30000 // 30 second timeout
     });
 
     const data = response.data;
@@ -45,8 +56,15 @@ const askGemini = async (modelName, prompt, mimeType = null, base64Image = null)
     const err = data?.error?.message || "Unknown response format from Gemini";
     throw new Error(err);
   } catch (err) {
-    console.error("[Gemini API ERROR]", err.message);
-    throw err;
+    // Better error logging with detailed information
+    if (err.response?.data?.error) {
+      console.error("[Gemini API ERROR]", JSON.stringify(err.response.data.error, null, 2));
+    } else {
+      console.error("[Gemini API ERROR]", err.message);
+    }
+    
+    // Return a friendly error message instead of throwing
+    return `I encountered a technical issue while processing your request. Error: ${err.message || "Unknown error"}`;
   }
 };
 
