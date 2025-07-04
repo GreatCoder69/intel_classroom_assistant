@@ -135,3 +135,17 @@
 2025-07-05 02:10:59 [ERROR] classroom_assistant: [20250705020959] LLM generation timed out after 60 seconds
 2025-07-05 02:10:59 [INFO] classroom_assistant: [20250705020959] Generation completed in 60.01s
 2025-07-05 02:10:59 [INFO] classroom_assistant: [20250705020959] Response: 'Sorry, it's taking longer than...' (105 chars)
+2025-07-05 02:26:02 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-05 02:26:11 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-05 02:26:12 [INFO] classroom_assistant: Loading model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-05 02:26:19 [INFO] classroom_assistant: Preparing system prompts
+2025-07-05 02:26:19 [INFO] classroom_assistant: Initializing model with system prompt
+2025-07-05 02:26:22 [INFO] classroom_assistant: Model ready for inference
+2025-07-05 02:26:22 [INFO] classroom_assistant: Starting Intel Classroom Assistant server
+2025-07-05 02:26:22 [INFO] classroom_assistant: Running in production mode without auto-reloader
+2025-07-05 02:26:29 [INFO] classroom_assistant: [20250705022629] Chat request - Subject: cse, Role: student, Q: '[Context: This question is abo...'
+2025-07-05 02:26:29 [INFO] classroom_assistant: [20250705022629] Generating response
+2025-07-05 02:26:29 [INFO] classroom_assistant: [20250705022629] Generating response with student system prompt
+2025-07-05 02:27:09 [INFO] classroom_assistant: [20250705022629] Generation completed successfully
+2025-07-05 02:27:09 [INFO] classroom_assistant: [20250705022629] Generation completed in 39.78s
+2025-07-05 02:27:09 [INFO] classroom_assistant: [20250705022629] Response: 'Relational Databases Organize ...' (821 chars)

@@ -60,7 +60,7 @@ const handleLogin = async (values) => {
       <Container fluid className="d-flex flex-column justify-content-center align-items-center min-vh-100">
         <Row className="w-100 justify-content-center mb-4">
           <Col md={8} className="text-center login-brand">
-            <h1 className="display-4 mb-2">Intel Classroom Assistant</h1>
+            <h1 className="display-4 mb-2">EduAI</h1>
             <p className="lead">
               An AI-powered educational platform for enhancing learning experiences
             </p>
@@ -194,7 +194,7 @@ const handleLogin = async (values) => {
         <Row className="mt-4 w-100">
           <Col className="text-center">
             <p className="login-footer intel-powered">
-              © 2025 Intel Classroom Assistant | Powered by OpenVINO™
+              © 2025 EduAI
             </p>
           </Col>
         </Row>

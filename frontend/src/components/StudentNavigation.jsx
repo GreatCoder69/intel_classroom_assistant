@@ -91,7 +91,7 @@ const StudentNavigation = () => {
         <footer className="small text-secondary">
           Welcome, {user.name || user.email}
           <br />
-          © 2025 OpenVINO™ Assistant
+          EduAI
         </footer>
       </aside>
 

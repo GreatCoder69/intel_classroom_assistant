@@ -12,18 +12,8 @@ function Subjects() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [newSubject, setNewSubject] = useState({
     name: '',
-    description: '',
-    color: 'primary'
+    description: ''
   });
-
-  const colorOptions = [
-    { value: 'primary', label: 'Blue' },
-    { value: 'success', label: 'Green' },
-    { value: 'danger', label: 'Red' },
-    { value: 'warning', label: 'Yellow' },
-    { value: 'info', label: 'Cyan' },
-    { value: 'secondary', label: 'Gray' }
-  ];
 
   useEffect(() => {
     // Check authentication
@@ -78,14 +68,12 @@ function Subjects() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        // Refresh subjects list
-        fetchSubjects(token, user.role);
         setShowAddModal(false);
         setNewSubject({ name: '', description: '', color: 'primary' });
+        // Refresh subjects list
+        fetchSubjects(token, user.role);
       } else {
-        const errorData = await response.json();
-        setError(errorData.message || 'Failed to add subject');
+        setError('Failed to add subject');
       }
     } catch (err) {
       setError('Network error occurred');
@@ -93,194 +81,171 @@ function Subjects() {
     }
   };
 
-  const handleUpdateProgress = async (subjectId, newProgress) => {
-    const token = localStorage.getItem('token');
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subjects/${subjectId}/progress`, {
-        method: 'PUT',
-        headers: {
-          'x-access-token': token,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ progress: newProgress })
-      });
-
-      if (response.ok) {
-        // Update local state
-        setSubjects(prev => prev.map(subject => 
-          subject.id === subjectId 
-            ? { ...subject, progress: newProgress }
-            : subject
-        ));
-      } else {
-        setError('Failed to update progress');
-      }
-    } catch (err) {
-      setError('Network error occurred');
-      console.error('Error updating progress:', err);
-    }
-  };
-
   if (loading) {
     return (
-      <div className="subjects-container">
+      <div style={{ 
+        background: "linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)", 
+        minHeight: "100vh", 
+        padding: "2rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
         <div className="text-center">
-          <div className="spinner-border" role="status">
+          <div className="spinner-border text-light" role="status" style={{ width: "3rem", height: "3rem" }}>
             <span className="visually-hidden">Loading...</span>
           </div>
+          <p className="text-light mt-3" style={{ fontSize: "1.1rem" }}>Loading subjects...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="subjects-container">
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h2 className="subjects-title">
-          {user?.role === 'teacher' ? 'Manage Subjects' : 'My Subjects'}
-        </h2>
-        {user?.role === 'teacher' && (
-          <Button 
-            variant="primary" 
-            onClick={() => setShowAddModal(true)}
-          >
-            Add Subject
-          </Button>
-        )}
-      </div>
-
-      {error && (
-        <Alert variant="danger" className="mb-3">
-          {error}
-        </Alert>
-      )}
-
-      <div className="subjects-list">
-        {subjects.length === 0 ? (
-          <div className="text-center">
-            <p>No subjects available.</p>
-            {user?.role === 'teacher' && (
-              <p>Click "Add Subject" to create your first subject.</p>
-            )}
+    <div style={{ 
+      background: "linear-gradient(135deg, #1e1e1e 0%, #2d2d2d 100%)", 
+      minHeight: "100vh", 
+      padding: "2rem" 
+    }}>
+      <div className="subjects-container">
+        {/* Header Section */}
+        <div className="d-flex justify-content-between align-items-start mb-4">
+          <div>
+            <h2 className="subjects-title">
+              {user?.role === 'teacher' ? '👨‍🏫 Manage Subjects' : '📚 My Subjects'}
+            </h2>
+            <p className="subjects-description">
+              {user?.role === 'teacher' 
+                ? 'Create and manage subjects for your students. Add new subjects to organize learning materials.' 
+                : 'Explore your enrolled subjects and track your learning progress across different topics.'}
+            </p>
           </div>
-        ) : (
-          subjects.map((subject) => (
-            <div key={subject.id} className="subject-card">
-              <div className="subject-name">{subject.name}</div>
-              {subject.description && (
-                <div className="subject-description">{subject.description}</div>
-              )}
-              
-              {user?.role === 'student' && (
-                <>
-                  <div className="progress mb-3" style={{ height: '1.1rem', background: '#181a1b', borderRadius: '8px' }}>
-                    <div
-                      className={`progress-bar bg-${subject.color}`}
-                      role="progressbar"
-                      style={{ 
-                        width: `${subject.progress || 0}%`, 
-                        fontWeight: 600, 
-                        fontSize: '0.95rem', 
-                        borderRadius: '8px' 
-                      }}
-                      aria-valuenow={subject.progress || 0}
-                      aria-valuemin="0"
-                      aria-valuemax="100"
-                    >
-                      {subject.progress || 0}%
-                    </div>
-                  </div>
-                  <div className="d-flex justify-content-center gap-2">
-                    <button 
-                      className="btn btn-sm btn-outline-secondary"
-                      onClick={() => handleUpdateProgress(subject.id, Math.min((subject.progress || 0) + 10, 100))}
-                    >
-                      +10% Progress
-                    </button>
-                    <button className="btn btn-sm btn-outline-info">
-                      Resources
-                    </button>
-                  </div>
-                </>
-              )}
+          {user?.role === 'teacher' && (
+            <Button 
+              className="add-subject-btn"
+              onClick={() => setShowAddModal(true)}
+            >
+              + Add Subject
+            </Button>
+          )}
+        </div>
 
-              {user?.role === 'teacher' && (
-                <>
-                  <div className="teacher-stats">
-                    <small className="text-muted">
-                      Students: {subject.studentCount || 0} | 
-                      Assignments: {subject.assignmentCount || 0} | 
-                      Avg Progress: {subject.averageProgress || 0}%
-                    </small>
-                  </div>
-                  <div className="d-flex justify-content-center gap-2 mt-2">
-                    <button className="btn btn-sm btn-outline-primary">
-                      Manage
-                    </button>
-                    <button className="btn btn-sm btn-outline-info">
-                      Resources
-                    </button>
-                    <button className="btn btn-sm btn-outline-success">
-                      Assignments
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))
+        {/* Error Alert */}
+        {error && (
+          <Alert variant="danger" className="mb-4" style={{ 
+            backgroundColor: "rgba(220, 53, 69, 0.1)", 
+            borderColor: "#dc3545", 
+            color: "#ffffff" 
+          }}>
+            {error}
+          </Alert>
         )}
-      </div>
 
-      {/* Add Subject Modal (Teacher only) */}
-      <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Add New Subject</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <Form onSubmit={handleAddSubject}>
-            <Form.Group className="mb-3">
-              <Form.Label>Subject Name</Form.Label>
-              <Form.Control
-                type="text"
-                value={newSubject.name}
-                onChange={(e) => setNewSubject(prev => ({...prev, name: e.target.value}))}
-                required
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Description</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={3}
-                value={newSubject.description}
-                onChange={(e) => setNewSubject(prev => ({...prev, description: e.target.value}))}
-              />
-            </Form.Group>
-            <Form.Group className="mb-3">
-              <Form.Label>Color Theme</Form.Label>
-              <Form.Select
-                value={newSubject.color}
-                onChange={(e) => setNewSubject(prev => ({...prev, color: e.target.value}))}
-              >
-                {colorOptions.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </Form.Select>
-            </Form.Group>
-          </Form>
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowAddModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="primary" onClick={handleAddSubject}>
-            Add Subject
-          </Button>
-        </Modal.Footer>
-      </Modal>
+        {/* Back Button */}
+        <Button 
+          className="back-btn mb-4"
+          onClick={() => navigate('/dashboard')}
+        >
+          ← Back to Dashboard
+        </Button>
+
+        {/* Subjects Grid */}
+        <div className="subjects-list">
+          {subjects.length === 0 ? (
+            <div className="no-subjects">
+              <div style={{ textAlign: "center", padding: "3rem" }}>
+                <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📖</div>
+                <p style={{ fontSize: "1.3rem", marginBottom: "1rem", color: "#ffffff" }}>
+                  No subjects available yet.
+                </p>
+                {user?.role === 'teacher' && (
+                  <p style={{ opacity: "0.8", color: "#e0e0e0" }}>
+                    Click "Add Subject" to create your first subject and start organizing your classroom content.
+                  </p>
+                )}
+              </div>
+            </div>
+          ) : (
+            subjects.map((subject) => (
+              <div key={subject.id} className="subject-card">
+                <div className="subject-name">{subject.name}</div>
+                {subject.description && (
+                  <div style={{ 
+                    color: "#e0e0e0", 
+                    fontSize: "1rem", 
+                    lineHeight: "1.5", 
+                    marginBottom: "1rem",
+                    opacity: "0.9"
+                  }}>
+                    {subject.description}
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Add Subject Modal */}
+        <Modal 
+          show={showAddModal} 
+          onHide={() => setShowAddModal(false)}
+          contentClassName="bg-dark text-light"
+        >
+          <Modal.Header closeButton style={{ borderColor: "#404040" }}>
+            <Modal.Title>Add New Subject</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleAddSubject}>
+              <Form.Group className="mb-3">
+                <Form.Label>Subject Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter subject name"
+                  value={newSubject.name}
+                  onChange={(e) => setNewSubject({...newSubject, name: e.target.value})}
+                  required
+                  style={{ 
+                    backgroundColor: "#2a2a2a", 
+                    borderColor: "#404040", 
+                    color: "#fff" 
+                  }}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  placeholder="Enter subject description"
+                  value={newSubject.description}
+                  onChange={(e) => setNewSubject({...newSubject, description: e.target.value})}
+                  style={{ 
+                    backgroundColor: "#2a2a2a", 
+                    borderColor: "#404040", 
+                    color: "#fff" 
+                  }}
+                />
+              </Form.Group>
+
+              <div className="d-flex justify-content-end gap-2">
+                <Button 
+                  variant="secondary" 
+                  onClick={() => setShowAddModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="add-subject-btn"
+                >
+                  Add Subject
+                </Button>
+              </div>
+            </Form>
+          </Modal.Body>
+        </Modal>
+      </div>
     </div>
   );
 }

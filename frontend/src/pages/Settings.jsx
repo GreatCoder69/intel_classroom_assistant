@@ -9,11 +9,6 @@ function Settings() {
    *   JSX.Element: Settings interface with tabs and form controls
    */
   const [activeTab, setActiveTab] = useState('general');
-  
-  // Add debugging to check if component is mounting
-  useEffect(() => {
-    console.log('Settings component mounted');
-  }, []);
 
   const renderTabContent = () => {
     switch (activeTab) {

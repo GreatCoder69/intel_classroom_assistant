@@ -65,7 +65,7 @@ const Layout = ({ children }) => {
           </ul>
         </nav>
         <footer className="small text-light-emphasis">
-          © 2025 Intel Classroom Assistant | Powered by OpenVINO™
+          EduAI
         </footer>
       </aside>
 

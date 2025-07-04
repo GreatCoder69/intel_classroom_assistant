@@ -14,7 +14,7 @@ function Landing() {
     <Container fluid className="d-flex flex-column justify-content-center align-items-center vh-100 bg-dark text-light">
       <Row className="w-100 justify-content-center">
         <Col md={8} className="text-center mb-5">
-          <h1 className="display-4 mb-4">Intel Classroom Assistant</h1>
+          <h1 className="display-4 mb-4">EduAI</h1>
           <p className="lead">
             An AI-powered educational platform for enhancing learning experiences
           </p>
@@ -41,7 +41,7 @@ function Landing() {
       </Row>
       
       <footer className="text-center mt-5">
-        <p className="text-muted">© 2025 Intel Classroom Assistant | Powered by OpenVINO™</p>
+        <p className="text-muted">EduAI</p>
       </footer>
     </Container>
   );

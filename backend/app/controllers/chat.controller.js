@@ -379,10 +379,6 @@ exports.getSubjectStatistics = async (req, res) => {
     const user = await User.findOne({ email });
     const userRole = user ? user.role : 'student';
     
-    console.log("=== Subject Statistics Debug (New Model) ===");
-    console.log("User email:", email);
-    console.log("User role:", userRole);
-    
     let matchFilter = {};
     
     if (userRole === 'teacher') {
@@ -437,31 +433,4 @@ exports.getSubjectStatistics = async (req, res) => {
   }
 };
 
-// Debug endpoint to check chat data
-exports.debugChatData = async (req, res) => {
-  try {
-    const email = req.userEmail;
-    const chats = await Chat.find({ email });
-    
-    const debugInfo = {
-      email,
-      chatCount: chats.length,
-      chats: chats.map(chat => ({
-        subject: chat._id,
-        entryCount: chat.chat.length,
-        entries: chat.chat.map(entry => ({
-          hasQuestion: !!entry.question,
-          question: entry.question?.substring(0, 100),
-          chatSubject: entry.chatSubject,
-          userRole: entry.userRole,
-          timestamp: entry.timestamp
-        }))
-      }))
-    };
-    
-    res.status(200).json(debugInfo);
-  } catch (err) {
-    console.error("Error in debug endpoint:", err);
-    res.status(500).json({ message: "Error fetching debug data" });
-  }
-};
+

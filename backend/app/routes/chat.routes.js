@@ -12,7 +12,6 @@ router.get("/chat", verifyToken, chatController.getAllChats); // ✅ Add verifyT
 router.post("/deletechat", verifyToken, chatController.deleteChatBySubject);
 router.get("/admin/users-chats", verifyToken, chatController.getAllUsersWithChats);
 router.get("/subject-statistics", verifyToken, chatController.getSubjectStatistics);
-router.get("/debug-chat-data", verifyToken, chatController.debugChatData);
 router.post('/admin/toggle-status', verifyToken, adminController.toggleUserStatus);
 router.get("/general-chat", chatController.getGeneralChats);
 router.get("/search-general-chats", chatController.searchGeneralChats);

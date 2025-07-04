@@ -22,6 +22,31 @@ const COLORS = [
   "#ff5c5c",  // red
 ];
 
+// CSS to disable hover effects on chart bars
+const chartStyles = `
+  .recharts-bar-rectangle:hover {
+    filter: none !important;
+    opacity: 1 !important;
+    box-shadow: none !important;
+  }
+  
+  .recharts-bar-rectangle {
+    cursor: default !important;
+  }
+  
+  .recharts-responsive-container svg {
+    cursor: default !important;
+  }
+`;
+
+// Inject styles once
+if (typeof document !== 'undefined' && !document.getElementById('chart-no-hover-styles')) {
+  const styleElement = document.createElement('style');
+  styleElement.id = 'chart-no-hover-styles';
+  styleElement.textContent = chartStyles;
+  document.head.appendChild(styleElement);
+}
+
 const SubjectWiseChart = ({ userRole = 'student' }) => {
   const [data, setData] = useState([]);
   const token = localStorage.getItem("token");
@@ -136,9 +161,17 @@ const SubjectWiseChart = ({ userRole = 'student' }) => {
             }}
           />
 
-          <Bar dataKey="count" barSize={18}>
+          <Bar 
+            dataKey="count" 
+            barSize={18}
+            style={{ cursor: "default" }}
+          >
             {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              <Cell 
+                key={i} 
+                fill={COLORS[i % COLORS.length]}
+                style={{ cursor: "default" }}
+              />
             ))}
           </Bar>
         </BarChart>

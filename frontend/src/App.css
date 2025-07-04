@@ -1,139 +1,225 @@
-body, html, #root {
-  height: 100%;
+/* Global App Styles - Dark Theme */
+* {
+  box-sizing: border-box;
   margin: 0;
-  font-family: 'Segoe UI', sans-serif;
+  padding: 0;
 }
 
-.app-container.light-mode {
-  background-color: #f9f9f9;
-  color: #000;
+body {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #ffffff;
 }
 
-.light-sidebar {
-  background-color: #ffffff;
-  border-right: 1px solid #ccc;
-}
-
-.sidebar {
-  width: 250px;
-  padding: 20px;
-}
-
-.new-chat-btn {
-  width: 100%;
-  background-color: #ff6b00;
-  border: none;
-  color: #fff;
-}
-
-.new-chat-btn:hover {
-  background-color: #e65a00;
-}
-
-.topics-list {
-  list-style: none;
-  padding-left: 0;
-  margin-top: 20px;
-}
-
-.topic-item {
-  padding: 10px;
-  margin-bottom: 5px;
-  background-color: #eeeeee;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.topic-item.active,
-.topic-item:hover {
-  background-color: #ff6b00;
-  color: #fff;
-}
-
-.chat-area {
-  flex-grow: 1;
+#root {
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #fefefe;
 }
 
-.chat-header {
-  padding: 15px 20px;
-  display: flex;
-  justify-content: flex-end;
-  border-bottom: 1px solid #ccc;
+/* High contrast text for better readability */
+.text-light {
+  color: #e8e8e8 !important;
 }
 
-.profile-button {
-  width: 40px;
-  height: 40px;
-  background-color: #ff6b00;
-  color: white;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.text-muted {
+  color: #b0b0b0 !important;
 }
 
-.chat-messages {
-  flex-grow: 1;
-  overflow-y: auto;
-  padding: 20px;
+.text-white {
+  color: #ffffff !important;
 }
 
-.message-row {
-  display: flex;
-  margin-bottom: 10px;
-}
-
-.message-row.user {
-  justify-content: flex-end;
-}
-
-.message-row.bot {
-  justify-content: flex-start;
-}
-
-.message-bubble {
-  max-width: 60%;
-  padding: 10px 15px;
-  border-radius: 16px;
-  font-size: 14px;
-  background-color: #e0e0e0;
-  color: #000;
-}
-
-.message-row.user .message-bubble {
-  background-color: #ff6b00;
-  color: #fff;
-}
-
-.chat-input {
-  padding: 20px;
-  background-color: #fff;
-  border-top: 1px solid #ccc;
-}
-
-.send-btn {
-  background-color: #ff6b00;
+/* Button styles with better contrast */
+.btn-primary {
+  background: linear-gradient(135deg, #3a7bd5 0%, #00d2ff 100%);
   border: none;
+  color: white;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-.send-btn:hover {
-  background-color: #e65a00;
+.btn-primary:hover {
+  background: linear-gradient(135deg, #2563eb 0%, #0891b2 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(58, 123, 213, 0.3);
+  color: white;
 }
 
-.auth-container {
-  margin: auto;
-  max-width: 400px;
-  padding: 40px;
-  background: white;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  margin-top: 80px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.btn-outline-primary {
+  border: 2px solid #3a7bd5;
+  color: #3a7bd5;
+  background: transparent;
+  font-weight: 600;
+  transition: all 0.3s ease;
 }
 
-.auth-switch p {
-  margin-top: 20px;
+.btn-outline-primary:hover {
+  background: #3a7bd5;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.btn-outline-secondary {
+  border: 1px solid #6c757d;
+  color: #e8e8e8;
+  background: transparent;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-secondary:hover {
+  background: #6c757d;
+  color: white;
+  border-color: #6c757d;
+}
+
+/* Card styles */
+.card {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+}
+
+.card-header {
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Form controls */
+.form-control {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.form-control:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #3a7bd5;
+  box-shadow: 0 0 0 0.2rem rgba(58, 123, 213, 0.25);
+  color: #ffffff;
+}
+
+.form-control::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Modal styles */
+.modal-content {
+  background: rgba(26, 26, 46, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  color: #ffffff;
+}
+
+.modal-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.modal-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dropdown styles */
+.dropdown-menu {
+  background: rgba(26, 26, 46, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.dropdown-item {
+  color: #e8e8e8;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(58, 123, 213, 0.3);
+  color: #ffffff;
+}
+
+/* Alert styles */
+.alert {
+  border: none;
+  backdrop-filter: blur(10px);
+}
+
+.alert-success {
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: #bbf7d0;
+}
+
+.alert-danger {
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #fecaca;
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  color: #bfdbfe;
+}
+
+.alert-warning {
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fef3c7;
+}
+
+/* Navbar styles */
+.navbar {
+  background: rgba(26, 26, 46, 0.9) !important;
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.navbar-brand {
+  color: #ffffff !important;
+  font-weight: 700;
+}
+
+.navbar-nav .nav-link {
+  color: #e8e8e8 !important;
+  font-weight: 500;
+}
+
+.navbar-nav .nav-link:hover {
+  color: #3a7bd5 !important;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .card {
+    margin-bottom: 1rem;
+  }
 }
