@@ -2,6 +2,7 @@ require('dotenv').config(); // Load environment variables
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const { createProxyMiddleware } = require('http-proxy-middleware'); // Add this import for proxy functionality
 
 const app = express();
 
