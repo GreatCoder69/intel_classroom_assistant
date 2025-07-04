@@ -27,6 +27,8 @@ const ChatPage = () => {
   const [newTopicName, setNewTopicName] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
+  const [useResources, setUseResources] = useState(false); // For student to enable/disable resource context
+  const [user, setUser] = useState(null); // Store user data to check role
 
   const [profile, setProfile] = useState({
     email: "",
@@ -41,6 +43,14 @@ const ChatPage = () => {
     if (!token) {
       navigate("/login");
       return;
+    }
+
+    // Get user data from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      console.log('User data from localStorage:', parsedUser); // Debug log
+      setUser(parsedUser);
     }
 
     fetchUserProfile();
@@ -174,6 +184,10 @@ const ChatPage = () => {
       formData.append("model", selectedModel); // 👈 Add this line
       // Use "General" as fallback if no specific subject selected
       formData.append("chatSubject", selectedSubject || "General");
+      // Add useResources parameter for students
+      if (user?.role === 'student' && useResources) {
+        formData.append("useResources", "true");
+      }
       if (currentMessage.trim()) formData.append("question", currentMessage);
       if (imageFile) formData.append("image", imageFile);
 
@@ -307,8 +321,21 @@ const ChatPage = () => {
           "https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2281862025.jpg",
         password: "",
       });
+      
+      // Also set user data for role checking
+      setUser({
+        email: data.email,
+        name: data.name,
+        role: data.role || 'student'  // Default to student if role is missing
+      });
     } catch (err) {
       console.error("Error fetching user profile:", err);
+      // Set default user data on error
+      setUser({
+        email: '',
+        name: '',
+        role: 'student'
+      });
     }
   };
 
@@ -671,7 +698,7 @@ const ChatPage = () => {
               </Button>
             </div>
           )}
-          
+
           <InputGroup>
             <Form.Control
               placeholder="Type a message..."
@@ -697,6 +724,23 @@ const ChatPage = () => {
                 </option>
               ))}
             </Form.Select>
+
+            {/* Resource context checkbox for students - inline with dropdown */}
+            {user?.role === 'student' && selectedSubject && selectedSubject !== 'General' && (
+              <div className="d-flex align-items-center" style={{ padding: '0 8px', whiteSpace: 'nowrap' }}>
+                <Form.Check
+                  type="checkbox"
+                  id="use-resources-checkbox"
+                  checked={useResources}
+                  onChange={(e) => setUseResources(e.target.checked)}
+                  label={
+                    <span style={{ fontSize: '0.85rem', color: '#adb5bd', fontWeight: '500' }}>
+                      📚 Use PDFs
+                    </span>
+                  }
+                />
+              </div>
+            )}
 
             {/* Image Upload Button */}
             <input

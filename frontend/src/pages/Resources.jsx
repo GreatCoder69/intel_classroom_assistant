@@ -22,6 +22,7 @@ function Resources() {
     description: '',
     file: null
   });
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     // Check authentication
@@ -38,6 +39,27 @@ function Resources() {
     fetchSubject(token);
     fetchResources(token);
   }, [navigate, subjectId]);
+
+  // Auto-refresh resources every 5 seconds if any are still processing
+  useEffect(() => {
+    const hasProcessingResources = resources.some(resource => 
+      resource.extractionStatus === 'processing' || 
+      resource.extractionStatus === 'pending' ||
+      resource.jsonFileStatus === 'pending'
+    );
+    
+    if (!hasProcessingResources) return;
+    
+    const interval = setInterval(() => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        console.log('🔄 Auto-refreshing resources status...');
+        fetchResources(token);
+      }
+    }, 5000); // Refresh every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, [resources]);
 
   const fetchSubject = async (token) => {
     try {
@@ -246,6 +268,45 @@ function Resources() {
     }
   };
 
+  const handleDownloadJson = async (resourceId, resourceName) => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/resources/${resourceId}/json`, {
+        headers: {
+          'x-access-token': token
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${resourceName.replace(/[^a-zA-Z0-9]/g, '_')}_content.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        const errorText = await response.text();
+        setError(`Failed to download JSON: ${errorText}`);
+      }
+    } catch (err) {
+      setError('Network error occurred');
+      console.error('Error downloading JSON:', err);
+    }
+  };
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    const token = localStorage.getItem('token');
+    try {
+      await fetchResources(token);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const openEditModal = (resource) => {
     setEditingResource({
       id: resource._id,
@@ -331,12 +392,58 @@ function Resources() {
               📎 Upload Resource
             </Button>
           )}
+          
+          {/* Refresh Button */}
+          <Button 
+            variant="outline-secondary"
+            size="sm"
+            onClick={handleManualRefresh}
+            disabled={refreshing}
+            className="ms-2"
+          >
+            {refreshing ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>
+                Refreshing...
+              </>
+            ) : (
+              <>🔄 Refresh</>
+            )}
+          </Button>
         </div>
+
+        {/* JSON Info for Teachers */}
+        {user?.role === 'teacher' && (
+          <div className="alert alert-info mb-4" style={{ 
+            backgroundColor: "#1a4d73", 
+            borderColor: "#2980b9", 
+            color: "#bde7ff" 
+          }}>
+            <div className="d-flex align-items-center">
+              <i className="fas fa-info-circle me-2"></i>
+              <div>
+                <strong>AI Context Integration:</strong> When you upload PDFs, their content is automatically extracted and saved as JSON files. 
+                Students can choose to include this content as context when chatting with the AI assistant. 
+                You can download the JSON files using the <span style={{backgroundColor: "#28a745", padding: "2px 6px", borderRadius: "3px", fontSize: "0.8em"}}>📄 JSON</span> button.
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Error Alert */}
         {error && (
           <Alert variant="danger" onClose={() => setError('')} dismissible>
             {error}
+          </Alert>
+        )}
+
+        {/* Auto-refresh indicator */}
+        {resources.some(r => r.extractionStatus === 'processing' || r.extractionStatus === 'pending' || r.jsonFileStatus === 'pending') && (
+          <Alert variant="info" className="mb-3">
+            <div className="d-flex align-items-center">
+              <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+              <small>Auto-refreshing status every 5 seconds for processing resources...</small>
+            </div>
           </Alert>
         )}
 
@@ -377,6 +484,33 @@ function Resources() {
                       Uploaded: {new Date(resource.uploadDate).toLocaleDateString()}
                       {resource.uploadedBy && ` by ${resource.uploadedBy.name}`}
                     </small>
+                    {resource.extractionStatus && (
+                      <div className="extraction-status mt-2">
+                        <small>
+                          Content Extraction: 
+                          <span className={`status-badge status-${resource.extractionStatus}`}>
+                            {resource.extractionStatus === 'processing' && '⏳ Processing...'}
+                            {resource.extractionStatus === 'completed' && `✅ Complete (${resource.pageCount} pages, ${resource.wordCount} words)`}
+                            {resource.extractionStatus === 'failed' && '❌ Failed'}
+                            {resource.extractionStatus === 'pending' && '⏸️ Pending'}
+                          </span>
+                        </small>
+                      </div>
+                    )}
+                    
+                    {/* Show JSON file status for teachers */}
+                    {user?.role === 'teacher' && (
+                      <div className="json-status mt-1">
+                        <small>
+                          JSON File: 
+                          <span className={`status-badge status-${resource.jsonFileStatus || 'pending'}`}>
+                            {(!resource.jsonFileStatus || resource.jsonFileStatus === 'pending') && '⏸️ Pending'}
+                            {resource.jsonFileStatus === 'created' && '✅ Created'}
+                            {resource.jsonFileStatus === 'failed' && '❌ Failed'}
+                          </span>
+                        </small>
+                      </div>
+                    )}
                   </div>
                   
                   <div className="resource-actions">
@@ -404,6 +538,16 @@ function Resources() {
                         >
                           🗑️ Delete
                         </Button>
+                        {resource.jsonFileStatus === 'created' && (
+                          <Button 
+                            variant="success"
+                            size="sm"
+                            onClick={() => handleDownloadJson(resource._id, resource.name)}
+                            title="Download extracted content as JSON"
+                          >
+                            � JSON
+                          </Button>
+                        )}
                       </>
                     )}
                   </div>
@@ -470,7 +614,8 @@ function Resources() {
                   }}
                 />
                 <Form.Text className="text-muted">
-                  Only PDF files are allowed. Maximum file size: 40MB
+                  Only PDF files are allowed. Maximum file size: 40MB<br/>
+                  📄 <strong>Note:</strong> After upload, the PDF content will be automatically extracted and saved as a JSON file for AI context use.
                 </Form.Text>
               </Form.Group>
 

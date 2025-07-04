@@ -45,6 +45,42 @@ const Resource = mongoose.model(
     isActive: {
       type: Boolean,
       default: true
+    },
+    // PDF content extraction fields
+    extractedText: {
+      type: String,
+      default: ''
+    },
+    textChunks: [{
+      page: Number,
+      content: String,
+      wordCount: Number
+    }],
+    extractionStatus: {
+      type: String,
+      enum: ['pending', 'processing', 'completed', 'failed'],
+      default: 'pending'
+    },
+    extractionDate: {
+      type: Date
+    },
+    pageCount: {
+      type: Number,
+      default: 0
+    },
+    wordCount: {
+      type: Number,
+      default: 0
+    },
+    // JSON file creation status
+    jsonFileStatus: {
+      type: String,
+      enum: ['pending', 'created', 'failed'],
+      default: 'pending'
+    },
+    jsonFilePath: {
+      type: String,
+      default: ''
     }
   }, {
     timestamps: true

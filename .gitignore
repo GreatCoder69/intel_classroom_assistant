@@ -63,6 +63,8 @@ backend/app/node_modules/
 backend/app/uploads/
 backend/uploads/
 
+uploads/
+
 # === Frontend (React/Vite) ===
 classroom-assistant/node_modules/
 classroom-assistant/.env

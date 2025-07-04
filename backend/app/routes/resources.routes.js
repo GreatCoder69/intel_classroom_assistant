@@ -16,8 +16,17 @@ module.exports = function(app) {
   // Get a specific resource
   app.get("/api/resources/:id", [authJwt.verifyToken], controller.getResource);
   
+  // Get extracted content for a resource
+  app.get("/api/resources/:id/content", [authJwt.verifyToken], controller.getResourceContent);
+  
+  // Get all extracted content for a subject (for AI context)
+  app.get("/api/subjects/:subjectId/content", [authJwt.verifyToken], controller.getSubjectContent);
+  
   // Download a resource file
   app.get("/api/resources/:id/download", [authJwt.verifyToken], controller.downloadResource);
+  
+  // Download extracted content as JSON (Teacher only)
+  app.get("/api/resources/:id/json", [authJwt.verifyToken, authJwt.isTeacher], controller.downloadJson);
   
   // Teacher-only routes
   app.post("/api/subjects/:subjectId/resources", 

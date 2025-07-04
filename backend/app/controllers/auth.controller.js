@@ -153,6 +153,7 @@ exports.getMe = async (req, res) => {
       name: user.name,
       phone: user.phone,
       email: user.email,
+      role: user.role,           // Add role field
       profileimg: user.profileimg 
     });
   } catch (err) {

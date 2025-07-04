@@ -46,7 +46,7 @@ const MESSAGES_PER_PAGE = 5;
 
 
 exports.addChat = async (req, res) => {
-  const { subject, question, chatSubject } = req.body;
+  const { subject, question, chatSubject, useResources } = req.body;
   const email = req.userEmail;
 
   if (!subject || (!question && !req.file) || !email) {
@@ -69,6 +69,11 @@ exports.addChat = async (req, res) => {
       flaskPayload.question = question ? 
         `[Context: This question is about ${chatSubject}] ${question}` : 
         `Please provide information about ${chatSubject}`;
+    }
+    
+    // Add useResources parameter for student context enhancement
+    if (useResources === 'true' || useResources === true) {
+      flaskPayload.useResources = true;
     }
     
     let imageUrl   = null;                        // for DB

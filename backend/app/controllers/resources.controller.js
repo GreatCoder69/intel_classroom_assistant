@@ -4,6 +4,7 @@ const Subject = db.subject;
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const pdfParse = require('pdf-parse');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -35,6 +36,217 @@ const upload = multer({
     }
   }
 });
+
+/**
+ * Create intelligent chunks for AI processing
+ * This function breaks text into semantically meaningful chunks
+ */
+function createIntelligentChunks(text, pageCount) {
+  const chunks = [];
+  const maxChunkSize = 800; // words per chunk (optimal for AI context)
+  const minChunkSize = 100; // minimum words to avoid tiny chunks
+  
+  // First, split by major section indicators
+  const sectionSeparators = [
+    /\n\s*(?:CHAPTER|Chapter|chapter)\s+\d+/g,
+    /\n\s*(?:SECTION|Section|section)\s+\d+/g,
+    /\n\s*\d+\.\s+[A-Z]/g, // Numbered sections like "1. Introduction"
+    /\n\s*[A-Z][A-Z\s]{10,}\n/g, // ALL CAPS headers
+    /\n\s*[A-Z][a-z\s]{5,}:\s*\n/g, // Title headers like "Introduction:"
+  ];
+  
+  let sections = [text];
+  
+  // Apply section separators
+  for (const separator of sectionSeparators) {
+    const newSections = [];
+    for (const section of sections) {
+      const split = section.split(separator);
+      newSections.push(...split.filter(s => s.trim().length > 0));
+    }
+    if (newSections.length > sections.length) {
+      sections = newSections;
+    }
+  }
+  
+  // If we don't have good sections, split by paragraphs
+  if (sections.length <= 3) {
+    sections = text.split(/\n\s*\n\s*\n/); // Double line breaks
+  }
+  
+  // Further chunk each section if it's too large
+  sections.forEach((section, sectionIndex) => {
+    const sectionWords = section.trim().split(/\s+/);
+    
+    if (sectionWords.length <= maxChunkSize) {
+      // Section is small enough, use as-is
+      if (sectionWords.length >= minChunkSize) {
+        chunks.push({
+          id: `chunk_${chunks.length + 1}`,
+          section: sectionIndex + 1,
+          content: section.trim(),
+          wordCount: sectionWords.length,
+          type: 'section',
+          summary: generateChunkSummary(section.trim())
+        });
+      }
+    } else {
+      // Split large section into smaller chunks
+      const paragraphs = section.split(/\n\s*\n/);
+      let currentChunk = '';
+      let currentWordCount = 0;
+      
+      for (const paragraph of paragraphs) {
+        const paragraphWords = paragraph.trim().split(/\s+/);
+        
+        if (currentWordCount + paragraphWords.length > maxChunkSize && currentChunk) {
+          // Save current chunk and start new one
+          chunks.push({
+            id: `chunk_${chunks.length + 1}`,
+            section: sectionIndex + 1,
+            content: currentChunk.trim(),
+            wordCount: currentWordCount,
+            type: 'paragraph_group',
+            summary: generateChunkSummary(currentChunk.trim())
+          });
+          currentChunk = paragraph;
+          currentWordCount = paragraphWords.length;
+        } else {
+          currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
+          currentWordCount += paragraphWords.length;
+        }
+      }
+      
+      // Add the last chunk
+      if (currentChunk.trim() && currentWordCount >= minChunkSize) {
+        chunks.push({
+          id: `chunk_${chunks.length + 1}`,
+          section: sectionIndex + 1,
+          content: currentChunk.trim(),
+          wordCount: currentWordCount,
+          type: 'paragraph_group',
+          summary: generateChunkSummary(currentChunk.trim())
+        });
+      }
+    }
+  });
+  
+  // If we still have very few chunks, do a simple word-count based split
+  if (chunks.length < 3) {
+    return createSimpleWordChunks(text, maxChunkSize);
+  }
+  
+  return chunks;
+}
+
+/**
+ * Generate a summary for a text chunk
+ */
+function generateChunkSummary(text) {
+  const firstSentence = text.split(/[.!?]/)[0];
+  if (firstSentence.length > 100) {
+    return firstSentence.substring(0, 97) + '...';
+  }
+  return firstSentence + '.';
+}
+
+/**
+ * Simple word-based chunking as fallback
+ */
+function createSimpleWordChunks(text, maxChunkSize) {
+  const words = text.split(/\s+/);
+  const chunks = [];
+  
+  for (let i = 0; i < words.length; i += maxChunkSize) {
+    const chunkWords = words.slice(i, i + maxChunkSize);
+    const content = chunkWords.join(' ');
+    
+    chunks.push({
+      id: `chunk_${chunks.length + 1}`,
+      section: Math.floor(i / maxChunkSize) + 1,
+      content: content,
+      wordCount: chunkWords.length,
+      type: 'word_group',
+      summary: generateChunkSummary(content)
+    });
+  }
+  
+  return chunks;
+}
+
+/**
+ * Extract keywords from text content for better searchability
+ */
+function extractKeywords(text) {
+  // Common stop words to filter out
+  const stopWords = new Set([
+    'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+    'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'do', 'does', 'did',
+    'will', 'would', 'could', 'should', 'may', 'might', 'can', 'this', 'that', 'these', 'those',
+    'i', 'you', 'he', 'she', 'it', 'we', 'they', 'me', 'him', 'her', 'us', 'them'
+  ]);
+  
+  // Extract words (3+ characters, alphanumeric)
+  const words = text.toLowerCase()
+    .match(/\b[a-z]{3,}\b/g) || [];
+  
+  // Count word frequency
+  const wordFreq = {};
+  words.forEach(word => {
+    if (!stopWords.has(word)) {
+      wordFreq[word] = (wordFreq[word] || 0) + 1;
+    }
+  });
+  
+  // Get top keywords (minimum frequency of 2, max 10 keywords)
+  return Object.entries(wordFreq)
+    .filter(([word, freq]) => freq >= 2)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10)
+    .map(([word, freq]) => ({ word, frequency: freq }));
+}
+
+/**
+ * Extract text content from PDF file
+ */
+async function extractPDFText(filePath) {
+  try {
+    console.log('Starting PDF text extraction for:', filePath);
+    
+    // Read the PDF file
+    const dataBuffer = fs.readFileSync(filePath);
+    
+    // Parse the PDF
+    const data = await pdfParse(dataBuffer);
+    
+    const fullText = data.text;
+    const pageCount = data.numpages;
+    
+    // Intelligent chunking for AI processing
+    const textChunks = createIntelligentChunks(fullText, pageCount);
+    const wordCount = fullText.split(/\s+/).length;
+    
+    console.log(`PDF extraction completed: ${pageCount} pages, ${wordCount} words`);
+    
+    return {
+      extractedText: fullText,
+      textChunks: textChunks,
+      pageCount: pageCount,
+      wordCount: wordCount,
+      status: 'completed'
+    };
+  } catch (error) {
+    console.error('Error extracting PDF text:', error);
+    return {
+      extractedText: '',
+      textChunks: [],
+      pageCount: 0,
+      wordCount: 0,
+      status: 'failed',
+      error: error.message
+    };
+  }
+}
 
 /**
  * Upload a new resource for a subject (Teacher only)
@@ -82,6 +294,7 @@ exports.uploadResource = async (req, res) => {
       return res.status(400).send({ message: "File size too large. Maximum size is 40MB." });
     }
     
+    // Create resource with initial extraction status
     const resource = new Resource({
       name: name.trim(),
       description: description ? description.trim() : '',
@@ -90,15 +303,115 @@ exports.uploadResource = async (req, res) => {
       fileSize: req.file.size,
       mimeType: req.file.mimetype,
       subjectId: subjectId,
-      uploadedBy: uploadedBy
+      uploadedBy: uploadedBy,
+      extractionStatus: 'processing'
     });
     
     await resource.save();
+    console.log('Resource saved with ID:', resource._id);
     
-    console.log('Resource saved successfully:', resource._id);
+    // Extract PDF text in background (don't block response)
+    setImmediate(async () => {
+      try {
+        console.log('🔄 Starting background PDF extraction for resource:', resource._id);
+        console.log('📁 File path:', req.file.path);
+        console.log('📊 File size:', req.file.size, 'bytes');
+        
+        const extractionResult = await extractPDFText(req.file.path);
+        console.log('✅ PDF extraction result:', {
+          pageCount: extractionResult.pageCount,
+          wordCount: extractionResult.wordCount,
+          status: extractionResult.status
+        });
+        
+        // Update resource with extracted content
+        const updateResult = await Resource.findByIdAndUpdate(resource._id, {
+          extractedText: extractionResult.extractedText,
+          textChunks: extractionResult.textChunks,
+          pageCount: extractionResult.pageCount,
+          wordCount: extractionResult.wordCount,
+          extractionStatus: extractionResult.status,
+          extractionDate: new Date()
+        });
+        
+        console.log('📝 PDF extraction database update completed for resource:', resource._id);
+        console.log('🔄 Update result:', updateResult ? 'Success' : 'Failed');
+        
+        // Save extracted content as JSON file for easy access
+        const jsonFilePath = req.file.path.replace('.pdf', '_content.json');
+        console.log('💾 Creating JSON file at:', jsonFilePath);
+        
+        const contentData = {
+          resource: {
+            id: resource._id,
+            name: resource.name,
+            fileName: resource.fileName,
+            subject: subject.name,
+            subjectId: resource.subjectId,
+            extractionDate: new Date(),
+            totalPages: extractionResult.pageCount,
+            totalWords: extractionResult.wordCount,
+            totalChunks: extractionResult.textChunks.length
+          },
+          summary: {
+            chunkTypes: extractionResult.textChunks.reduce((acc, chunk) => {
+              acc[chunk.type] = (acc[chunk.type] || 0) + 1;
+              return acc;
+            }, {}),
+            averageWordsPerChunk: Math.round(extractionResult.wordCount / extractionResult.textChunks.length),
+            contentOverview: extractionResult.textChunks.slice(0, 3).map(c => c.summary).join(' | ')
+          },
+          chunks: extractionResult.textChunks.map(chunk => ({
+            id: chunk.id,
+            section: chunk.section,
+            type: chunk.type,
+            summary: chunk.summary,
+            content: chunk.content,
+            wordCount: chunk.wordCount,
+            // Add search keywords extracted from content
+            keywords: extractKeywords(chunk.content)
+          })),
+          // Remove the full text to avoid redundancy - it's already in chunks
+          metadata: {
+            fileSize: resource.fileSize,
+            uploadDate: resource.uploadDate,
+            uploadedBy: resource.uploadedBy,
+            processingNote: "This content has been intelligently chunked for optimal AI processing. Each chunk represents a semantic section of the document."
+          }
+        };
+        
+        fs.writeFileSync(jsonFilePath, JSON.stringify(contentData, null, 2));
+        console.log('💾 JSON content file saved:', jsonFilePath);
+        
+        // Update resource with JSON file status
+        const jsonUpdateResult = await Resource.findByIdAndUpdate(resource._id, {
+          jsonFileStatus: 'created',
+          jsonFilePath: jsonFilePath
+        });
+        
+        console.log('📄 JSON file status update completed for resource:', resource._id);
+        console.log('🔄 JSON update result:', jsonUpdateResult ? 'Success' : 'Failed');
+        
+      } catch (extractionError) {
+        console.error('❌ Error during PDF extraction:', extractionError);
+        console.error('📊 Error details:', {
+          message: extractionError.message,
+          stack: extractionError.stack
+        });
+        
+        const errorUpdateResult = await Resource.findByIdAndUpdate(resource._id, {
+          extractionStatus: 'failed',
+          extractionDate: new Date(),
+          jsonFileStatus: 'failed'
+        });
+        
+        console.log('💥 Error status update completed for resource:', resource._id);
+        console.log('🔄 Error update result:', errorUpdateResult ? 'Success' : 'Failed');
+      }
+    });
     
     res.status(201).send({
-      message: "Resource uploaded successfully!",
+      message: "Resource uploaded successfully! PDF content extraction is in progress.",
       resource: {
         id: resource._id,
         name: resource.name,
@@ -106,7 +419,8 @@ exports.uploadResource = async (req, res) => {
         fileName: resource.fileName,
         fileSize: resource.fileSize,
         uploadDate: resource.uploadDate,
-        subjectId: resource.subjectId
+        subjectId: resource.subjectId,
+        extractionStatus: resource.extractionStatus
       }
     });
   } catch (err) {
@@ -136,7 +450,27 @@ exports.getResourcesBySubject = async (req, res) => {
       isActive: true 
     }).populate('uploadedBy', 'name email').sort({ uploadDate: -1 });
     
-    res.status(200).send(resources);
+    // Add extraction status information to response
+    const resourcesWithStatus = resources.map(resource => ({
+      _id: resource._id,
+      name: resource.name,
+      description: resource.description,
+      fileName: resource.fileName,
+      fileSize: resource.fileSize,
+      mimeType: resource.mimeType,
+      uploadDate: resource.uploadDate,
+      uploadedBy: resource.uploadedBy,
+      subjectId: resource.subjectId,
+      extractionStatus: resource.extractionStatus,
+      extractionDate: resource.extractionDate,
+      pageCount: resource.pageCount,
+      wordCount: resource.wordCount,
+      jsonFileStatus: resource.jsonFileStatus,  // Add JSON file status
+      jsonFilePath: resource.jsonFilePath,      // Add JSON file path
+      hasExtractedContent: resource.extractionStatus === 'completed' && resource.extractedText
+    }));
+    
+    res.status(200).send(resourcesWithStatus);
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
@@ -190,6 +524,41 @@ exports.downloadResource = async (req, res) => {
 };
 
 /**
+ * Download extracted content as JSON file (Teacher only)
+ */
+exports.downloadJson = async (req, res) => {
+  try {
+    const resourceId = req.params.id;
+    
+    const resource = await Resource.findById(resourceId);
+    if (!resource) {
+      return res.status(404).send({ message: "Resource not found!" });
+    }
+    
+    // Check if JSON extraction was successful
+    if (resource.jsonFileStatus !== 'created' || !resource.jsonFilePath) {
+      return res.status(404).send({ message: "JSON file not available. Text extraction may have failed or is still pending." });
+    }
+    
+    // Check if JSON file exists
+    if (!fs.existsSync(resource.jsonFilePath)) {
+      return res.status(404).send({ message: "JSON file not found on server!" });
+    }
+    
+    // Set headers for JSON download
+    const jsonFileName = `${resource.name.replace(/[^a-zA-Z0-9]/g, '_')}_content.json`;
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Disposition', `attachment; filename="${jsonFileName}"`);
+    
+    // Stream the JSON file
+    const fileStream = fs.createReadStream(resource.jsonFilePath);
+    fileStream.pipe(res);
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+/**
  * Update a resource (Teacher only)
  */
 exports.updateResource = async (req, res) => {
@@ -236,15 +605,94 @@ exports.deleteResource = async (req, res) => {
       return res.status(404).send({ message: "Resource not found!" });
     }
     
-    // Delete the file from filesystem
+    // Delete the PDF file from filesystem
     if (fs.existsSync(resource.filePath)) {
       fs.unlinkSync(resource.filePath);
+      console.log('Deleted PDF file:', resource.filePath);
+    }
+    
+    // Delete the associated JSON content file
+    const jsonFilePath = resource.filePath.replace('.pdf', '_content.json');
+    if (fs.existsSync(jsonFilePath)) {
+      fs.unlinkSync(jsonFilePath);
+      console.log('Deleted JSON content file:', jsonFilePath);
     }
     
     // Delete the resource from database
     await Resource.findByIdAndDelete(resourceId);
     
-    res.status(200).send({ message: "Resource deleted successfully!" });
+    res.status(200).send({ message: "Resource and associated content deleted successfully!" });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+/**
+ * Get extracted content for a resource
+ */
+exports.getResourceContent = async (req, res) => {
+  try {
+    const resourceId = req.params.id;
+    
+    const resource = await Resource.findById(resourceId).populate('subjectId');
+    if (!resource) {
+      return res.status(404).send({ message: "Resource not found!" });
+    }
+    
+    res.status(200).send({
+      id: resource._id,
+      name: resource.name,
+      description: resource.description,
+      fileName: resource.fileName,
+      subjectName: resource.subjectId.name,
+      extractionStatus: resource.extractionStatus,
+      extractionDate: resource.extractionDate,
+      pageCount: resource.pageCount,
+      wordCount: resource.wordCount,
+      extractedText: resource.extractedText,
+      textChunks: resource.textChunks
+    });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+/**
+ * Get all extracted content for a subject (for AI context)
+ */
+exports.getSubjectContent = async (req, res) => {
+  try {
+    const subjectId = req.params.subjectId;
+    
+    const resources = await Resource.find({ 
+      subjectId: subjectId,
+      isActive: true,
+      extractionStatus: 'completed'
+    }).populate('subjectId uploadedBy', 'name email');
+    
+    const subjectContent = {
+      subjectId: subjectId,
+      subjectName: resources.length > 0 ? resources[0].subjectId.name : '',
+      totalResources: resources.length,
+      totalPages: resources.reduce((sum, r) => sum + (r.pageCount || 0), 0),
+      totalWords: resources.reduce((sum, r) => sum + (r.wordCount || 0), 0),
+      lastUpdated: resources.length > 0 ? Math.max(...resources.map(r => r.extractionDate)) : null,
+      resources: resources.map(resource => ({
+        id: resource._id,
+        name: resource.name,
+        description: resource.description,
+        fileName: resource.fileName,
+        pageCount: resource.pageCount,
+        wordCount: resource.wordCount,
+        uploadDate: resource.uploadDate,
+        extractionDate: resource.extractionDate,
+        extractedText: resource.extractedText,
+        textChunks: resource.textChunks,
+        uploadedBy: resource.uploadedBy.name
+      }))
+    };
+    
+    res.status(200).send(subjectContent);
   } catch (err) {
     res.status(500).send({ message: err.message });
   }

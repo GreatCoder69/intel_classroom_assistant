@@ -1,0 +1,64 @@
+{
+  "server_port": 8000,
+  "server_host": "0.0.0.0",
+  "flask_env": "production",
+  "log_level": "INFO",
+  
+  "performance": {
+    "workers": 8,
+    "batch_size": 4,
+    "batch_timeout": 0.1,
+    "request_pool_size": 20
+  },
+  
+  "memory": {
+    "max_memory_mb": 4096,
+    "cleanup_threshold": 80,
+    "critical_threshold": 90,
+    "gc_frequency": 25
+  },
+  
+  "cache": {
+    "max_size": 1000,
+    "ttl": 300,
+    "compression_enabled": true,
+    "warmup_enabled": true
+  },
+  
+  "model": {
+    "model_id": "OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov",
+    "cache_size": 2,
+    "warmup_enabled": true,
+    "optimization_enabled": true
+  },
+  
+  "monitoring": {
+    "enabled": true,
+    "interval": 5,
+    "metrics_retention": 1000,
+    "alerts_enabled": true
+  },
+  
+  "thresholds": {
+    "response_time_ms": 1000,
+    "memory_percent": 85,
+    "cache_hit_rate": 0.7,
+    "error_rate": 0.05,
+    "cpu_percent": 80
+  },
+  
+  "logging": {
+    "level": "INFO",
+    "file_enabled": true,
+    "file_max_size_mb": 20,
+    "file_backup_count": 10,
+    "console_enabled": true,
+    "filter_enabled": true
+  },
+  
+  "security": {
+    "cors_enabled": true,
+    "max_content_length_mb": 100,
+    "timeout_seconds": 30
+  }
+}
