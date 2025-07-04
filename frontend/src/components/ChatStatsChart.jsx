@@ -22,46 +22,65 @@ const COLORS = [
   "#ff5c5c",  // red
 ];
 
-const SubjectWiseChart = () => {
+const SubjectWiseChart = ({ userRole = 'student' }) => {
   const [data, setData] = useState([]);
   const token = localStorage.getItem("token");
 
   /* ──────────────────────────────────────── */
   useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/admin/users-chats`, {
+    console.log("Fetching subject statistics for role:", userRole);
+    fetch(`${import.meta.env.VITE_API_URL}/api/subject-statistics`, {
       headers: { "x-access-token": token },
     })
-      .then((res) => res.json())
-      .then((users) => {
-        const totals = {};
-        users.forEach((u) =>
-          u.chats.forEach((c) => {
-            const n = (c.history || []).length;
-            totals[c.subject] = (totals[c.subject] || 0) + n;
-          })
-        );
-
-        const grand = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
-        const rows = Object.entries(totals)
-          .map(([subject, count]) => ({
-            subject,
-            count,
-            percent: (count / grand) * 100,
-          }))
-          .sort((a, b) => b.count - a.count);
-
-        setData(rows);
+      .then((res) => {
+        console.log("API Response status:", res.status);
+        return res.json();
       })
-      .catch(console.error);
-  }, [token]);
+      .then((stats) => {
+        console.log("Raw stats from API:", stats);
+        // Calculate total for percentage calculation
+        const total = stats.reduce((sum, item) => sum + item.count, 0) || 1;
+        
+        // Add percentage to each item
+        const dataWithPercent = stats.map(item => ({
+          ...item,
+          percent: (item.count / total) * 100
+        }));
+
+        console.log("Processed stats data:", dataWithPercent);
+        setData(dataWithPercent);
+      })
+      .catch((error) => {
+        console.error("Error fetching subject statistics:", error);
+      });
+  }, [token, userRole]);
 
   /* ──────────────────────────────────────── */
   return (
     <div className="my-5">
-      <ResponsiveContainer
-        width="100%"
-        height={Math.max(300, data.length * 50)}
-      >
+      <h3 className="text-center mb-4" style={{ color: "#fff" }}>
+        📊 {userRole === 'teacher' ? 'Student Questions by Subject' : 'Your Questions by Subject'}
+      </h3>
+      <p className="text-center mb-4" style={{ color: "#ccc" }}>
+        {userRole === 'teacher' 
+          ? 'Aggregated statistics from all student questions across subjects'
+          : 'Number of questions you have asked by subject context'
+        }
+      </p>
+      {data.length === 0 ? (
+        <div className="text-center py-5">
+          <p className="text-muted">
+            {userRole === 'teacher' 
+              ? 'No student questions found yet. Students need to start asking questions to see statistics here.'
+              : 'No questions asked yet. Start a chat to see your statistics here!'
+            }
+          </p>
+        </div>
+      ) : (
+        <ResponsiveContainer
+          width="100%"
+          height={Math.max(300, data.length * 50)}
+        >
         <BarChart
           data={data}
           layout="vertical"
@@ -109,9 +128,9 @@ const SubjectWiseChart = () => {
                 >
                   <strong>{label}</strong>
                   <br />
-                  Doubts: {count}
+                  Questions: {count}
                   <br />
-                  {percent.toFixed(1)}%
+                  {percent.toFixed(1)}% of total
                 </div>
               );
             }}
@@ -123,7 +142,8 @@ const SubjectWiseChart = () => {
             ))}
           </Bar>
         </BarChart>
-      </ResponsiveContainer>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 };

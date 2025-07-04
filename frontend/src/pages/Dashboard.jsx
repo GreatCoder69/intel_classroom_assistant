@@ -1,5 +1,5 @@
 // DashboardPage.jsx
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { FaHome, FaComment, FaSignOutAlt, FaBook } from "react-icons/fa";
 import SubjectWiseChart from "../components/ChatStatsChart";
@@ -8,13 +8,55 @@ const SidebarLayout = () => {
   const navigate   = useNavigate();
   const location   = useLocation();
   const user       = JSON.parse(localStorage.getItem("user") || "{}");
+  const [userRole, setUserRole] = useState(null);
 
   const isActive = (path) => location.pathname === path;
+
+  useEffect(() => {
+    // Fetch user role from token or API
+    const fetchUserRole = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token,
+          },
+        });
+        const data = await res.json();
+        setUserRole(data.role || 'student');
+      } catch (err) {
+        console.error("Error fetching user role:", err);
+        setUserRole('student'); // Default to student
+      }
+    };
+    
+    fetchUserRole();
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
+  };
+
+  // Debug function to check chat data
+  const debugChatData = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/debug-chat-data`, {
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token,
+        },
+      });
+      const data = await res.json();
+      console.log("=== DEBUG CHAT DATA ===");
+      console.log(JSON.stringify(data, null, 2));
+      alert("Check console for debug data");
+    } catch (err) {
+      console.error("Error fetching debug data:", err);
+    }
   };
 
   return (
@@ -86,8 +128,30 @@ const SidebarLayout = () => {
 
       {/* ───── Main content ───── */}
       <main className="flex-grow-1 p-4" style={{ background: "#000", color: "#fff" }}>
+        <div className="mb-4">
+          <h2 className="text-white mb-2">📊 Dashboard</h2>
+          {userRole === 'teacher' ? (
+            <p className="text-muted">
+              View aggregated statistics of all student questions by subject. This shows the overall learning trends across your classroom. Teacher conversations are excluded from these statistics.
+            </p>
+          ) : (
+            <p className="text-muted">
+              Track your questions and doubts by subject. The "General" category includes questions asked without a specific subject context.
+            </p>
+          )}
+          
+          {/* Temporary debug button */}
+          <button 
+            onClick={debugChatData}
+            className="btn btn-sm btn-outline-warning"
+            style={{ fontSize: "12px" }}
+          >
+            🔍 Debug Chat Data (Check Console)
+          </button>
+        </div>
+        
         {/* Put <Outlet/> if you want nested routing */}
-        <SubjectWiseChart />
+        <SubjectWiseChart userRole={userRole} />
       </main>
     </div>
   );

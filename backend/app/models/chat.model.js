@@ -53,6 +53,18 @@ const ChatSchema = new mongoose.Schema({
       modelUsed: {
         type: String,
         default: ''
+      },
+
+      // 📚 New: Subject context selected for this message
+      chatSubject: {
+        type: String,
+        default: 'General'
+      },
+
+      // 👤 New: Role of the user who sent this message
+      userRole: {
+        type: String,
+        default: 'student'
       }
     }
   ],

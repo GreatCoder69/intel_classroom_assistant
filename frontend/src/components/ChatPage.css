@@ -24,6 +24,8 @@ body, .vh-100 { background:#000 !important; color:#fff !important; }
 .msg-row      { display:flex; width:100%; }
 .user-left    { justify-content:flex-start; }
 .bot-right    { justify-content:flex-end; }
+.user-right   { justify-content:flex-end; }
+.bot-left     { justify-content:flex-start; }
 
 /* spinner (bootstrp utility already white) */
 .spinner-border, .spinner-grow { filter:brightness(1.8); }

@@ -113,3 +113,25 @@
 2025-07-05 00:30:41 [INFO] classroom_assistant: [20250705003021] Generation completed successfully
 2025-07-05 00:30:41 [INFO] classroom_assistant: [20250705003021] Generation completed in 20.09s
 2025-07-05 00:30:41 [INFO] classroom_assistant: [20250705003021] Response: 'The user is seeking informatio...' (339 chars)
+2025-07-05 01:53:47 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-05 01:53:57 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-05 01:53:58 [INFO] classroom_assistant: Loading model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-05 01:54:05 [INFO] classroom_assistant: Preparing system prompts
+2025-07-05 01:54:05 [INFO] classroom_assistant: Initializing model with system prompt
+2025-07-05 01:54:12 [INFO] classroom_assistant: Model ready for inference
+2025-07-05 01:54:12 [INFO] classroom_assistant: Starting Intel Classroom Assistant server
+2025-07-05 01:54:12 [INFO] classroom_assistant: Running in production mode without auto-reloader
+2025-07-05 02:07:03 [INFO] classroom_assistant: [20250705020703] Chat request - Subject: cse, Role: student, Q: 'What are relational databases'
+2025-07-05 02:07:03 [WARNING] classroom_assistant: [20250705020703] High memory usage: 85.2% (Available: 2307.61 MB)
+2025-07-05 02:07:03 [INFO] classroom_assistant: [20250705020703] Generating response
+2025-07-05 02:07:03 [INFO] classroom_assistant: [20250705020703] Generating response with student system prompt
+2025-07-05 02:07:42 [INFO] classroom_assistant: [20250705020703] Generation completed successfully
+2025-07-05 02:07:42 [INFO] classroom_assistant: [20250705020703] Generation completed in 38.83s
+2025-07-05 02:07:42 [INFO] classroom_assistant: [20250705020703] Response: 'Relational databases organize ...' (424 chars)
+2025-07-05 02:09:59 [INFO] classroom_assistant: [20250705020959] Chat request - Subject: doubts, Role: student, Q: 'explain mergesort'
+2025-07-05 02:09:59 [WARNING] classroom_assistant: [20250705020959] High memory usage: 82.3% (Available: 2752.50 MB)
+2025-07-05 02:09:59 [INFO] classroom_assistant: [20250705020959] Generating response
+2025-07-05 02:09:59 [INFO] classroom_assistant: [20250705020959] Generating response with student system prompt
+2025-07-05 02:10:59 [ERROR] classroom_assistant: [20250705020959] LLM generation timed out after 60 seconds
+2025-07-05 02:10:59 [INFO] classroom_assistant: [20250705020959] Generation completed in 60.01s
+2025-07-05 02:10:59 [INFO] classroom_assistant: [20250705020959] Response: 'Sorry, it's taking longer than...' (105 chars)

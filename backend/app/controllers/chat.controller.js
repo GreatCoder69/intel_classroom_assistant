@@ -2,6 +2,7 @@ require('dotenv').config(); // Load .env
 const fs = require("fs");
 const path = require("path");
 const Chat = require("../models/chat.model");
+const ChatMessage = require("../models/chatMessage.model"); // New chat message model
 const User = require("../models/user.model");
 const pdfParse = require("pdf-parse");
 const logEvent = require("../utils/logEvent");
@@ -45,7 +46,7 @@ const MESSAGES_PER_PAGE = 5;
 
 
 exports.addChat = async (req, res) => {
-  const { subject, question } = req.body;
+  const { subject, question, chatSubject } = req.body;
   const email = req.userEmail;
 
   if (!subject || (!question && !req.file) || !email) {
@@ -60,6 +61,16 @@ exports.addChat = async (req, res) => {
     /* ------------------------------------------------------------------ */
     const role = req.userRole || "student";       // default role
     const flaskPayload = { subject, question, role };
+    
+    // Add chatSubject context if provided
+    if (chatSubject) {
+      flaskPayload.chatSubject = chatSubject;
+      // Enhance the question with subject context
+      flaskPayload.question = question ? 
+        `[Context: This question is about ${chatSubject}] ${question}` : 
+        `Please provide information about ${chatSubject}`;
+    }
+    
     let imageUrl   = null;                        // for DB
     let mimeType   = null;
     let base64Body = null;
@@ -121,6 +132,8 @@ exports.addChat = async (req, res) => {
       entryNumber: (count % MESSAGES_PER_PAGE) + 1,
       responseTime,
       chatCategory,
+      chatSubject: chatSubject || null, // Store the selected subject
+      userRole: role, // Store the user role
     };
 
     await Chat.findOneAndUpdate(
@@ -128,6 +141,36 @@ exports.addChat = async (req, res) => {
       { $push: { chat: chatEntry }, $set: { lastUpdated: new Date(), email } },
       { upsert: true, new: true }
     );
+
+    /* ------------------------------------------------------------------ */
+    /* 3.5️⃣  Also save to new ChatMessage model for statistics            */
+    /* ------------------------------------------------------------------ */
+    try {
+      const user = await User.findOne({ email });
+      const newChatMessage = new ChatMessage({
+        userId: user ? user._id.toString() : email,
+        userEmail: email,
+        userRole: role,
+        message: question || "Image/File uploaded",
+        response: answer,
+        chatSubject: chatSubject || 'General',
+        subject: subject,
+        imageUrl: imageUrl,
+        mimeType: mimeType,
+        responseTime: responseTime,
+        modelUsed: "OpenVINO-DeepSeek-R1"
+      });
+      
+      await newChatMessage.save();
+      console.log('💾 Chat message saved for statistics:', {
+        userRole: role,
+        chatSubject: chatSubject || 'General',
+        subject: subject
+      });
+    } catch (saveError) {
+      console.error('Error saving chat message for statistics:', saveError);
+      // Don't fail the main request if statistics save fails
+    }
 
     /* ------------------------------------------------------------------ */
     /* 4️⃣  Log event + return to client                                  */
@@ -326,5 +369,99 @@ exports.searchGeneralChats = async (req, res) => {
   } catch (err) {
     console.error("Error in searchGeneralChats:", err);
     res.status(500).json({ message: "Server error during search" });
+  }
+};
+
+// Get subject-based statistics for dashboard
+exports.getSubjectStatistics = async (req, res) => {
+  try {
+    const email = req.userEmail;
+    const user = await User.findOne({ email });
+    const userRole = user ? user.role : 'student';
+    
+    console.log("=== Subject Statistics Debug (New Model) ===");
+    console.log("User email:", email);
+    console.log("User role:", userRole);
+    
+    let matchFilter = {};
+    
+    if (userRole === 'teacher') {
+      // For teachers, show aggregated statistics from all students only
+      matchFilter = { userRole: 'student' };
+      console.log("Teacher view: filtering for student messages only");
+    } else {
+      // For students, show only their own statistics
+      matchFilter = { userEmail: email };
+      console.log("Student view: filtering for own messages only");
+    }
+    
+    console.log("Match filter:", matchFilter);
+    
+    // Use the new ChatMessage model for statistics
+    const messageCount = await ChatMessage.countDocuments(matchFilter);
+    console.log("Total messages found:", messageCount);
+    
+    if (messageCount === 0) {
+      console.log("No messages found, returning empty array");
+      return res.status(200).json([]);
+    }
+    
+    // Aggregate by chatSubject
+    const pipeline = [
+      { $match: matchFilter },
+      { 
+        $group: { 
+          _id: '$chatSubject', 
+          count: { $sum: 1 } 
+        } 
+      },
+      { 
+        $project: {
+          subject: '$_id',
+          count: 1,
+          _id: 0
+        }
+      },
+      { $sort: { count: -1 } }
+    ];
+    
+    console.log("Aggregation pipeline:", JSON.stringify(pipeline, null, 2));
+    
+    const statsArray = await ChatMessage.aggregate(pipeline);
+    console.log("Aggregation result:", statsArray);
+
+    res.status(200).json(statsArray);
+  } catch (err) {
+    console.error("Error getting subject statistics:", err);
+    res.status(500).json({ message: "Error fetching subject statistics" });
+  }
+};
+
+// Debug endpoint to check chat data
+exports.debugChatData = async (req, res) => {
+  try {
+    const email = req.userEmail;
+    const chats = await Chat.find({ email });
+    
+    const debugInfo = {
+      email,
+      chatCount: chats.length,
+      chats: chats.map(chat => ({
+        subject: chat._id,
+        entryCount: chat.chat.length,
+        entries: chat.chat.map(entry => ({
+          hasQuestion: !!entry.question,
+          question: entry.question?.substring(0, 100),
+          chatSubject: entry.chatSubject,
+          userRole: entry.userRole,
+          timestamp: entry.timestamp
+        }))
+      }))
+    };
+    
+    res.status(200).json(debugInfo);
+  } catch (err) {
+    console.error("Error in debug endpoint:", err);
+    res.status(500).json({ message: "Error fetching debug data" });
   }
 };

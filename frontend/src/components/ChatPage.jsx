@@ -25,6 +25,8 @@ const ChatPage = () => {
   const [imageFile, setImageFile] = useState(null);
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState("");
 
   const [profile, setProfile] = useState({
     email: "",
@@ -42,6 +44,7 @@ const ChatPage = () => {
     }
 
     fetchUserProfile();
+    fetchSubjects();
     const savedOrder = localStorage.getItem("topicsOrder");
     if (savedOrder) {
       setTopics(JSON.parse(savedOrder));
@@ -169,6 +172,8 @@ const ChatPage = () => {
       const formData = new FormData();
       formData.append("subject", selectedTopic);
       formData.append("model", selectedModel); // 👈 Add this line
+      // Use "General" as fallback if no specific subject selected
+      formData.append("chatSubject", selectedSubject || "General");
       if (currentMessage.trim()) formData.append("question", currentMessage);
       if (imageFile) formData.append("image", imageFile);
 
@@ -225,26 +230,53 @@ const ChatPage = () => {
 
   const addTopic = async () => {
     const topic = newTopicName.trim();
-    if (!topic || topics.includes(topic)) {
-      toast.warn("Topic is empty or already exists.");
+    
+    // Validation checks
+    if (!topic) {
+      toast.warn("Please enter a topic name.");
+      return;
+    }
+    
+    if (topics.includes(topic)) {
+      toast.warn("Topic already exists. Please choose a different name.");
       return;
     }
 
-    const now = new Date();
-    const chatPair = [
-      { sender: "user", message: "Hello", timestamp: now },
-      { sender: "bot", message: "Hello, how are you?", timestamp: now },
-    ];
+    try {
+      // Create initial chat entry
+      const now = new Date();
+      const initialChatPair = [
+        { sender: "user", message: "Hello", timestamp: now.toISOString() },
+        { sender: "bot", message: "Hello! How can I help you today?", timestamp: now.toISOString() },
+      ];
 
-    const updatedTopics = [topic, ...topics];
-    setTopics(updatedTopics);
-    localStorage.setItem("topicsOrder", JSON.stringify(updatedTopics));
-    setSelectedTopic(topic);
-    setChatHistory((prev) => ({ ...prev, [topic]: chatPair }));
-    setChat(chatPair);
-    setNewTopicName("");
-    setShowNewTopicModal(false);
-    toast.success("New topic created.");
+      // Update topics list
+      const updatedTopics = [topic, ...topics];
+      
+      // Update all states
+      setTopics(updatedTopics);
+      localStorage.setItem("topicsOrder", JSON.stringify(updatedTopics));
+      setSelectedTopic(topic);
+      setChatHistory((prev) => ({ 
+        ...prev, 
+        [topic]: initialChatPair 
+      }));
+      setChat(initialChatPair);
+      
+      // Reset form and close modal
+      setNewTopicName("");
+      setShowNewTopicModal(false);
+      
+      toast.success(`Topic "${topic}" created successfully!`);
+    } catch (error) {
+      console.error("Error creating topic:", error);
+      toast.error("Failed to create topic. Please try again.");
+    }
+  };
+
+  const handleOpenNewTopicModal = () => {
+    setNewTopicName(""); // Reset the input field
+    setShowNewTopicModal(true);
   };
 
   const selectTopic = (topic) => {
@@ -277,6 +309,27 @@ const ChatPage = () => {
       });
     } catch (err) {
       console.error("Error fetching user profile:", err);
+    }
+  };
+
+  const fetchSubjects = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/subjects`, {
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token,
+        },
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setSubjects(data);
+        // Set default subject to "General" if none selected
+        if (!selectedSubject) {
+          setSelectedSubject("General");
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching subjects:", err);
     }
   };
 
@@ -421,7 +474,7 @@ const ChatPage = () => {
         <>
           <Button
             className="w-100 mb-2"
-            onClick={() => setShowNewTopicModal(true)}
+            onClick={handleOpenNewTopicModal}
           >
             + New Chat
           </Button>
@@ -508,7 +561,7 @@ const ChatPage = () => {
             <div
               key={i}
               className={`msg-row ${
-                msg.sender === "user" ? "user-left" : "bot-right"
+                msg.sender === "user" ? "user-right" : "bot-left"
               } mb-3`}
             >
               <div
@@ -616,6 +669,7 @@ const ChatPage = () => {
               </Button>
             </div>
           )}
+          
           <InputGroup>
             <Form.Control
               placeholder="Type a message..."
@@ -625,6 +679,22 @@ const ChatPage = () => {
                 if (e.key === "Enter") handleSend();
               }}
             />
+
+            {/* Subject Selection Dropdown */}
+            <Form.Select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              size="sm"
+              style={{ maxWidth: "150px" }}
+            >
+              <option value="">Subject...</option>
+              <option value="General">General</option>
+              {subjects.map((subject) => (
+                <option key={subject._id} value={subject.name}>
+                  {subject.name}
+                </option>
+              ))}
+            </Form.Select>
 
             {/* Image Upload Button */}
             <input
@@ -646,7 +716,7 @@ const ChatPage = () => {
 
             <Button
               onClick={handleSend}
-              disabled={!currentMessage.trim() && !imageFile}
+              disabled={(!currentMessage.trim() && !imageFile)}
             >
               Send
             </Button>
@@ -655,7 +725,10 @@ const ChatPage = () => {
       </div>
       <Modal
         show={showNewTopicModal}
-        onHide={() => setShowNewTopicModal(false)}
+        onHide={() => {
+          setNewTopicName("");
+          setShowNewTopicModal(false);
+        }}
         centered
       >
         <Modal.Header closeButton>
@@ -668,18 +741,32 @@ const ChatPage = () => {
               type="text"
               value={newTopicName}
               onChange={(e) => setNewTopicName(e.target.value)}
-              placeholder="e.g. React Tips"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  addTopic();
+                }
+              }}
+              placeholder="e.g. React Tips, Math Problems, Science Queries"
+              autoFocus
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button
             variant="secondary"
-            onClick={() => setShowNewTopicModal(false)}
+            onClick={() => {
+              setNewTopicName("");
+              setShowNewTopicModal(false);
+            }}
           >
             Cancel
           </Button>
-          <Button variant="primary" onClick={addTopic}>
+          <Button 
+            variant="primary" 
+            onClick={addTopic}
+            disabled={!newTopicName.trim()}
+          >
             Create
           </Button>
         </Modal.Footer>
