@@ -1,37 +1,38 @@
+// components/SubjectStatsChart.jsx
 import React, { useEffect, useState } from "react";
 import {
   BarChart,
   Bar,
   XAxis,
   YAxis,
-  CartesianGrid,
   Tooltip,
-  Legend,
   ResponsiveContainer,
+  CartesianGrid,
 } from "recharts";
 
-const months = [
-  "JAN",
-  "FEB",
-  "MAR",
-  "APR",
-  "MAY",
-  "JUN",
-  "JUL",
-  "AUG",
-  "SEP",
-  "OCT",
-  "NOV",
-  "DEC",
-];
-
-const getMonth = (dateStr) => {
-  const monthIndex = new Date(dateStr).getMonth();
-  return months[monthIndex] || "";
+/* ---------- helper for tooltip ---------- */
+const CustomTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  const { count, percent } = payload[0].payload;
+  return (
+    <div
+      style={{
+        background: "#111",
+        color: "#fff",
+        padding: "6px 10px",
+        borderRadius: 4,
+        fontSize: 13,
+      }}
+    >
+      <strong>{label}</strong>
+      <br />Doubts: {count}
+      <br />{percent.toFixed(1)}%
+    </div>
+  );
 };
 
-const ChatStatsChart = () => {
-  const [chartData, setChartData] = useState([]);
+const SubjectStatsChart = () => {
+  const [data, setData] = useState([]);
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -39,65 +40,63 @@ const ChatStatsChart = () => {
       headers: { "x-access-token": token },
     })
       .then((res) => res.json())
-      .then((data) => {
-        // Initialize monthly count structure
-        const monthlyStats = {};
-        months.forEach((m) => {
-          monthlyStats[m] = {
-            month: m,
-            noFile: 0,
-            withImage: 0,
-            withPDF: 0,
-          };
-        });
+      .then((users) => {
+        /* ---------- aggregate counts ---------- */
+        const subjectCounts = {}; // { subject: count }
 
-        // Process chats
-        data.forEach((user) => {
-          user.chats.forEach((chat) => {
-            chat.history.forEach((msg) => {
-              const month = getMonth(msg.timestamp);
-              if (!month) return;
+        users.forEach((u) =>
+          u.chats.forEach((chat) => {
+            const subj = chat.subject;
+            const count = (chat.history || []).length;
+            subjectCounts[subj] = (subjectCounts[subj] || 0) + count;
+          })
+        );
 
-              const url = msg.imageUrl;
+        // convert to array & sort
+        const total = Object.values(subjectCounts).reduce((a, b) => a + b, 0) || 1;
+        const chartRows = Object.entries(subjectCounts)
+          .map(([subject, count]) => ({
+            subject,
+            count,
+            percent: (count / total) * 100,
+          }))
+          .sort((a, b) => b.count - a.count);
 
-              if (!url) {
-                monthlyStats[month].noFile++;
-              } else if (url.endsWith(".jpg") || url.endsWith(".png")) {
-                monthlyStats[month].withImage++;
-              } else if (url.endsWith(".pdf")) {
-                monthlyStats[month].withPDF++;
-              }
-            });
-          });
-        });
-
-        // Set the result for Recharts
-        const final = months.map((m) => monthlyStats[m]);
-        setChartData(final);
+        setData(chartRows);
       })
       .catch(console.error);
   }, [token]);
 
+  /* ---------- dynamic height: 50px per subject ---------- */
+  const height = Math.max(300, data.length * 50);
+
   return (
-    <div className="my-5">
-      <ResponsiveContainer width="100%" height={300}>
+    <div className="my-4">
+      <ResponsiveContainer width="100%" height={height}>
         <BarChart
-          data={chartData}
-          barSize={5}
-          margin={{ top: 20, right: 30, left: 0, bottom: 5 }}
+          data={data}
+          layout="vertical"
+          margin={{ top: 20, right: 40, left: 60, bottom: 20 }}
         >
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip />
-          <Legend />
-          <Bar dataKey="noFile" fill="#a64bf4" name="No File" />
-          <Bar dataKey="withImage" fill="#ff7aa8" name="Image" />
-          <Bar dataKey="withPDF" fill="#4caefc" name="PDF" />
+          <XAxis
+            type="number"
+            allowDecimals={false}
+            label={{ value: "Number of Doubts", position: "insideBottom", dy: 10 }}
+          />
+          <YAxis
+            type="category"
+            dataKey="subject"
+            width={120}
+            tickLine={false}
+            axisLine={false}
+          />
+          <Tooltip content={<CustomTooltip />} />
+          <Bar dataKey="count" fill="#4caefc" barSize={18} />
         </BarChart>
       </ResponsiveContainer>
     </div>
   );
 };
 
-export default ChatStatsChart;
+export default SubjectStatsChart;

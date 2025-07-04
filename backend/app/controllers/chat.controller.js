@@ -52,81 +52,92 @@ exports.addChat = async (req, res) => {
   }
 
   try {
-    let answer   = null;
+    let answer = null;
     let imageUrl = null;
     let responseTime = 0;
 
-    /* ---------- helper to call Gemini and track time ---------- */
     const callGemini = async (prompt, mime = null, b64 = null) => {
-      const t0 = Date.now();
-      const out = await askGemini("gemini", prompt, mime, b64);
-      responseTime = Date.now() - t0;
-      return out;
+      const start = Date.now();
+      const output = await askGemini("gemini", prompt, mime, b64);
+      responseTime = Date.now() - start;
+      return output;
     };
 
-    /* ---------- 1️⃣  EDUCATIONAL CHECK ---------- */
+    // 1️⃣ STRICT EDUCATIONAL FILTER
     const eduPrompt = `
-Classify the following question strictly as "educational" or "non-educational".
+You are a strict classifier for a college assistant.
+
+Classify the following question as either:
+- "educational" (if it's clearly academic: math, science, coding, etc.)
+- "non-educational" (if it's leisure, entertainment, movies, sports, etc.)
+
+Only return one word: "educational" or "non-educational".
+
 Question: "${question}"
-Return ONLY that single word.
 `;
-    const edu = (await callGemini(eduPrompt)).trim().toLowerCase();
 
-    if (edu !== "educational") {
-      answer = "I'm an educational assistant focused on academic topics. Please ask a learning‑related question.";
-    } else {
-      /* ---------- 2️⃣  NORMAL Q&A (text / image / pdf) ---------- */
-      if (req.file) {
-        const ok = ["image/jpeg","image/png","image/webp","application/pdf"];
-        if (!ok.includes(req.file.mimetype)) {
-          return res.status(400).json({ message: "Unsupported file type" });
-        }
+    const isEducational = (await callGemini(eduPrompt)).trim().toLowerCase();
 
-        imageUrl = `/uploads/${req.file.filename}`;
-
-        if (req.file.mimetype === "application/pdf") {
-          const pdfText = (await pdfParse(fs.readFileSync(req.file.path))).text;
-          const prompt  = question
-            ? `${question}\n\nAlso consider this PDF content:\n${pdfText}`
-            : `Please analyse this PDF content:\n${pdfText}`;
-          answer = await callGemini(prompt);
-        } else {
-          const base64 = fs.readFileSync(req.file.path).toString("base64");
-          answer = await callGemini(question || "", req.file.mimetype, base64);
-        }
-      } else {
-        answer = await callGemini(question);
-      }
+    if (isEducational !== "educational") {
+      return res.status(200).json({
+        answer: "I'm an educational assistant focused only on college subjects. Please ask a relevant academic question.",
+        file: null,
+        chatCategory: null
+      });
     }
 
-    /* ---------- 3️⃣  TOPIC CLASSIFICATION (broad) ---------- */
+    // 2️⃣ GET RESPONSE
+    if (req.file) {
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+      if (!allowedTypes.includes(req.file.mimetype)) {
+        return res.status(400).json({ message: "Unsupported file type" });
+      }
+
+      imageUrl = `/uploads/${req.file.filename}`;
+
+      if (req.file.mimetype === "application/pdf") {
+        const pdfText = (await pdfParse(fs.readFileSync(req.file.path))).text;
+        const prompt = question
+          ? `${question}\n\nAlso consider this PDF content:\n${pdfText}`
+          : `Please analyze this PDF content:\n${pdfText}`;
+        answer = await callGemini(prompt);
+      } else {
+        const base64 = fs.readFileSync(req.file.path).toString("base64");
+        answer = await callGemini(question, req.file.mimetype, base64);
+      }
+    } else {
+      answer = await callGemini(question);
+    }
+
+    // 3️⃣ BROAD CATEGORY CLASSIFICATION
     let chatCategory = "unknown";
     try {
       const catPrompt = `
-You are a course‑outline classifier.
+You are a syllabus topic classifier for college-level subjects.
 
-• SUBJECT: "${subject}"
-• QUESTION: "${question}"
+Given:
+- SUBJECT: "${subject}"
+- QUESTION: "${question}"
 
-Return the single MOST RELEVANT TOPIC from the subject syllabus
-(max 3 words, e.g. "binary trees", "sorting algorithms").
-Do NOT repeat words from the question verbatim.
-Return ONLY the topic phrase.
+Return only a **broad topic name** (2–3 words max), e.g.:
+  "linear algebra", "binary trees", "network protocols", "machine learning"
+
+Avoid repeating words directly from the question. Return only the category label.
 `;
       chatCategory = (await callGemini(catPrompt)).trim().toLowerCase();
       if (!chatCategory) chatCategory = "unknown";
-    } catch { /* swallow errors */ }
+    } catch {}
 
-    /* ---------- 4️⃣  PERSIST CHAT ENTRY ---------- */
+    // 4️⃣ SAVE TO DB
     const existing = await Chat.findOne({ _id: subject, email });
-    const count    = existing ? existing.chat.length : 0;
+    const count = existing ? existing.chat.length : 0;
 
     const chatEntry = {
-      question   : question || null,
-      imageUrl   : imageUrl  || null,
+      question: question || null,
+      imageUrl: imageUrl || null,
       answer,
-      timestamp  : new Date(),
-      pageNumber : Math.floor(count / MESSAGES_PER_PAGE) + 1,
+      timestamp: new Date(),
+      pageNumber: Math.floor(count / MESSAGES_PER_PAGE) + 1,
       entryNumber: (count % MESSAGES_PER_PAGE) + 1,
       responseTime,
       chatCategory
@@ -140,12 +151,13 @@ Return ONLY the topic phrase.
 
     await logEvent({
       email,
-      action : "create_chat",
+      action: "create_chat",
       message: `Message added to '${subject}'`,
-      meta   : { chatCategory }
+      meta: { chatCategory }
     });
 
     res.status(200).json({ answer, file: imageUrl, chatCategory });
+
   } catch (err) {
     console.error("Gemini error:", err.message);
     await logLLMError({ email, subject, prompt: question, error: err });

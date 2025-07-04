@@ -11,37 +11,27 @@ import GeneralChat from "./components/GeneralChat";
 import ChatDetail from "./components/ChatDetail";
 import AdminErrorLogs from "./components/AdminErrorLogs";
 import Dashboard from "./pages/Dashboard";
-import Layout from "./components/Layout";
-import Settings from "./pages/Settings";
-
-// A wrapper component that adds the Layout to a component
-const WithLayout = ({ Component }) => (
-  <Layout>
-    <Component />
-  </Layout>
-);
 
 const App = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/login" element={<LoginPage />} />
     <Route path="/signup" element={<SignupPage />} />
-    
-    {/* Protected Routes with Layout */}
-    <Route path="/dashboard" element={<WithLayout Component={Dashboard} />} />
-    <Route path="/chat" element={<WithLayout Component={ChatPage} />} />
-    <Route path="/general-chat" element={<WithLayout Component={GeneralChat} />} />
-    <Route path="/history" element={<WithLayout Component={ChatHistory} />} />
-    <Route path="/chat-detail" element={<WithLayout Component={ChatDetail} />} />
-    <Route path="/settings" element={<WithLayout Component={Settings} />} />
-    
+
+    {/* Main App Routes without Layout */}
+    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/chat" element={<ChatPage />} />
+    <Route path="/general-chat" element={<GeneralChat />} />
+    <Route path="/history" element={<ChatHistory />} />
+    <Route path="/chat-detail" element={<ChatDetail />} />
+
     {/* Admin routes */}
     <Route path="/admin" element={<AdminPage />} />
     <Route path="/manage-user" element={<EditProfile />} />
     <Route path="/edit-user/:email" element={<EditUser />} />
     <Route path="/error-logs" element={<AdminErrorLogs />} />
-    
-    {/* Default redirect to login */}
+
+    {/* Default redirect */}
     <Route path="*" element={<Navigate to="/login" replace />} />
   </Routes>
 );

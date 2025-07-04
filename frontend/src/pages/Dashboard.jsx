@@ -1,56 +1,102 @@
-import React from 'react';
+import React, { useEffect, useState } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
-function Dashboard() {
-  /**
-   * Main dashboard component showing overview cards for user activity.
-   * 
-   * Returns:
-   *   JSX.Element: Dashboard with activity cards and metrics
-   */
+const SubjectWiseChart = () => {
+  const [data, setData] = useState([]);
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    fetch(`${import.meta.env.VITE_API_URL}/api/admin/users-chats`, {
+      headers: { "x-access-token": token },
+    })
+      .then((res) => res.json())
+      .then((users) => {
+        const subjectCounts = {};
+
+        users.forEach((user) => {
+          user.chats.forEach((chat) => {
+            const subj = chat.subject;
+            const count = (chat.history || []).length;
+            subjectCounts[subj] = (subjectCounts[subj] || 0) + count;
+          });
+        });
+
+        const total = Object.values(subjectCounts).reduce((a, b) => a + b, 0) || 1;
+        const chartRows = Object.entries(subjectCounts)
+          .map(([subject, count]) => ({
+            subject,
+            count,
+            percent: (count / total) * 100,
+          }))
+          .sort((a, b) => b.count - a.count);
+
+        setData(chartRows);
+      })
+      .catch(console.error);
+  }, [token]);
+
   return (
-    <div className="h-100 w-100 d-flex flex-column p-4">
-      <h2 className="mb-4">Dashboard</h2>
-      <div className="bg-secondary bg-opacity-25 p-4 rounded flex-grow-1">
-        <div className="row">
-          <div className="col-md-6 mb-4">
-            <div className="card bg-primary text-white">
-              <div className="card-body">
-                <h5 className="card-title">Recent Activity</h5>
-                <p className="card-text">No recent activity to display.</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-md-6 mb-4">
-            <div className="card bg-info text-white">
-              <div className="card-body">
-                <h5 className="card-title">Today's Schedule</h5>
-                <p className="card-text">No scheduled classes today.</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-md-6 mb-4">
-            <div className="card bg-success text-white">
-              <div className="card-body">
-                <h5 className="card-title">Learning Progress</h5>
-                <p className="card-text">Start learning to see your progress.</p>
-              </div>
-            </div>
-          </div>
-          
-          <div className="col-md-6 mb-4">
-            <div className="card bg-warning text-dark">
-              <div className="card-body">
-                <h5 className="card-title">Upcoming Assignments</h5>
-                <p className="card-text">No upcoming assignments.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="my-5">
+      <h4 className="mb-3">Subject-wise Doubt Distribution</h4>
+      <ResponsiveContainer width="100%" height={Math.max(300, data.length * 50)}>
+        <BarChart
+          data={data}
+          layout="vertical"
+          margin={{ top: 20, right: 40, left: 80, bottom: 20 }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis
+            type="number"
+            allowDecimals={false}
+            label={{
+              value: "Number of Doubts",
+              position: "insideBottom",
+              dy: 10,
+            }}
+          />
+          <YAxis
+            type="category"
+            dataKey="subject"
+            width={120}
+            tickLine={false}
+            axisLine={false}
+          />
+          <Tooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              const { count, percent } = payload[0].payload;
+              return (
+                <div
+                  style={{
+                    background: "#111",
+                    color: "#fff",
+                    padding: "6px 10px",
+                    borderRadius: 4,
+                    fontSize: 13,
+                  }}
+                >
+                  <strong>{label}</strong>
+                  <br />
+                  Doubts: {count}
+                  <br />
+                  {percent.toFixed(1)}%
+                </div>
+              );
+            }}
+          />
+          <Bar dataKey="count" fill="#4caefc" barSize={18} />
+        </BarChart>
+      </ResponsiveContainer>
     </div>
   );
-}
+};
 
-export default Dashboard;
+export default SubjectWiseChart;

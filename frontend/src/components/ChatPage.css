@@ -28,3 +28,21 @@ body, .vh-100 { background:#000 !important; color:#fff !important; }
 /* spinner (bootstrp utility already white) */
 .spinner-border, .spinner-grow { filter:brightness(1.8); }
 
+.markdown p {
+  margin: 0;
+  line-height: 1.4; /* Adjust to your preference */
+}
+
+.markdown ul, .markdown ol {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.markdown li {
+  margin-bottom: 4px;
+}
+
+.markdown {
+  white-space: pre-wrap;
+  word-break: break-word;
+}

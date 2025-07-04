@@ -35,10 +35,10 @@ const handleLogin = async (values) => {
       localStorage.setItem("token", data.accessToken);
       localStorage.setItem("user", JSON.stringify(data.user));
 
-      if (data.user.isAdmin) {
-        navigate("/admin");
-      } else {
+      if (data.user.role == "teacher") {
         navigate("/dashboard");
+      } else {
+        navigate("/chat");
       }
     } else {
       setLoginError(data.message || "Login failed. Please check your credentials.");

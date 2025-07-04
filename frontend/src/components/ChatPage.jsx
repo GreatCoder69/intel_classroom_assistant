@@ -425,8 +425,6 @@ const ChatPage = () => {
           >
             + New Chat
           </Button>
-
-          
         </>
 
         <div style={{ overflowY: "auto", maxHeight: "calc(100vh - 100px)" }}>
@@ -457,25 +455,12 @@ const ChatPage = () => {
                 </div>
                 <small
                   className={
-                    selectedTopic === topic ? "text-light" : "text-muted"
+                    selectedTopic === topic ? "text-light" : "text-light"
                   }
                 >
                   {chatHistory[topic]?.length || 0} messages
                 </small>
-                {topicMeta[topic]?.category && (
-                  <div
-                    className="mt-1 px-2 py-1 rounded"
-                    style={{
-                      backgroundColor: "orange", // Ochre
-                      color: "black",
-                      fontSize: "0.75rem", // Smaller text
-                      textAlign: "left", // Left align
-                      width: "fit-content",
-                    }}
-                  >
-                    {topicMeta[topic].category}
-                  </div>
-                )}
+                
               </div>
             ))}
         </div>
@@ -542,40 +527,6 @@ const ChatPage = () => {
                           {msg.image.split("/").pop()}
                         </a>
                       </div>
-                      <div className="d-flex align-items-center gap-3">
-                        <Button
-                          variant="outline-light"
-                          size="sm"
-                          onClick={async () => {
-                            const entryId = msg._id;
-                            if (!entryId) {
-                              alert("Entry ID missing");
-                              return;
-                            }
-                            try {
-                              const res = await fetch(
-                                `${
-                                  import.meta.env.VITE_API_URL
-                                }/api/download-docx/${entryId}`
-                              );
-                              if (!res.ok) throw new Error("Download failed");
-                              const blob = await res.blob();
-                              const link = document.createElement("a");
-                              link.href = window.URL.createObjectURL(blob);
-                              link.download = `response-${entryId}.docx`;
-                              link.click();
-                            } catch (err) {
-                              alert("Error downloading DOCX");
-                              console.error(err);
-                            }
-                          }}
-                        >
-                          ⬇ Download DOCX
-                        </Button>
-                        <small className="text-light">
-                          Downloads: {msg.downloadCount || 0}
-                        </small>
-                      </div>
                     </div>
                   ) : (
                     <img
@@ -590,9 +541,30 @@ const ChatPage = () => {
                   ))}
 
                 {msg.message && (
-                  <div style={{ marginTop: 8 }}>
+                  <div
+                    style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+                  >
                     {msg.sender === "bot" ? (
-                      <ReactMarkdown>{msg.message}</ReactMarkdown>
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => (
+                            <p
+                              style={{
+                                margin: 0,
+                                lineHeight: "1.4",
+                                paddingBottom: "2px",
+                              }}
+                            >
+                              {children}
+                            </p>
+                          ),
+                          li: ({ children }) => (
+                            <li style={{ marginBottom: "2px" }}>{children}</li>
+                          ),
+                        }}
+                      >
+                        {msg.message}
+                      </ReactMarkdown>
                     ) : (
                       msg.message
                     )}
