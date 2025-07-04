@@ -11,14 +11,73 @@ import threading
 import psutil
 from datetime import datetime
 import traceback
+from logging.handlers import RotatingFileHandler
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+# Configure improved logging with filtering
+log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
+os.makedirs(log_dir, exist_ok=True)
+
+# Set up log format and handlers
+LOG_FORMAT = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
+LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+# Create a custom filter to reduce repetitive or low-value logs
+class LogFilter(logging.Filter):
+    def __init__(self):
+        super().__init__()
+        self.last_messages = {}
+        self.repeat_threshold = 5  # Only show repeated messages after this many occurrences
+        self.repeat_counts = {}
+        
+    def filter(self, record):
+        # Filter out certain verbose OpenVINO messages
+        if any(msg in record.getMessage() for msg in [
+            "Setting `pad_token_id`", 
+            "attention mask is not set",
+            "The attention mask and the pad token id were not set"
+        ]):
+            return False
+        
+        # Handle repeated messages
+        message = record.getMessage()
+        if message in self.last_messages:
+            self.repeat_counts[message] = self.repeat_counts.get(message, 0) + 1
+            if self.repeat_counts[message] < self.repeat_threshold:
+                return False
+            else:
+                self.repeat_counts[message] = 0
+                record.getMessage = lambda: f"{message} (repeated {self.repeat_threshold} times)"
+        
+        self.last_messages[message] = time.time()
+        return True
+
+# Create console handler with filter
+console_handler = logging.StreamHandler()
+console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
+console_handler.addFilter(LogFilter())
+console_handler.setLevel(logging.INFO)
+
+# Create file handler for full logs
+file_handler = RotatingFileHandler(
+    os.path.join(log_dir, 'classroom_assistant.log'), 
+    maxBytes=10*1024*1024,  # 10MB
+    backupCount=5
 )
-logger = logging.getLogger(__name__)
+file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
+file_handler.setLevel(logging.DEBUG)
+
+# Configure root logger
+logging.basicConfig(level=logging.INFO, handlers=[console_handler, file_handler])
+
+# Reduce verbosity of specific loggers
+logging.getLogger('werkzeug').setLevel(logging.WARNING)  # Silence Flask's built-in logs
+logging.getLogger('urllib3').setLevel(logging.WARNING)
+logging.getLogger('transformers').setLevel(logging.WARNING)
+logging.getLogger('optimum').setLevel(logging.WARNING)
+
+# Get our application logger
+logger = logging.getLogger('classroom_assistant')
+logger.info("Starting logging system with improved configuration")
 
 # Wrap Vosk import in try-except to handle import errors gracefully
 try:
@@ -55,7 +114,7 @@ try:
             VOSK_AVAILABLE = False
 except Exception as e:
     logger.error(f"Error loading Vosk model: {str(e)}")
-    logger.error(traceback.format_exc())
+    logger.debug(traceback.format_exc())  # Use debug level for stack traces
     VOSK_AVAILABLE = False
 
 # Dynamic context template to be added with each user query
@@ -158,15 +217,27 @@ Guidelines:
 # Default system prompt as fallback
 BASE_SYSTEM_PROMPT = STUDENT_SYSTEM_PROMPT
 
-# LLM setup
+# Model inference lock to prevent concurrent requests
+model_lock = threading.RLock()
+
+# LLM setup with reduced logging
 try:
     model_id = "OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov" 
     logger.info(f"Loading model: {model_id}")
+    
+    # Temporarily suppress transformer warnings during model loading
+    transformers_logger = logging.getLogger("transformers")
+    original_level = transformers_logger.level
+    transformers_logger.setLevel(logging.ERROR)
+    
     tokenizer = AutoTokenizer.from_pretrained(model_id)
     model = OVModelForCausalLM.from_pretrained(model_id)
     
+    # Restore original logging level
+    transformers_logger.setLevel(original_level)
+    
     # Store tokenized system prompts for different roles
-    logger.info("Tokenizing role-specific system prompts")
+    logger.info("Preparing system prompts")
     student_prompt_ids = tokenizer(STUDENT_SYSTEM_PROMPT, return_tensors="pt").input_ids
     teacher_prompt_ids = tokenizer(TEACHER_SYSTEM_PROMPT, return_tensors="pt").input_ids
     
@@ -177,13 +248,15 @@ try:
     }
     
     # Initialize the model with the base (student) system prompt as default
-    logger.info("Initializing model with default system prompt")
-    _ = model.generate(student_prompt_ids, max_length=len(student_prompt_ids[0]) + 1)
-    logger.info("Model initialized with system prompt")
-    
-    logger.info(f"Model loaded successfully and initialized with system prompts: {model_id}")
+    logger.info("Initializing model with system prompt")
+    with model_lock:
+        _ = model.generate(student_prompt_ids, max_length=len(student_prompt_ids[0]) + 1)
+    logger.info("Model ready for inference")
+    model_ready = True
 except Exception as e:
     logger.error(f"Error loading the model: {str(e)}")
+    logger.debug(traceback.format_exc())  # Use debug level for stack traces
+    model_ready = False
 
 def extract_assistant_response(full_text):
     """
@@ -330,10 +403,10 @@ def chat():
     """
     request_id = datetime.now().strftime("%Y%m%d%H%M%S")
     
-    # Log the request content type and headers for debugging
+    # Only log content type if it's not the expected type
     content_type = request.headers.get('Content-Type', 'unknown')
-    logger.info(f"[{request_id}] Request Content-Type: {content_type}")
-    logger.info(f"[{request_id}] Request Headers: {dict(request.headers)}")
+    if content_type != 'application/json':
+        logger.info(f"[{request_id}] Unusual Content-Type: {content_type}")
     
     # Handle different content types
     try:
@@ -353,28 +426,28 @@ def chat():
             except:
                 data = {}
                 
-        # Log received data for debugging
-        logger.info(f"[{request_id}] Received data: {data}")
-        
-        # Extract parameters from request
+        # Log a condensed version of the request
         question = data.get("question", "")
         subject = data.get("subject", "General")
-        
-        # Get user role from request or header
         user_role = data.get("role", "student")
+        
+        # Get user role from header if present
         if "X-User-Role" in request.headers:
             user_role = request.headers.get("X-User-Role")
         
-        # Get user email from request or header
+        # Get user email from request or header but don't log it fully (privacy)
         user_email = data.get("email", None)
         if "X-User-Email" in request.headers:
             user_email = request.headers.get("X-User-Email")
         
-        logger.info(f"[{request_id}] Received chat request - Subject: {subject}, Role: {user_role}, Email: {user_email}, Question: '{question}'")
+        email_log = user_email[:3] + "..." if user_email else None
+        question_preview = question[:30] + "..." if len(question) > 30 else question
+        logger.info(f"[{request_id}] Chat request - Subject: {subject}, Role: {user_role}, Q: '{question_preview}'")
         
-        # Monitor initial memory usage
+        # Only log memory if it's above a threshold
         mem_before = psutil.virtual_memory()
-        logger.info(f"[{request_id}] Memory usage before processing: {mem_before.percent}% (Available: {mem_before.available / (1024*1024):.2f} MB)")
+        if mem_before.percent > 80:
+            logger.warning(f"[{request_id}] High memory usage: {mem_before.percent}% (Available: {mem_before.available / (1024*1024):.2f} MB)")
         
         if not question:
             logger.warning(f"[{request_id}] No question provided in request")
@@ -385,10 +458,9 @@ def chat():
             logger.warning(f"[{request_id}] Invalid role provided: {user_role}, defaulting to student")
             user_role = "student"
             
-        logger.info(f"[{request_id}] Tokenizing input and preparing LLM for {user_role} role")
+        logger.debug(f"[{request_id}] Preparing input for {user_role} role")
         # Add subject context to enhance the response
         context_and_question = f"{get_current_dynamic_context()}\n\nSubject: {subject}\nUser: {question}\n\nIntel Assistant:"
-        logger.info(f"[{request_id}] Using dynamic context with subject and user query for {user_role} role")
         
         # Prepare input text
         input_text = context_and_question
@@ -397,7 +469,7 @@ def chat():
         # Get the appropriate system prompt based on user role
         role_prompt_ids = system_prompt_ids.get(user_role, system_prompt_ids["student"])
         
-        logger.info(f"[{request_id}] Starting LLM generation with {user_role} role system prompt")
+        logger.info(f"[{request_id}] Generating response")
         start = time.time()
         
         # Set a timeout for LLM generation
@@ -413,26 +485,24 @@ def chat():
                     # Use the appropriate system prompt based on user role
                     logger.info(f"[{request_id}] Generating response with {user_role} system prompt")
                     
-                    # Determine which system prompt to use based on role
-                    current_prompt_ids = role_prompt_ids
-                    
-                    # Combine the system prompt prefix with the input
-                    # For OpenVINO models, we need to handle this with the tokenizer
-                    # First get the tokenized system prompt for the role
+                    # Get the appropriate system prompt based on role
                     role_system_prompt = STUDENT_SYSTEM_PROMPT if user_role == "student" else TEACHER_SYSTEM_PROMPT
                     
                     # Create combined input with role-specific system prompt
                     combined_input = f"{role_system_prompt}\n\n{input_text}"
                     combined_inputs = tokenizer(combined_input, return_tensors="pt")
                     
-                    outputs = model.generate(
-                        **combined_inputs,
-                        max_length=2048,      
-                        min_length=20,        
-                        do_sample=True,       
-                        temperature=0.7,      
-                        no_repeat_ngram_size=3 
-                    )
+                    # Use a lock to prevent concurrent inference requests
+                    with model_lock:
+                        outputs = model.generate(
+                            **combined_inputs,
+                            max_length=2048,      
+                            min_length=20,        
+                            do_sample=True,       
+                            temperature=0.7,      
+                            no_repeat_ngram_size=3 
+                        )
+                        
                     full_response = tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
                     # Extract only the actual assistant response
                     answer = extract_assistant_response(full_response)
@@ -463,17 +533,19 @@ def chat():
             answer = "Sorry, an unexpected error occurred while processing your request."
     
         process_time = round(end - start, 2)
-        logger.info(f"[{request_id}] LLM generation took {process_time} seconds")
+        logger.info(f"[{request_id}] Generation completed in {process_time}s")
     
         # Force garbage collection to free memory
         gc.collect()
     
-        # Monitor final memory usage
+        # Only log final memory if it changed significantly
         mem_after = psutil.virtual_memory()
-        logger.info(f"[{request_id}] Memory usage after processing: {mem_after.percent}% (Available: {mem_after.available / (1024*1024):.2f} MB)")
+        if abs(mem_after.percent - mem_before.percent) > 5:
+            logger.info(f"[{request_id}] Memory change: {mem_before.percent}% → {mem_after.percent}%")
     
         if answer:
-            logger.info(f"[{request_id}] Sending response: '{answer[:100]}...' ({len(answer)} chars)")
+            answer_preview = answer[:30] + "..." if len(answer) > 30 else answer
+            logger.info(f"[{request_id}] Response: '{answer_preview}' ({len(answer)} chars)")
         else:
             answer = "Sorry, I couldn't generate a response. Please try again."
             logger.warning(f"[{request_id}] No response was generated")
@@ -488,7 +560,7 @@ def chat():
         
     except Exception as e:
         logger.error(f"[{request_id}] Error processing request: {str(e)}")
-        logger.error(traceback.format_exc())
+        logger.debug(traceback.format_exc())  # Use debug level for stack traces
         return jsonify({"error": "Server error", "message": str(e)}), 500
 
 # Add a compatible endpoint for the original /api/query endpoint
@@ -536,4 +608,18 @@ def health_check():
 
 if __name__ == "__main__":
     logger.info("Starting Intel Classroom Assistant server")
-    app.run(debug=True, port=8000)
+    
+    # For development - auto-reload when code changes
+    if os.environ.get("FLASK_ENV") == "development":
+        logger.info("Running in development mode with auto-reloader")
+        app.run(debug=True, port=8000, use_reloader=True)
+    else:
+        # For production - stable and no reloading
+        logger.info("Running in production mode without auto-reloader")
+        # Disable Flask's built-in logging
+        import logging
+        werkzeug_logger = logging.getLogger('werkzeug')
+        werkzeug_logger.disabled = True
+        app.logger.disabled = True
+        
+        app.run(debug=False, port=8000, use_reloader=False)
