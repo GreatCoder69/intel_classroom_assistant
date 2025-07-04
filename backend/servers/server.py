@@ -1,3 +1,10 @@
+"""
+Intel Classroom Assistant Server - Basic Version
+
+A Flask-based server providing AI-powered educational chat functionality.
+Includes conversation management, role-based prompting, and basic model handling.
+"""
+
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
@@ -18,8 +25,13 @@ os.makedirs(log_dir, exist_ok=True)
 LOG_FORMAT = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-# Create a custom filter to reduce repetitive or low-value logs
 class LogFilter(logging.Filter):
+    """
+    Custom logging filter to reduce repetitive or verbose log messages.
+    
+    Tracks message frequency and filters out excessive repetition while
+    preserving important error information and system status updates.
+    """
     def __init__(self):
         super().__init__()
         self.last_messages = {}
@@ -76,39 +88,12 @@ logging.getLogger('optimum').setLevel(logging.WARNING)
 logger = logging.getLogger('classroom_assistant')
 logger.info("Starting logging system with improved configuration")
 
-# Wrap Vosk import in try-except to handle import errors gracefully
-try:
-    from vosk import Model, KaldiRecognizer
-    VOSK_AVAILABLE = True
-except ImportError:
-    logger.warning("Vosk not available. Speech recognition will be disabled.")
-    VOSK_AVAILABLE = False
-
 from transformers import AutoTokenizer
 from optimum.intel.openvino import OVModelForCausalLM
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Configure CORS to allow requests from any origin
-
-
-# Configure Vosk model path - allow environment variable override
-VOSK_MODEL_PATH = os.environ.get("VOSK_MODEL_PATH", "vosk-model-small-en-us-0.15")
-
-try:
-    if VOSK_AVAILABLE:
-        logger.info(f"Loading Vosk model from: {VOSK_MODEL_PATH}")
-        if os.path.exists(VOSK_MODEL_PATH):
-            asr_model = Model(VOSK_MODEL_PATH)
-            rec = KaldiRecognizer(asr_model, 16000)
-            logger.info("Vosk model loaded successfully")
-        else:
-            logger.error(f"Vosk model not found at: {VOSK_MODEL_PATH}")
-            VOSK_AVAILABLE = False
-except Exception as e:
-    logger.error(f"Error loading Vosk model: {str(e)}")
-    logger.debug(traceback.format_exc())  # Use debug level for stack traces
-    VOSK_AVAILABLE = False
 
 # Dynamic context template to be added with each user query
 DYNAMIC_CONTEXT_TEMPLATE = """
@@ -142,10 +127,10 @@ def get_current_dynamic_context():
 # Model storage for conversation history
 class ConversationState:
     """
-    Stores conversation history and state.
+    Manages conversation history and state for chat sessions.
     
-    Attributes:
-        history (list): List of conversation messages
+    Stores conversation exchanges as a simple list structure
+    for basic context preservation between requests.
     """
     def __init__(self):
         self.history = []
@@ -155,7 +140,7 @@ conversation_state = ConversationState()
 
 # Role-specific system prompts
 STUDENT_SYSTEM_PROMPT = """You are EduAI, a knowledgeable and friendly classroom assistant designed to help students with academic questions.
-You accept both text and voice input and provide accurate, concise answers that are easy to understand.
+You accept text input and provide accurate, concise answers that are easy to understand.
 Purpose:
 To support students in learning by offering clear explanations, step-by-step problem solving, and reinforcing concepts across subjects.
 Subjects Covered:
@@ -182,7 +167,7 @@ Guidelines:
 - Keep the answers under 2048 characters"""
 
 TEACHER_SYSTEM_PROMPT = """You are EduAI, an efficient and knowledgeable assistant designed to support teachers in academic planning, student engagement, and content delivery.
-You understand both text and voice input and provide practical, accurate, and actionable responses.
+You understand text input and provide practical, accurate, and actionable responses.
 Purpose:
 To assist teachers with lesson planning, instructional support, and classroom strategies by delivering subject-specific guidance and pedagogical recommendations.
 Subjects Covered:
@@ -303,73 +288,6 @@ def extract_assistant_response(full_text):
     
     return cleaned
 
-# Audio callback for Vosk
-def audio_callback(indata, frames, time_info, status):
-    """
-    Audio callback function for Vosk speech recognition.
-    
-    Args:
-        indata: Input audio data
-        frames: Number of frames
-        time_info: Time information
-        status: Status information
-    """
-    q.put(bytes(indata))
-
-@app.route("/listen", methods=["GET"])
-def listen():
-    """
-    Listen for speech input and return transcribed text.
-    
-    Returns:
-        JSON: Transcribed speech text or error message
-    """
-    # Check if Vosk is available
-    if not VOSK_AVAILABLE or rec is None:
-        logger.error("Speech recognition requested but Vosk is not available")
-        return jsonify({
-            "error": "Speech recognition is not available",
-            "message": "The speech recognition system is not properly configured."
-        }), 503  # Service Unavailable
-    
-    request_id = datetime.now().strftime("%Y%m%d%H%M%S")
-    logger.info(f"[{request_id}] Speech recognition started")
-    recognized_text = ""
-    last_speech_time = time.time()
-    timeout_seconds = 10
-
-    try:
-        with sd.RawInputStream(samplerate=16000, blocksize=8000, dtype='int16',
-                            channels=1, callback=audio_callback):
-            while True:
-                if not q.empty():
-                    data = q.get()
-                    if rec.AcceptWaveform(data):
-                        result = rec.Result()
-                        text = json.loads(result).get("text", "")
-                        if text.strip():
-                            recognized_text = text
-                            logger.info(f"[{request_id}] Speech recognized: '{text}'")
-                            break
-                    else:
-                        partial = json.loads(rec.PartialResult()).get("partial", "")
-                        if partial.strip():
-                            last_speech_time = time.time()
-                            logger.debug(f"[{request_id}] Partial recognition: '{partial}'")
-
-                if time.time() - last_speech_time > timeout_seconds:
-                    logger.warning(f"[{request_id}] Timeout - no speech detected after {timeout_seconds} seconds")
-                    break
-    except Exception as e:
-        logger.error(f"[{request_id}] Error during speech recognition: {str(e)}")
-        return jsonify({
-            "error": "Speech recognition failed",
-            "message": str(e)
-        }), 500
-
-    logger.info(f"[{request_id}] Sending response back to frontend: '{recognized_text}'")
-    return jsonify({"transcript": recognized_text})
-
 class TimeoutException(Exception):
     """Custom exception for LLM generation timeout."""
     pass
@@ -391,8 +309,24 @@ def timeout_handler(signum, frame):
 @app.route("/api/chat", methods=["POST"])
 def chat():
     """
-    Process user queries using LLM and return AI-generated responses.
-    Designed to match the Node.js API structure.
+    Main chat endpoint for AI assistant interactions.
+    
+    Processes user messages through the AI model with role-specific prompting
+    and conversation context. Handles both student and teacher roles with
+    appropriate system prompts and response formatting.
+    
+    Request JSON:
+        {
+            "message": "user question text",
+            "role": "student" or "teacher" (optional)
+        }
+    
+    Returns:
+        JSON response with:
+        - answer: AI response text
+        - chatCategory: "general"
+        - latency: Response time in seconds
+        - metadata: Request tracking information
     """
     request_id = datetime.now().strftime("%Y%m%d%H%M%S")
     
@@ -564,27 +498,23 @@ def query():
     """
     return chat()
 
-@app.route("/api/listen", methods=["GET"])
-def api_listen():
-    """
-    Alias of the listen function with /api prefix for compatibility.
-    """
-    return listen()
-
 @app.route("/api/health", methods=["GET"])
 def health_check():
     """
-    Check the health status of the server and its components.
+    Health check endpoint for monitoring server and model status.
     
     Returns:
-        JSON: Health status information
+        JSON response with:
+        - status: "healthy" or "unhealthy"
+        - timestamp: Current server time
+        - components: Status of server and AI model
+        - memory: System memory usage statistics
     """
     status = {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "components": {
             "server": "up",
-            "speech_recognition": "up" if VOSK_AVAILABLE and rec is not None else "down",
             "llm": "up" if 'model' in globals() and model is not None else "down"
         },
         "memory": {

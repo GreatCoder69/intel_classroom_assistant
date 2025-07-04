@@ -1,3 +1,10 @@
+"""
+Optimized Model Manager for Intel Classroom Assistant
+
+Provides efficient loading, caching, and inference management for AI language models
+with memory optimization, error handling, and performance monitoring capabilities.
+"""
+
 import os
 import gc
 import time
@@ -12,7 +19,12 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ModelConfig:
-    """Configuration for optimized model loading and inference."""
+    """
+    Configuration parameters for AI model loading and optimization.
+    
+    Defines model behavior, memory limits, caching settings, and performance
+    parameters for efficient inference operations.
+    """
     model_id: str
     cache_dir: str = "./model_cache"
     max_context_length: int = 1024
@@ -24,18 +36,20 @@ class ModelConfig:
 
 class OptimizedModelManager:
     """
-    Manages optimized loading and inference for language models.
+    Manages AI model lifecycle with optimization and error handling.
     
-    Features:
-    - Caching of model and tokenizer
-    - Memory-efficient inference
-    - Batch processing optimization
-    - Error handling and recovery
-    - Thread-safe operation
+    Handles model loading with caching, memory-efficient inference,
+    conversation context management, and automatic error recovery.
+    Thread-safe for concurrent requests.
     """
     
     def __init__(self, config: ModelConfig):
-        """Initialize the model manager with configuration."""
+        """
+        Initialize model manager with configuration.
+        
+        Args:
+            config (ModelConfig): Model configuration parameters
+        """
         self.config = config
         self.model = None
         self.tokenizer = None
@@ -44,16 +58,24 @@ class OptimizedModelManager:
         self._ensure_cache_dir()
         
     def _ensure_cache_dir(self):
-        """Ensure the cache directory exists."""
+        """
+        Create model cache directory if it doesn't exist.
+        
+        Ensures the configured cache directory exists for storing
+        model files and tokenizer data.
+        """
         if not os.path.exists(self.config.cache_dir):
             os.makedirs(self.config.cache_dir, exist_ok=True)
             
     def load_model_cached(self) -> bool:
         """
-        Load model with caching.
+        Load AI model and tokenizer with caching optimization.
+        
+        Attempts to load the configured model from cache or download if needed.
+        Uses OpenVINO optimization for efficient CPU inference.
         
         Returns:
-            bool: True if loading was successful
+            bool: True if model loaded successfully, False otherwise
         """
         try:
             from transformers import AutoTokenizer
@@ -89,7 +111,12 @@ class OptimizedModelManager:
             return False
     
     def warm_up_model(self):
-        """Warm up the model with a simple inference to initialize internal states."""
+        """
+        Initialize model with a test inference to prepare internal states.
+        
+        Runs a simple inference to warm up the model pipeline and
+        ensure optimal performance for subsequent requests.
+        """
         if not self.is_model_loaded:
             logger.warning("Cannot warm up: model not loaded")
             return
@@ -111,10 +138,11 @@ class OptimizedModelManager:
     
     def get_memory_stats(self) -> Dict[str, float]:
         """
-        Get current memory usage statistics.
+        Retrieve current system memory usage statistics.
         
         Returns:
-            Dict[str, float]: Memory usage statistics
+            Dict[str, float]: Memory statistics including total, available,
+                            used percentage, and current process memory
         """
         memory = psutil.virtual_memory()
         return {
@@ -126,16 +154,20 @@ class OptimizedModelManager:
     
     def _check_memory_pressure(self) -> bool:
         """
-        Check if system is under memory pressure.
+        Check if system memory usage exceeds configured threshold.
         
         Returns:
-            bool: True if memory usage exceeds threshold
+            bool: True if memory usage is above threshold, False otherwise
         """
         memory = psutil.virtual_memory()
         return memory.percent > self.config.memory_threshold
     
     def _clean_memory(self):
-        """Attempt to clean up memory if under pressure."""
+        """
+        Perform garbage collection if system is under memory pressure.
+        
+        Attempts to free unused memory when system usage exceeds threshold.
+        """
         if self._check_memory_pressure():
             logger.info("Memory pressure detected, cleaning up...")
             gc.collect()
@@ -148,16 +180,20 @@ class OptimizedModelManager:
         system_prompt: str = None
     ) -> Tuple[str, float]:
         """
-        Generate optimized response with error handling and retries.
+        Generate AI response with optimization and error handling.
+        
+        Processes input text through the AI model with conversation context,
+        automatic retry logic, and memory management. Handles inference errors
+        gracefully with exponential backoff.
         
         Args:
-            input_text (str): Input text for generation
-            role (str): User role (student/teacher)
-            conversation_history (List[str]): Previous conversation for context
-            system_prompt (str): System prompt to use
+            input_text (str): User input text to process
+            role (str): User role for context (student/teacher)
+            conversation_history (List[str]): Previous conversation exchanges
+            system_prompt (str): Optional system prompt override
             
         Returns:
-            Tuple[str, float]: Generated text and time taken
+            Tuple[str, float]: Generated response text and inference time in seconds
         """
         if not self.is_model_loaded:
             return "Model not loaded. Please try again later.", 0.0

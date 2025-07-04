@@ -11,7 +11,7 @@ Goals:
 
 For student:
 Chatbot where student can directly text to assistant.
-Voice input option available.
+Text-based input interface.
 Records all matter taught in class.
 When question asked, try sticking to what was taught in class. Else, inform not taught in today’s class.
 Summarizer and chart maker like graphs etc.

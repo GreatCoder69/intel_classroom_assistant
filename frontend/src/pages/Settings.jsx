@@ -67,14 +67,6 @@ function Settings() {
             </div>
             <div className="card-body">
               <form>
-                <div className="mb-3">
-                  <label htmlFor="assistantVoice" className="form-label">Assistant Voice</label>
-                  <select className="form-select" id="assistantVoice">
-                    <option>Default</option>
-                    <option>Male</option>
-                    <option>Female</option>
-                  </select>
-                </div>
                 <div className="mb-3 form-check">
                   <input type="checkbox" className="form-check-input" id="assistantTips" />
                   <label className="form-check-label settings-label-highlight" htmlFor="assistantTips">Show tips from assistant</label>
@@ -107,11 +99,6 @@ function Settings() {
                     <option>Dark</option>
                     <option>Light</option>
                   </select>
-                </div>
-          
-                <div className="mb-3 form-check">
-                  <input type="checkbox" className="form-check-input" id="voiceInput" defaultChecked />
-                  <label className="form-check-label settings-label-highlight" htmlFor="voiceInput">Enable Voice Input</label>
                 </div>
                 <button type="submit" className="btn btn-primary">Save Changes</button>
               </form>

@@ -30,7 +30,7 @@ function Landing() {
           <FaGraduationCap size={60} className="mb-4 text-primary" />
           <h2 className="mb-4">AI-Powered Learning Experience</h2>
           <p className="lead mb-5">
-            Get started with our classroom assistant featuring voice recognition and AI tutoring
+            Get started with our classroom assistant featuring AI tutoring and interactive learning
           </p>
           <Link to="/login">
             <Button variant="primary" size="lg" className="px-5 py-3">

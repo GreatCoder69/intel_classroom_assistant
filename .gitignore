@@ -9,11 +9,6 @@
 ehthumbs.db
 Thumbs.db
 archive/model_cache
-# Vosk speech recognition models - ignore in all locations
-vosk-model*/
-**/vosk-model*/
-**/vosk-model-small-en-us-0.15/
-vosk-model-small-en-us-0.15/
 
 # === Python ===
 __pycache__/

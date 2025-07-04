@@ -6,7 +6,7 @@ This folder contains development utilities, test scripts, and experimental code 
 - Helps keep the main project directory clean.
 
 ## Example Contents
-- Microphone or LLM test scripts
+- AI model test scripts
 - Data conversion utilities
 - One-off experiments
 

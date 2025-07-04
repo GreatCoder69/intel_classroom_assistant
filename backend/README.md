@@ -1,45 +1,39 @@
-# Backend (Flask API)
+# Backend
 
-This directory contains the Python backend for Intel Classroom Assistant.
+Flask-based backend API for Intel Classroom Assistant.
 
-## Main Files
+## Files
 
-- `server.py` - Main Flask server (API, LLM, optional speech)
-- `server_optimized.py` - Optimized server with model caching, batching, and memory improvements
-- `optimized_model_manager.py` - Utilities for model loading, caching, and management
-- `performance_monitor.py` - Real-time performance and health monitoring
+- `server.js` - Node.js Express server with authentication, chat, and user management
+- `servers/server.py` - Python Flask server with basic AI chat functionality
+- `servers/server_optimized.py` - Optimized Python server with model caching and memory management
+- `servers/optimized_model_manager.py` - Model loading and inference utilities
 
 ## Structure
 
-- `app/` - All backend code (controllers, models, routes, utils)
-- `servers/` - Main and optimized server entrypoints
-- `uploads/` - Uploaded files (if enabled)
+- `app/` - Node.js application (controllers, models, routes, middleware)
+- `servers/` - Python Flask servers
+- `uploads/` - File uploads directory
 
 ## Setup
 
-1. Create a virtual environment and activate it:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r ../requirements_optimization.txt
-   ```
-3. Run the server:
-   ```bash
-   python servers/server.py
-   # or for optimized version
-   python servers/server_optimized.py
-   ```
+### Node.js Server
+```bash
+npm install
+npm start
+```
 
-## Notes
-- All function docstrings use the format:
-  """
-  Description
-  Args:
-      ...
-  Returns:
-      ...
-  """
-- See `../optimization_guide.md` for performance tips.
+### Python Server
+```bash
+pip install -r requirements.txt
+python servers/server.py
+# or optimized version:
+python servers/server_optimized.py
+```
+
+## API Endpoints
+
+- `/api/auth/*` - Authentication (signup, login, logout)
+- `/api/chat` - Chat with AI assistant
+- `/api/users/*` - User management
+- `/api/admin/*` - Admin functions

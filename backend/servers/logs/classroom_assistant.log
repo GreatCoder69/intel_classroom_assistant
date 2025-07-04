@@ -48,3 +48,54 @@
 2025-07-04 17:48:57 [INFO] classroom_assistant: [20250704174835] Generation completed successfully
 2025-07-04 17:48:57 [INFO] classroom_assistant: [20250704174835] Generation completed in 21.49s
 2025-07-04 17:48:58 [INFO] classroom_assistant: [20250704174835] Response: 'Global warming is the process ...' (302 chars)
+2025-07-04 18:52:40 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-04 18:52:50 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-04 18:52:50 [INFO] classroom_assistant: Loading Vosk model from: vosk-model-small-en-us-0.15
+2025-07-04 18:52:50 [ERROR] classroom_assistant: Vosk model not found at: vosk-model-small-en-us-0.15
+2025-07-04 18:52:50 [INFO] classroom_assistant: Loading model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-04 18:52:58 [INFO] classroom_assistant: Preparing system prompts
+2025-07-04 18:52:58 [INFO] classroom_assistant: Initializing model with system prompt
+2025-07-04 18:53:04 [INFO] classroom_assistant: Model ready for inference
+2025-07-04 18:53:04 [INFO] classroom_assistant: Starting Intel Classroom Assistant server
+2025-07-04 18:53:04 [INFO] classroom_assistant: Running in production mode without auto-reloader
+2025-07-04 18:53:13 [INFO] classroom_assistant: [20250704185313] Unusual Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryKCKIzsgDlbvVbJbZ
+2025-07-04 18:53:13 [INFO] classroom_assistant: [20250704185313] Chat request - Subject: dsaasdsd, Role: student, Q: 'what is merge sort'
+2025-07-04 18:53:13 [WARNING] classroom_assistant: [20250704185313] High memory usage: 85.2% (Available: 2306.95 MB)
+2025-07-04 18:53:13 [INFO] classroom_assistant: [20250704185313] Generating response
+2025-07-04 18:53:13 [INFO] classroom_assistant: [20250704185313] Generating response with student system prompt
+2025-07-04 18:53:36 [INFO] classroom_assistant: [20250704185313] Generation completed successfully
+2025-07-04 18:53:36 [INFO] classroom_assistant: [20250704185313] Generation completed in 22.92s
+2025-07-04 18:53:36 [INFO] classroom_assistant: [20250704185313] Response: 'Merge sort is an efficient sor...' (370 chars)
+2025-07-04 19:06:12 [INFO] classroom_assistant: [20250704190612] Unusual Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryH7mTgr5TCfwbt5dC
+2025-07-04 19:06:12 [INFO] classroom_assistant: [20250704190612] Chat request - Subject: asdadadada, Role: student, Q: 'explain mergesort'
+2025-07-04 19:06:12 [INFO] classroom_assistant: [20250704190612] Generating response
+2025-07-04 19:06:12 [INFO] classroom_assistant: [20250704190612] Generating response with student system prompt
+2025-07-04 19:06:50 [INFO] classroom_assistant: [20250704190612] Generation completed successfully
+2025-07-04 19:06:50 [INFO] classroom_assistant: [20250704190612] Generation completed in 38.67s
+2025-07-04 19:06:50 [INFO] classroom_assistant: [20250704190612] Response: 'Mergesort is an efficient sort...' (466 chars)
+2025-07-04 19:13:54 [INFO] classroom_assistant: [20250704191354] Chat request - Subject: ok, Role: student, Q: 'what is geography '
+2025-07-04 19:13:54 [INFO] classroom_assistant: [20250704191354] Generating response
+2025-07-04 19:13:54 [INFO] classroom_assistant: [20250704191354] Generating response with student system prompt
+2025-07-04 19:14:12 [INFO] classroom_assistant: [20250704191354] Generation completed successfully
+2025-07-04 19:14:12 [INFO] classroom_assistant: [20250704191354] Generation completed in 18.05s
+2025-07-04 19:14:13 [INFO] classroom_assistant: [20250704191354] Response: 'Geography is the scientific st...' (143 chars)
+2025-07-04 20:18:11 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-04 20:18:44 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-04 20:18:46 [INFO] classroom_assistant: Loading model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-04 20:18:53 [INFO] classroom_assistant: Preparing system prompts
+2025-07-04 20:18:53 [INFO] classroom_assistant: Initializing model with system prompt
+2025-07-04 20:18:56 [INFO] classroom_assistant: Model ready for inference
+2025-07-04 20:18:56 [INFO] classroom_assistant: Starting Intel Classroom Assistant server
+2025-07-04 20:18:56 [INFO] classroom_assistant: Running in production mode without auto-reloader
+2025-07-04 20:19:15 [INFO] classroom_assistant: [20250704201915] Chat request - Subject: teach, Role: teacher, Q: 'What are the important data st...'
+2025-07-04 20:19:15 [INFO] classroom_assistant: [20250704201915] Generating response
+2025-07-04 20:19:15 [INFO] classroom_assistant: [20250704201915] Generating response with teacher system prompt
+2025-07-04 20:20:15 [ERROR] classroom_assistant: [20250704201915] LLM generation timed out after 60 seconds
+2025-07-04 20:20:15 [INFO] classroom_assistant: [20250704201915] Generation completed in 60.01s
+2025-07-04 20:20:15 [INFO] classroom_assistant: [20250704201915] Response: 'Sorry, it's taking longer than...' (105 chars)
+2025-07-04 20:20:25 [INFO] classroom_assistant: [20250704202025] Chat request - Subject: teach, Role: teacher, Q: 'list data structures'
+2025-07-04 20:20:25 [INFO] classroom_assistant: [20250704202025] Generating response
+2025-07-04 20:20:25 [INFO] classroom_assistant: [20250704202025] Generating response with teacher system prompt
+2025-07-04 20:21:25 [ERROR] classroom_assistant: [20250704202025] LLM generation timed out after 60 seconds
+2025-07-04 20:21:25 [INFO] classroom_assistant: [20250704202025] Generation completed in 60.01s
+2025-07-04 20:21:26 [INFO] classroom_assistant: [20250704202025] Response: 'Sorry, it's taking longer than...' (105 chars)
