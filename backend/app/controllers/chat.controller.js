@@ -6,7 +6,7 @@ const User = require("../models/user.model");
 const pdfParse = require("pdf-parse");
 const logEvent = require("../utils/logEvent");
 const logLLMError = require("../utils/logError");
-const askGemini = require("./askGemini");
+
 const axios   = require("axios");
 const FLASK_SERVER = process.env.FLASK_SERVER || "http://localhost:8000";
 

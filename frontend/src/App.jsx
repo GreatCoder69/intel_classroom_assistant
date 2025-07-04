@@ -11,7 +11,7 @@ import GeneralChat from "./components/GeneralChat";
 import ChatDetail from "./components/ChatDetail";
 import AdminErrorLogs from "./components/AdminErrorLogs";
 import Dashboard from "./pages/Dashboard";
-
+import TeacherChat from "./components/TeacherChat";
 const App = () => (
   <Routes>
     {/* Public Routes */}
@@ -24,6 +24,7 @@ const App = () => (
     <Route path="/general-chat" element={<GeneralChat />} />
     <Route path="/history" element={<ChatHistory />} />
     <Route path="/chat-detail" element={<ChatDetail />} />
+    <Route path="/teacher-chat" element={<TeacherChat />} />
 
     {/* Admin routes */}
     <Route path="/admin" element={<AdminPage />} />
