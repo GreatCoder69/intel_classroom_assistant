@@ -7,6 +7,8 @@ const pdfParse = require("pdf-parse");
 const logEvent = require("../utils/logEvent");
 const logLLMError = require("../utils/logError");
 const askGemini = require("./askGemini");
+const axios   = require("axios");
+const FLASK_SERVER = process.env.FLASK_SERVER || "http://localhost:8000";
 
 exports.getAllUsersWithChats = async (req, res) => {
   try {
@@ -42,105 +44,83 @@ exports.getAllUsersWithChats = async (req, res) => {
 const MESSAGES_PER_PAGE = 5;
 
 
-// ✅ Main chat handler
 exports.addChat = async (req, res) => {
   const { subject, question } = req.body;
   const email = req.userEmail;
 
   if (!subject || (!question && !req.file) || !email) {
-    return res.status(400).json({ message: "Missing subject, question/image/pdf, or email" });
+    return res
+      .status(400)
+      .json({ message: "Missing subject, question/image/pdf, or email" });
   }
 
   try {
-    let answer = null;
-    let imageUrl = null;
-    let responseTime = 0;
+    /* ------------------------------------------------------------------ */
+    /* 1️⃣  Prepare payload for the Flask LLM                             */
+    /* ------------------------------------------------------------------ */
+    const role = req.userRole || "student";       // default role
+    const flaskPayload = { subject, question, role };
+    let imageUrl   = null;                        // for DB
+    let mimeType   = null;
+    let base64Body = null;
 
-    const callGemini = async (prompt, mime = null, b64 = null) => {
-      const start = Date.now();
-      const output = await askGemini("gemini", prompt, mime, b64);
-      responseTime = Date.now() - start;
-      return output;
-    };
-
-    // 1️⃣ STRICT EDUCATIONAL FILTER
-    const eduPrompt = `
-You are a strict classifier for a college assistant.
-
-Classify the following question as either:
-- "educational" (if it's clearly academic: math, science, coding, etc.)
-- "non-educational" (if it's leisure, entertainment, movies, sports, etc.)
-
-Only return one word: "educational" or "non-educational".
-
-Question: "${question}"
-`;
-
-    const isEducational = (await callGemini(eduPrompt)).trim().toLowerCase();
-
-    if (isEducational !== "educational") {
-      return res.status(200).json({
-        answer: "I'm an educational assistant focused only on college subjects. Please ask a relevant academic question.",
-        file: null,
-        chatCategory: null
-      });
-    }
-
-    // 2️⃣ GET RESPONSE
     if (req.file) {
-      const allowedTypes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
-      if (!allowedTypes.includes(req.file.mimetype)) {
+      const allowed = [
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "application/pdf",
+      ];
+      if (!allowed.includes(req.file.mimetype)) {
         return res.status(400).json({ message: "Unsupported file type" });
       }
 
       imageUrl = `/uploads/${req.file.filename}`;
+      mimeType = req.file.mimetype;
 
-      if (req.file.mimetype === "application/pdf") {
+      if (mimeType === "application/pdf") {
+        // read PDF text and append to question, same logic as before
         const pdfText = (await pdfParse(fs.readFileSync(req.file.path))).text;
-        const prompt = question
+        flaskPayload.question = question
           ? `${question}\n\nAlso consider this PDF content:\n${pdfText}`
-          : `Please analyze this PDF content:\n${pdfText}`;
-        answer = await callGemini(prompt);
+          : `Please analyse this PDF content:\n${pdfText}`;
       } else {
-        const base64 = fs.readFileSync(req.file.path).toString("base64");
-        answer = await callGemini(question, req.file.mimetype, base64);
+        // image → base64
+        base64Body = fs.readFileSync(req.file.path).toString("base64");
+        flaskPayload.mimeType   = mimeType;
+        flaskPayload.base64Image = base64Body;
       }
-    } else {
-      answer = await callGemini(question);
     }
 
-    // 3️⃣ BROAD CATEGORY CLASSIFICATION
-    let chatCategory = "unknown";
-    try {
-      const catPrompt = `
-You are a syllabus topic classifier for college-level subjects.
+    /* ------------------------------------------------------------------ */
+    /* 2️⃣  Call the Flask backend                                        */
+    /* ------------------------------------------------------------------ */
+    const t0 = Date.now();
+    const flaskRes = await axios.post(
+      `${FLASK_SERVER}/api/chat`,
+      flaskPayload,
+      { headers: { "Content-Type": "application/json" } }
+    );
+    const responseTime = Date.now() - t0;
 
-Given:
-- SUBJECT: "${subject}"
-- QUESTION: "${question}"
+    const answer       = flaskRes.data.answer || "No answer";
+    const chatCategory = flaskRes.data.chatCategory || "general";
 
-Return only a **broad topic name** (2–3 words max), e.g.:
-  "linear algebra", "binary trees", "network protocols", "machine learning"
-
-Avoid repeating words directly from the question. Return only the category label.
-`;
-      chatCategory = (await callGemini(catPrompt)).trim().toLowerCase();
-      if (!chatCategory) chatCategory = "unknown";
-    } catch {}
-
-    // 4️⃣ SAVE TO DB
+    /* ------------------------------------------------------------------ */
+    /* 3️⃣  Persist in MongoDB exactly like before                        */
+    /* ------------------------------------------------------------------ */
     const existing = await Chat.findOne({ _id: subject, email });
-    const count = existing ? existing.chat.length : 0;
+    const count    = existing ? existing.chat.length : 0;
 
     const chatEntry = {
-      question: question || null,
-      imageUrl: imageUrl || null,
+      question   : question || null,
+      imageUrl   : imageUrl  || null,
       answer,
-      timestamp: new Date(),
-      pageNumber: Math.floor(count / MESSAGES_PER_PAGE) + 1,
+      timestamp  : new Date(),
+      pageNumber : Math.floor(count / MESSAGES_PER_PAGE) + 1,
       entryNumber: (count % MESSAGES_PER_PAGE) + 1,
       responseTime,
-      chatCategory
+      chatCategory,
     };
 
     await Chat.findOneAndUpdate(
@@ -149,19 +129,21 @@ Avoid repeating words directly from the question. Return only the category label
       { upsert: true, new: true }
     );
 
+    /* ------------------------------------------------------------------ */
+    /* 4️⃣  Log event + return to client                                  */
+    /* ------------------------------------------------------------------ */
     await logEvent({
       email,
-      action: "create_chat",
+      action : "create_chat",
       message: `Message added to '${subject}'`,
-      meta: { chatCategory }
+      meta   : { chatCategory },
     });
 
     res.status(200).json({ answer, file: imageUrl, chatCategory });
-
   } catch (err) {
-    console.error("Gemini error:", err.message);
+    console.error("LLM / Flask error:", err.message);
     await logLLMError({ email, subject, prompt: question, error: err });
-    res.status(500).json({ message: "LLM failure" });
+    res.status(500).json({ message: "LLM failure", detail: err.message });
   }
 };
 

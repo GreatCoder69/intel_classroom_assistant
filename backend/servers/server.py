@@ -1,9 +1,6 @@
 import os
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import queue
-import sounddevice as sd
-import json
 import time
 import gc
 import logging
@@ -94,10 +91,6 @@ from optimum.intel.openvino import OVModelForCausalLM
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # Configure CORS to allow requests from any origin
 
-# Vosk setup with proper error handling
-q = queue.Queue()
-asr_model = None
-rec = None
 
 # Configure Vosk model path - allow environment variable override
 VOSK_MODEL_PATH = os.environ.get("VOSK_MODEL_PATH", "vosk-model-small-en-us-0.15")
