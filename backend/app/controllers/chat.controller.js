@@ -7,6 +7,7 @@ const User = require("../models/user.model");
 const pdfParse = require("pdf-parse");
 const logEvent = require("../utils/logEvent");
 const logLLMError = require("../utils/logError");
+const askOpenVINO   = require('./openvinoClient');
 
 exports.getAllUsersWithChats = async (req, res) => {
   try {
@@ -41,255 +42,44 @@ exports.getAllUsersWithChats = async (req, res) => {
 
 const MESSAGES_PER_PAGE = 5;
 
-// ✅ Model selector
-const getLLMResponse = async (modelName, prompt, mimeType = null, base64Image = null) => {
-  const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-  const TOGETHER_API_KEY = process.env.TOGETHER_API_KEY;
-
-
-  // Alias fallback
-  if (modelName === 'together') {
-    modelName = 'together-deepseek'; // Default together model
-  }
-
-  if (modelName.includes('gemini')) {
-    const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const geminiModelName = modelName === 'gemini'
-    ? 'models/gemini-2.5-flash-preview-05-20'
-    : modelName;
-
-    const model = genAI.getGenerativeModel({ model: geminiModelName });
-
-    const parts = [];
-    if (base64Image && mimeType) {
-      parts.push({ inlineData: { data: base64Image, mimeType } });
-    }
-    if (prompt) {
-      parts.push({ text: prompt });
-    }
-
-    const result = await model.generateContent({
-      contents: [{ role: 'user', parts }]
-    });
-
-    return result.response.text();
-
-  } else if (modelName.startsWith('together')) {
-    let togetherModel;
-
-    switch (modelName) {
-      case 'together-deepseek':
-        togetherModel = 'deepseek-ai/DeepSeek-V3';
-        break;
-      case 'together-mixtral':
-        togetherModel = 'mistralai/Mixtral-8x7B-Instruct-v0.1';
-        break;
-      default:
-        throw new Error(`Unsupported Together model: ${modelName}`);
-    }
-
-    const res = await fetch('https://api.together.xyz/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${TOGETHER_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: togetherModel,
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.7,
-        top_p: 0.9,
-        max_tokens: 1024
-      })
-    });
-
-    const data = await res.json();
-
-    if (data.choices && data.choices.length > 0) {
-      return data.choices[0].message.content;
-    } else {
-      throw new Error('Together API did not return a valid response.');
-    }
-  } else {
-    throw new Error(`Unsupported model selected: ${modelName}`);
-  }
-};
-
 
 // ✅ Main chat handler
 exports.addChat = async (req, res) => {
-  const { subject, question, model: modelChoice } = req.body;
+  const { subject, question } = req.body;
   const email = req.userEmail;
 
-  if (!subject || (!question && !req.file) || !email) {
-    return res.status(400).send({ message: "Missing subject, question/image/pdf, or email" });
+  if (!subject || !question || !email) {
+    return res.status(400).json({ message: 'Need subject, question, email' });
   }
 
   try {
-    let answer = null;
-    let imageUrl = null;
-    let resolvedModel = modelChoice || 'gemini';
-    let modelUsed = '';
+    // —— ask LLM ————————————————
+    const t0 = Date.now();
+    const answer = await askOpenVINO(question);
+    const responseTime = Date.now() - t0;
 
-    if (resolvedModel === 'together' || resolvedModel === 'together-deepseek') {
-      modelUsed = 'deepseek-ai/DeepSeek-V3';
-      resolvedModel = 'together-deepseek';
-    } else if (resolvedModel === 'together-mixtral') {
-      modelUsed = 'mistralai/Mixtral-8x7B-Instruct-v0.1';
-    } else if (resolvedModel === 'gemini') {
-      modelUsed = 'models/gemini-2.5-flash-preview-05-20';
-      resolvedModel = modelUsed;
-    } else {
-      modelUsed = resolvedModel;
-    }
-
-    let responseTime = 0;
-
-    const generateAnswer = async (prompt, mimeType = null, base64Image = null) => {
-      const start = Date.now();
-      const response = await getLLMResponse(resolvedModel, prompt, mimeType, base64Image);
-      responseTime = Date.now() - start;
-      return response;
-    };
-
-    // ✅ File handling
-    if (req.file) {
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
-      const mimeType = req.file.mimetype;
-      if (!allowedTypes.includes(mimeType)) {
-        const error = new Error(`Unsupported file type: ${mimeType}`);
-        error.stack = '';
-        await logLLMError({ email, subject, prompt: question || '[File Input]', error });
-        return res.status(400).send({ message: "Unsupported file type" });
-      }
-
-      const filePath = req.file.path;
-      imageUrl = `/uploads/${req.file.filename}`;
-
-      if (mimeType === 'application/pdf') {
-        const pdfBuffer = fs.readFileSync(filePath);
-        const parsed = await pdfParse(pdfBuffer);
-        const pdfText = parsed.text;
-
-        const prompt = question
-          ? `${question}\n\nAlso, consider this PDF content:\n${pdfText}`
-          : `Please analyze this PDF content:\n${pdfText}`;
-
-        answer = await generateAnswer(prompt);
-      } else {
-        const imageBuffer = fs.readFileSync(filePath);
-        const base64Image = imageBuffer.toString("base64");
-
-        answer = await generateAnswer(question || '', mimeType, base64Image);
-      }
-    } else {
-      answer = await generateAnswer(question);
-    }
-
-    // ✅ Chat state and category check
-    let existingChat = await Chat.findOne({ _id: subject, email });
-    const isFirstMessage = !existingChat;
-
-    // 🔍 Ask LLM for categories
-    let subjectCategory = null;
-    let chatCategory = null;
-
-    try {
-      const categoryPrompt = `What is the category of the following user question? Just reply with one word like 'technology', 'sports', 'health', 'career', etc.\n\n"${question}"`;
-      const detectedCategory = await generateAnswer(categoryPrompt);
-      chatCategory = detectedCategory.trim().toLowerCase();
-
-      if (isFirstMessage) {
-        subjectCategory = chatCategory;
-      }
-    } catch (catErr) {
-      console.warn("Category detection failed:", catErr.message);
-      chatCategory = 'unknown';
-      if (isFirstMessage) subjectCategory = 'unknown';
-    }
-
-    const currentCount = existingChat ? existingChat.chat.length : 0;
-    const pageNumber = Math.floor(currentCount / MESSAGES_PER_PAGE) + 1;
-    const entryNumber = (currentCount % MESSAGES_PER_PAGE) + 1;
-
+    // —— store in DB (optional) ————
     const chatEntry = {
-      question: question || null,
-      imageUrl: imageUrl || null,
+      question,
       answer,
       timestamp: new Date(),
-      downloadCount: 0,
-      pageNumber,
-      entryNumber,
-      responseTime,
-      modelUsed,
-      chatCategory
+      responseTime
     };
-
-    const updateFields = {
-      $push: { chat: chatEntry },
-      $set: { lastUpdated: new Date(), email }
-    };
-
-    if (isFirstMessage) {
-    updateFields.$set.subjectCategory = subjectCategory;
-    updateFields.$set.isPublic = true; // default public
-  } else {
-    // Only compute if total messages <= 5
-    const chatDoc = await Chat.findOne({ _id: subject, email });
-    if (chatDoc && chatDoc.chat.length <= 5) {
-      const categoryCount = {};
-      chatDoc.chat.forEach((entry) => {
-        if (entry.chatCategory) {
-          const cat = entry.chatCategory.toLowerCase();
-          categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-        }
-      });
-
-      // Add current one too
-      if (chatCategory) {
-        const cat = chatCategory.toLowerCase();
-        categoryCount[cat] = (categoryCount[cat] || 0) + 1;
-      }
-
-      const sorted = Object.entries(categoryCount).sort((a, b) => b[1] - a[1]);
-      if (sorted.length > 0) {
-        updateFields.$set.subjectCategory = sorted[0][0]; // highest freq category
-      }
-    }
-  }
-
 
     await Chat.findOneAndUpdate(
       { _id: subject, email },
-      updateFields,
+      { $push: { chat: chatEntry }, $set: { lastUpdated: new Date() } },
       { upsert: true, new: true }
     );
 
-    await logEvent({
-      email,
-      action: "create_chat",
-      message: `Chat message added to subject '${subject}'`,
-      meta: {
-        subject,
-        question: question || null,
-        file: imageUrl || null
-      }
-    });
-
-    res.status(200).json({ answer, file: imageUrl });
+    // —— return to caller ————————
+    res.status(200).json({ answer });
 
   } catch (err) {
-    console.error("LLM error:", err);
-    await logLLMError({
-      email,
-      subject,
-      prompt: question || "[Image/PDF input]",
-      error: err,
-    });
-    res.status(500).send({ message: "Failed to generate response from LLM" });
+    console.error('OpenVINO error:', err.message);
+    res.status(500).json({ message: 'LLM failure' });
   }
 };
-
 
 
 // Get chat by subject (for a specific user)

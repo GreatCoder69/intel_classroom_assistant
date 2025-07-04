@@ -401,7 +401,7 @@ def audio_callback(indata, frames, time_info, status):
         logger.error(f"Audio error: {str(e)}")
 
 # ================= API Endpoints =================
-@app.route("/api/login", methods=["POST"])
+@app.route("/login", methods=["POST"])
 def login():
     """Optimized login handler"""
     try:

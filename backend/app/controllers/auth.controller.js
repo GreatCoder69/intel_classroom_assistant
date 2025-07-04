@@ -8,22 +8,24 @@ const bcrypt = require("bcryptjs");
 const fs = require("fs");
 const path = require("path");
 
+// ── SIGN‑UP ───────────────────────────────────────────
 exports.signup = async (req, res) => {
   try {
     const user = new User({
-      name: req.body.name,
-      phone: req.body.phone,
-      email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 8),
+      name      : req.body.name,
+      phone     : req.body.phone,
+      email     : req.body.email.toLowerCase(),
+      password  : bcrypt.hashSync(req.body.password, 8),
       profileimg: "https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2281862025.jpg",
+      role      : (req.body.role || "student").toLowerCase()   // 👈 new line
     });
 
     await user.save();
 
     await logEvent({
-      email: req.body.email,
-      action: "signup",
-      message: "User registered",
+      email  : user.email,
+      action : "signup",
+      message: "User registered"
     });
 
     res.status(201).send({ message: "User was registered successfully!" });
@@ -34,45 +36,39 @@ exports.signup = async (req, res) => {
 };
 
 
+// ── SIGN‑IN ───────────────────────────────────────────
 exports.signin = async (req, res) => {
   try {
-    const user = await User.findOne({ email: req.body.email });
-    if (!user) {
-      return res.status(404).send({ message: "User not found." });
-    }
+    const user = await User.findOne({ email: req.body.email.toLowerCase() });
+    if (!user)  return res.status(404).send({ message: "User not found." });
+    if (!user.isActive) return res.status(403).send({ message: "Account is disabled by admin." });
 
-    if (!user.isActive) {
-      return res.status(403).send({ message: "Account is disabled by admin." });
-    }
-
-    const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
-    if (!passwordIsValid) {
-      return res.status(401).send({
-        accessToken: null,
-        message: "Invalid Password!",
-      });
+    const valid = bcrypt.compareSync(req.body.password, user.password);
+    if (!valid) {
+      return res.status(401).send({ accessToken: null, message: "Invalid Password!" });
     }
 
     const token = jwt.sign(
-      { id: user._id, email: user.email },
+      { id: user._id, email: user.email, role: user.role },   // 👈 include role in token if you like
       config.secret,
       { algorithm: "HS256", allowInsecureKeySizes: true, expiresIn: 86400 }
     );
 
     await logEvent({
-      email: user.email,
-      action: "login",
+      email  : user.email,
+      action : "login",
       message: "User logged in",
-      meta: { ip: req.ip }
+      meta   : { ip: req.ip }
     });
 
     res.status(200).send({
       accessToken: token,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        isAdmin: user.isAdmin,
+        id      : user._id,
+        name    : user.name,
+        email   : user.email,
+        role    : user.role,     // 👈 return role
+        isAdmin : user.isAdmin,
         isActive: user.isActive
       }
     });

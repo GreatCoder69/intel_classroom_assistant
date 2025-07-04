@@ -10,34 +10,45 @@ const Login = () => {
   const [selectedRole, setSelectedRole] = useState("student");
   const [loginError, setLoginError] = useState("");
 
-  const handleLogin = async (values) => {
-    try {
-      // Include the selected role in the request
-      const payload = { ...values, role: selectedRole };
-      
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+const handleLogin = async (values) => {
+  try {
+    // Include selected role in the request payload
+    const payload = { ...values, role: selectedRole };
 
-      const data = await res.json();
-      if (data.accessToken && data.user) {
-        localStorage.setItem("token", data.accessToken);
-        localStorage.setItem("user", JSON.stringify(data.user));
-        if (data.user.isAdmin) {
-          navigate("/admin");
-        } else {
-          navigate("/dashboard");
-        }
-      } else {
-        setLoginError(data.message || "Login failed. Please check your credentials.");
-      }
-    } catch (err) {
-      console.error("Login error:", err);
-      setLoginError("A network error occurred. Please try again.");
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    // ✳️ Validate role: prevent student logging in as teacher, and vice versa
+    if (data.user && data.user.role !== selectedRole) {
+      setLoginError(
+        `You selected “${selectedRole}” but this account is a “${data.user.role}”.`
+      );
+      return;
     }
-  };
+
+    if (data.accessToken && data.user) {
+      localStorage.setItem("token", data.accessToken);
+      localStorage.setItem("user", JSON.stringify(data.user));
+
+      if (data.user.isAdmin) {
+        navigate("/admin");
+      } else {
+        navigate("/dashboard");
+      }
+    } else {
+      setLoginError(data.message || "Login failed. Please check your credentials.");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    setLoginError("A network error occurred. Please try again.");
+  }
+};
+
 
   return (
     <div className="login-container d-flex align-items-center auth px-0">
@@ -164,15 +175,7 @@ const Login = () => {
                         </button>
                       </div>
                       
-                      <div className="credentials-hint mt-4">
-                        <div className="d-flex align-items-center mb-1">
-                          <FaInfoCircle className="me-2 text-primary" />
-                          <strong>Demo Credentials</strong>
-                        </div>
-                        <p className="mb-0 small">
-                          Use "student@example.com" or "teacher@example.com" with password "password123"
-                        </p>
-                      </div>
+                      
                     </Form>
                   )}
                 </Formik>

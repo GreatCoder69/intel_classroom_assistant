@@ -8,6 +8,7 @@ const User = mongoose.model(
     phone: String,
     password: String,
     profileimg: String,
+    role: { type: String, default: "student" },
     isAdmin: { type: Boolean, default: false },
     isActive: {
       type: Boolean,

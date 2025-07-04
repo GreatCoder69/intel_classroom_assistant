@@ -20,7 +20,6 @@ import logging
 import threading
 import psutil
 from datetime import datetime
-from vosk import Model, KaldiRecognizer
 from optimized_model_manager import OptimizedModelManager, ModelConfig
 
 # Configure enhanced logging
@@ -43,13 +42,13 @@ CORS(app, resources={
 
 # Global configuration
 MODEL_CONFIG = ModelConfig(
-    model_id="OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov",
+    model_id="openvino/phi-2-quant-int4",
     cache_dir="./model_cache",
     max_context_length=1024,
     sliding_window_size=512,
     batch_size=2,  # Smaller batch for real-time responses
     max_queue_size=10,
-    memory_threshold=75.0,
+    memory_threshold=95.0,
     enable_kv_cache=True
 )
 
@@ -58,14 +57,6 @@ model_manager = OptimizedModelManager(MODEL_CONFIG)
 
 # Vosk setup with optimization
 q = queue.Queue(maxsize=100)  # Limit queue size
-try:
-    asr_model = Model("vosk-model-small-en-us-0.15")
-    rec = KaldiRecognizer(asr_model, 16000)
-    logger.info("Vosk ASR model loaded successfully")
-except Exception as e:
-    logger.error(f"Error loading Vosk model: {str(e)}")
-    asr_model = None
-    rec = None
 
 # Enhanced conversation state with memory optimization
 class OptimizedConversationState:
