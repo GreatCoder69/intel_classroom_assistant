@@ -149,3 +149,9 @@
 2025-07-05 02:27:09 [INFO] classroom_assistant: [20250705022629] Generation completed successfully
 2025-07-05 02:27:09 [INFO] classroom_assistant: [20250705022629] Generation completed in 39.78s
 2025-07-05 02:27:09 [INFO] classroom_assistant: [20250705022629] Response: 'Relational Databases Organize ...' (821 chars)
+2025-07-05 02:49:56 [INFO] classroom_assistant: [20250705024956] Chat request - Subject: Temp, Role: teacher, Q: 'List important data structures'
+2025-07-05 02:49:56 [INFO] classroom_assistant: [20250705024956] Generating response
+2025-07-05 02:49:56 [INFO] classroom_assistant: [20250705024956] Generating response with teacher system prompt
+2025-07-05 02:50:56 [ERROR] classroom_assistant: [20250705024956] LLM generation timed out after 60 seconds
+2025-07-05 02:50:56 [INFO] classroom_assistant: [20250705024956] Generation completed in 60.01s
+2025-07-05 02:50:56 [INFO] classroom_assistant: [20250705024956] Response: 'Sorry, it's taking longer than...' (105 chars)

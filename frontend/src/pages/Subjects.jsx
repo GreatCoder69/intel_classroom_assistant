@@ -10,6 +10,10 @@ function Subjects() {
   const [error, setError] = useState('');
   const [user, setUser] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editingSubject, setEditingSubject] = useState(null);
+  const [subjectToDelete, setSubjectToDelete] = useState(null);
   const [newSubject, setNewSubject] = useState({
     name: '',
     description: ''
@@ -69,7 +73,7 @@ function Subjects() {
 
       if (response.ok) {
         setShowAddModal(false);
-        setNewSubject({ name: '', description: '', color: 'primary' });
+        setNewSubject({ name: '', description: '' });
         // Refresh subjects list
         fetchSubjects(token, user.role);
       } else {
@@ -79,6 +83,79 @@ function Subjects() {
       setError('Network error occurred');
       console.error('Error adding subject:', err);
     }
+  };
+
+  const handleEditSubject = async (e) => {
+    e.preventDefault();
+    if (!editingSubject.name.trim()) return;
+
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subjects/${editingSubject.id}`, {
+        method: 'PUT',
+        headers: {
+          'x-access-token': token,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name: editingSubject.name,
+          description: editingSubject.description
+        })
+      });
+
+      if (response.ok) {
+        setShowEditModal(false);
+        setEditingSubject(null);
+        // Refresh subjects list
+        fetchSubjects(token, user.role);
+      } else {
+        setError('Failed to update subject');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+      console.error('Error updating subject:', err);
+    }
+  };
+
+  const handleDeleteSubject = async () => {
+    if (!subjectToDelete) return;
+
+    const token = localStorage.getItem('token');
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/subjects/${subjectToDelete.id}`, {
+        method: 'DELETE',
+        headers: {
+          'x-access-token': token,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        setShowDeleteModal(false);
+        setSubjectToDelete(null);
+        // Refresh subjects list
+        fetchSubjects(token, user.role);
+      } else {
+        setError('Failed to delete subject');
+      }
+    } catch (err) {
+      setError('Network error occurred');
+      console.error('Error deleting subject:', err);
+    }
+  };
+
+  const openEditModal = (subject) => {
+    setEditingSubject({
+      id: subject.id,
+      name: subject.name,
+      description: subject.description || ''
+    });
+    setShowEditModal(true);
+  };
+
+  const openDeleteModal = (subject) => {
+    setSubjectToDelete(subject);
+    setShowDeleteModal(true);
   };
 
   if (loading) {
@@ -180,6 +257,25 @@ function Subjects() {
                     {subject.description}
                   </div>
                 )}
+                {/* Edit and Delete buttons for teacher role */}
+                {user?.role === 'teacher' && (
+                  <div className="subject-actions d-flex justify-content-end gap-2">
+                    <Button 
+                      variant="outline-light" 
+                      onClick={() => openEditModal(subject)}
+                      size="sm"
+                    >
+                      Edit
+                    </Button>
+                    <Button 
+                      variant="danger" 
+                      onClick={() => openDeleteModal(subject)}
+                      size="sm"
+                    >
+                      Delete
+                    </Button>
+                  </div>
+                )}
               </div>
             ))
           )}
@@ -244,6 +340,97 @@ function Subjects() {
               </div>
             </Form>
           </Modal.Body>
+        </Modal>
+
+        {/* Edit Subject Modal */}
+        <Modal 
+          show={showEditModal} 
+          onHide={() => setShowEditModal(false)}
+          contentClassName="bg-dark text-light"
+        >
+          <Modal.Header closeButton style={{ borderColor: "#404040" }}>
+            <Modal.Title>Edit Subject</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form onSubmit={handleEditSubject}>
+              <Form.Group className="mb-3">
+                <Form.Label>Subject Name</Form.Label>
+                <Form.Control
+                  type="text"
+                  placeholder="Enter subject name"
+                  value={editingSubject?.name}
+                  onChange={(e) => setEditingSubject({...editingSubject, name: e.target.value})}
+                  required
+                  style={{ 
+                    backgroundColor: "#2a2a2a", 
+                    borderColor: "#404040", 
+                    color: "#fff" 
+                  }}
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3">
+                <Form.Label>Description</Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  placeholder="Enter subject description"
+                  value={editingSubject?.description}
+                  onChange={(e) => setEditingSubject({...editingSubject, description: e.target.value})}
+                  style={{ 
+                    backgroundColor: "#2a2a2a", 
+                    borderColor: "#404040", 
+                    color: "#fff" 
+                  }}
+                />
+              </Form.Group>
+
+              <div className="d-flex justify-content-end gap-2">
+                <Button 
+                  variant="secondary" 
+                  onClick={() => setShowEditModal(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  className="add-subject-btn"
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </Form>
+          </Modal.Body>
+        </Modal>
+
+        {/* Delete Subject Modal */}
+        <Modal 
+          show={showDeleteModal} 
+          onHide={() => setShowDeleteModal(false)}
+          contentClassName="bg-dark text-light"
+        >
+          <Modal.Header closeButton style={{ borderColor: "#404040" }}>
+            <Modal.Title>Confirm Deletion</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p style={{ color: "#ffffff" }}>
+              Are you sure you want to delete the subject "<strong>{subjectToDelete?.name}</strong>"? This action cannot be undone.
+            </p>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button 
+              variant="secondary" 
+              onClick={() => setShowDeleteModal(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="danger" 
+              onClick={handleDeleteSubject}
+            >
+              Delete Subject
+            </Button>
+          </Modal.Footer>
         </Modal>
       </div>
     </div>
