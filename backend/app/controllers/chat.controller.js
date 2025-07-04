@@ -2,12 +2,11 @@ require('dotenv').config(); // Load .env
 const fs = require("fs");
 const path = require("path");
 const Chat = require("../models/chat.model");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const User = require("../models/user.model");
 const pdfParse = require("pdf-parse");
 const logEvent = require("../utils/logEvent");
 const logLLMError = require("../utils/logError");
-const askOpenVINO   = require('./openvinoClient');
+const askGemini = require("./askGemini");
 
 exports.getAllUsersWithChats = async (req, res) => {
   try {
@@ -48,41 +47,112 @@ exports.addChat = async (req, res) => {
   const { subject, question } = req.body;
   const email = req.userEmail;
 
-  if (!subject || !question || !email) {
-    return res.status(400).json({ message: 'Need subject, question, email' });
+  if (!subject || (!question && !req.file) || !email) {
+    return res.status(400).json({ message: "Missing subject, question/image/pdf, or email" });
   }
 
   try {
-    // —— ask LLM ————————————————
-    const t0 = Date.now();
-    const answer = await askOpenVINO(question);
-    const responseTime = Date.now() - t0;
+    let answer   = null;
+    let imageUrl = null;
+    let responseTime = 0;
 
-    // —— store in DB (optional) ————
+    /* ---------- helper to call Gemini and track time ---------- */
+    const callGemini = async (prompt, mime = null, b64 = null) => {
+      const t0 = Date.now();
+      const out = await askGemini("gemini", prompt, mime, b64);
+      responseTime = Date.now() - t0;
+      return out;
+    };
+
+    /* ---------- 1️⃣  EDUCATIONAL CHECK ---------- */
+    const eduPrompt = `
+Classify the following question strictly as "educational" or "non-educational".
+Question: "${question}"
+Return ONLY that single word.
+`;
+    const edu = (await callGemini(eduPrompt)).trim().toLowerCase();
+
+    if (edu !== "educational") {
+      answer = "I'm an educational assistant focused on academic topics. Please ask a learning‑related question.";
+    } else {
+      /* ---------- 2️⃣  NORMAL Q&A (text / image / pdf) ---------- */
+      if (req.file) {
+        const ok = ["image/jpeg","image/png","image/webp","application/pdf"];
+        if (!ok.includes(req.file.mimetype)) {
+          return res.status(400).json({ message: "Unsupported file type" });
+        }
+
+        imageUrl = `/uploads/${req.file.filename}`;
+
+        if (req.file.mimetype === "application/pdf") {
+          const pdfText = (await pdfParse(fs.readFileSync(req.file.path))).text;
+          const prompt  = question
+            ? `${question}\n\nAlso consider this PDF content:\n${pdfText}`
+            : `Please analyse this PDF content:\n${pdfText}`;
+          answer = await callGemini(prompt);
+        } else {
+          const base64 = fs.readFileSync(req.file.path).toString("base64");
+          answer = await callGemini(question || "", req.file.mimetype, base64);
+        }
+      } else {
+        answer = await callGemini(question);
+      }
+    }
+
+    /* ---------- 3️⃣  TOPIC CLASSIFICATION (broad) ---------- */
+    let chatCategory = "unknown";
+    try {
+      const catPrompt = `
+You are a course‑outline classifier.
+
+• SUBJECT: "${subject}"
+• QUESTION: "${question}"
+
+Return the single MOST RELEVANT TOPIC from the subject syllabus
+(max 3 words, e.g. "binary trees", "sorting algorithms").
+Do NOT repeat words from the question verbatim.
+Return ONLY the topic phrase.
+`;
+      chatCategory = (await callGemini(catPrompt)).trim().toLowerCase();
+      if (!chatCategory) chatCategory = "unknown";
+    } catch { /* swallow errors */ }
+
+    /* ---------- 4️⃣  PERSIST CHAT ENTRY ---------- */
+    const existing = await Chat.findOne({ _id: subject, email });
+    const count    = existing ? existing.chat.length : 0;
+
     const chatEntry = {
-      question,
+      question   : question || null,
+      imageUrl   : imageUrl  || null,
       answer,
-      timestamp: new Date(),
-      responseTime
+      timestamp  : new Date(),
+      pageNumber : Math.floor(count / MESSAGES_PER_PAGE) + 1,
+      entryNumber: (count % MESSAGES_PER_PAGE) + 1,
+      responseTime,
+      chatCategory
     };
 
     await Chat.findOneAndUpdate(
       { _id: subject, email },
-      { $push: { chat: chatEntry }, $set: { lastUpdated: new Date() } },
+      { $push: { chat: chatEntry }, $set: { lastUpdated: new Date(), email } },
       { upsert: true, new: true }
     );
 
-    // —— return to caller ————————
-    res.status(200).json({ answer });
+    await logEvent({
+      email,
+      action : "create_chat",
+      message: `Message added to '${subject}'`,
+      meta   : { chatCategory }
+    });
 
+    res.status(200).json({ answer, file: imageUrl, chatCategory });
   } catch (err) {
-    console.error('OpenVINO error:', err.message);
-    res.status(500).json({ message: 'LLM failure' });
+    console.error("Gemini error:", err.message);
+    await logLLMError({ email, subject, prompt: question, error: err });
+    res.status(500).json({ message: "LLM failure" });
   }
 };
 
-
-// Get chat by subject (for a specific user)
 exports.getChatBySubject = async (req, res) => {
   const email = req.userEmail;
   const subject = req.params.subject;
