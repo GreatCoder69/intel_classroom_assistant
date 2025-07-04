@@ -36,6 +36,8 @@ process.noDeprecation = true;
 
 // Configure proxy for chat-related endpoints
 const FLASK_SERVER = process.env.FLASK_SERVER || 'http://localhost:8000';
+
+// Modified proxy middleware with response interception for persistence
 const chatProxy = createProxyMiddleware({
   target: FLASK_SERVER,
   changeOrigin: true,
@@ -61,6 +63,84 @@ const chatProxy = createProxyMiddleware({
       proxyReq.setHeader('Content-Length', Buffer.byteLength(bodyData));
       proxyReq.write(bodyData);
     }
+  },
+  onProxyRes: async (proxyRes, req, res) => {
+    // Only process POST requests to /api/chat or /api/query
+    if (req.method === 'POST' && (req.path === '/api/chat' || req.path === '/api/query')) {
+      // Store original end function
+      const originalEnd = res.end;
+      
+      // Buffer to store the response body
+      let responseBody = '';
+      
+      // Override the end function to intercept the response
+      res.end = function(chunk) {
+        if (chunk) {
+          responseBody += chunk;
+        }
+        
+        // Try to parse the response JSON
+        try {
+          const responseData = JSON.parse(responseBody);
+          const answer = responseData.answer;
+          const imageUrl = responseData.file;
+          const chatCategory = responseData.chatCategory || 'general';
+          
+          // Only save if we have an answer and the user is authenticated
+          if (answer && req.userEmail) {
+            const subject = req.body.subject;
+            const question = req.body.question;
+            const email = req.userEmail;
+            
+            // Get the Chat model
+            const Chat = require('./app/models/chat.model');
+            
+            // Persist to MongoDB asynchronously (don't wait for completion)
+            (async () => {
+              try {
+                const existing = await Chat.findOne({ _id: subject, email });
+                const count = existing ? existing.chat.length : 0;
+                
+                const chatEntry = {
+                  question: question || null,
+                  imageUrl: imageUrl || null,
+                  answer,
+                  timestamp: new Date(),
+                  pageNumber: Math.floor(count / 5) + 1,
+                  entryNumber: (count % 5) + 1,
+                  responseTime: responseData.latency || 0,
+                  chatCategory
+                };
+                
+                await Chat.findOneAndUpdate(
+                  { _id: subject, email },
+                  { $push: { chat: chatEntry }, $set: { lastUpdated: new Date(), email } },
+                  { upsert: true, new: true }
+                );
+                
+                console.log(`Chat saved to MongoDB: ${email} - ${subject} - ${question?.substring(0, 30)}...`);
+                
+                // Log the event
+                const logEvent = require('./app/utils/logEvent');
+                await logEvent({
+                  email,
+                  action: "create_chat",
+                  message: `Message added to '${subject}'`,
+                  meta: { chatCategory }
+                });
+              } catch (err) {
+                console.error('Error saving chat to MongoDB:', err);
+              }
+            })();
+          }
+        } catch (err) {
+          console.error('Error parsing proxy response:', err);
+        }
+        
+        // Call the original end function
+        originalEnd.apply(res, arguments);
+      };
+    }
   }
 });
 
@@ -72,7 +152,7 @@ app.use('/api/listen', createProxyMiddleware({ target: FLASK_SERVER, changeOrigi
 // Import routes for non-chat functionality
 require('./app/routes/auth.routes')(app);
 require('./app/routes/user.routes')(app);
-// require("./app/routes/chat.routes")(app); // Comment out the original chat routes
+// require("./app/routes/chat.routes")(app); // Keep this commented out to use the proxy
 require("./app/routes/admin.routes")(app);
 require("./app/routes/log.routes")(app);
 

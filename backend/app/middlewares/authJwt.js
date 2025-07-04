@@ -15,18 +15,11 @@ verifyToken = (req, res, next) => {
       return res.status(401).send({ message: "Unauthorized!" });
     }
 
-    try {
-      const user = await User.findById(decoded.id).exec();
-      if (!user) {
-        return res.status(404).send({ message: "User not found!" });
-      }
+    req.userId = decoded.id;
+    req.userEmail = decoded.email; // Make sure email is set here
+    req.userRole = decoded.role;   // And role if available
 
-      req.userId = user._id;
-      req.userEmail = user.email; // ✅ attach email
-      next();
-    } catch (dbErr) {
-      return res.status(500).send({ message: "Error verifying user" });
-    }
+    next();
   });
 };
 
