@@ -52,6 +52,7 @@ lerna-debug.log*
 pnpm-debug.log*
 
 # === Backend (Python/Node.js) ===
+backend/servers/logs/
 backend/servers/model_cache/
 backend/node_modules/
 backend/.env
