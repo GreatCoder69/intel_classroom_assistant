@@ -1,102 +1,84 @@
-import React, { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+// DashboardPage.jsx
+import React from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { FaHome, FaComment, FaSignOutAlt } from "react-icons/fa";
+import SubjectWiseChart from "../components/ChatStatsChart";
 
-const SubjectWiseChart = () => {
-  const [data, setData] = useState([]);
-  const token = localStorage.getItem("token");
+const SidebarLayout = () => {
+  const navigate   = useNavigate();
+  const location   = useLocation();
+  const user       = JSON.parse(localStorage.getItem("user") || "{}");
 
-  useEffect(() => {
-    fetch(`${import.meta.env.VITE_API_URL}/api/admin/users-chats`, {
-      headers: { "x-access-token": token },
-    })
-      .then((res) => res.json())
-      .then((users) => {
-        const subjectCounts = {};
+  const isActive = (path) => location.pathname === path;
 
-        users.forEach((user) => {
-          user.chats.forEach((chat) => {
-            const subj = chat.subject;
-            const count = (chat.history || []).length;
-            subjectCounts[subj] = (subjectCounts[subj] || 0) + count;
-          });
-        });
-
-        const total = Object.values(subjectCounts).reduce((a, b) => a + b, 0) || 1;
-        const chartRows = Object.entries(subjectCounts)
-          .map(([subject, count]) => ({
-            subject,
-            count,
-            percent: (count / total) * 100,
-          }))
-          .sort((a, b) => b.count - a.count);
-
-        setData(chartRows);
-      })
-      .catch(console.error);
-  }, [token]);
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
 
   return (
-    <div className="my-5">
-      <h4 className="mb-3">Subject-wise Doubt Distribution</h4>
-      <ResponsiveContainer width="100%" height={Math.max(300, data.length * 50)}>
-        <BarChart
-          data={data}
-          layout="vertical"
-          margin={{ top: 20, right: 40, left: 80, bottom: 20 }}
-        >
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis
-            type="number"
-            allowDecimals={false}
-            label={{
-              value: "Number of Doubts",
-              position: "insideBottom",
-              dy: 10,
-            }}
-          />
-          <YAxis
-            type="category"
-            dataKey="subject"
-            width={120}
-            tickLine={false}
-            axisLine={false}
-          />
-          <Tooltip
-            content={({ active, payload, label }) => {
-              if (!active || !payload?.length) return null;
-              const { count, percent } = payload[0].payload;
-              return (
-                <div
-                  style={{
-                    background: "#111",
-                    color: "#fff",
-                    padding: "6px 10px",
-                    borderRadius: 4,
-                    fontSize: 13,
-                  }}
-                >
-                  <strong>{label}</strong>
-                  <br />
-                  Doubts: {count}
-                  <br />
-                  {percent.toFixed(1)}%
-                </div>
-              );
-            }}
-          />
-          <Bar dataKey="count" fill="#4caefc" barSize={18} />
-        </BarChart>
-      </ResponsiveContainer>
+    <div className="d-flex">
+      {/* ───── Sidebar ───── */}
+      <aside
+        className="bg-dark text-light d-flex flex-column p-3"
+        style={{ width: 220, minHeight: "100vh" }}
+      >
+        <h5 className="mb-4">Classroom Assistant</h5>
+
+        <nav className="flex-grow-1">
+          <ul className="list-unstyled">
+
+            <li className="mb-3">
+              <Link
+                to="/dashboard"
+                className={`d-flex align-items-center text-decoration-none ${
+                  isActive("/dashboard") ? "text-white fw-bold" : "text-light"
+                }`}
+              >
+                <FaHome className="me-2" />
+                Dashboard
+              </Link>
+            </li>
+
+            <li className="mb-3">
+              {/* 👉 both `to` and active‑check use /chat */}
+              <Link
+                to="/teacher-chat"
+                className={`d-flex align-items-center text-decoration-none ${
+                  isActive("/chat") ? "text-white fw-bold" : "text-light"
+                }`}
+              >
+                <FaComment className="me-2" />
+                Chat Assistant
+              </Link>
+            </li>
+
+            <li className="mt-4">
+              <button
+                onClick={handleLogout}
+                className="btn btn-link p-0 text-danger d-flex align-items-center"
+              >
+                <FaSignOutAlt className="me-2" />
+                Logout
+              </button>
+            </li>
+
+          </ul>
+        </nav>
+
+        <footer className="small text-secondary">
+          © 2025 OpenVINO™ Assistant
+        </footer>
+      </aside>
+
+      {/* ───── Main content ───── */}
+      <main className="flex-grow-1 p-4" style={{ background: "#000", color: "#fff" }}>
+        {/* Put <Outlet/> if you want nested routing */}
+        <SubjectWiseChart />
+      </main>
     </div>
   );
 };
 
-export default SubjectWiseChart;
+export default SidebarLayout;

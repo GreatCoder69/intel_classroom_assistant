@@ -33,3 +33,18 @@
 2025-07-04 17:06:58 [INFO] classroom_assistant: [20250704170658] Generating response with student system prompt
 2025-07-04 17:07:16 [INFO] classroom_assistant: [20250704170658] Generation completed successfully
 2025-07-04 17:07:16 [INFO] classroom_assistant: [20250704170658] Generation completed in 17.56s
+2025-07-04 17:07:17 [INFO] classroom_assistant: [20250704170658] Response: 'A queue is an abstract data st...' (520 chars)
+2025-07-04 17:12:35 [INFO] classroom_assistant: [20250704171235] Chat request - Subject: Networking, Role: student, Q: 'What is ALOHA protocol?'
+2025-07-04 17:12:35 [WARNING] classroom_assistant: [20250704171235] High memory usage: 88.1% (Available: 1914.59 MB)
+2025-07-04 17:12:35 [INFO] classroom_assistant: [20250704171235] Generating response
+2025-07-04 17:12:35 [INFO] classroom_assistant: [20250704171235] Generating response with student system prompt
+2025-07-04 17:12:51 [INFO] classroom_assistant: [20250704171235] Generation completed successfully
+2025-07-04 17:12:51 [INFO] classroom_assistant: [20250704171235] Generation completed in 16.37s
+2025-07-04 17:12:51 [INFO] classroom_assistant: [20250704171235] Response: 'The ALOHAS protocol is designe...' (391 chars)
+2025-07-04 17:48:35 [INFO] classroom_assistant: [20250704174835] Chat request - Subject: Environmental Science, Role: teacher, Q: 'What is global warming?'
+2025-07-04 17:48:35 [WARNING] classroom_assistant: [20250704174835] High memory usage: 87.6% (Available: 1989.04 MB)
+2025-07-04 17:48:36 [INFO] classroom_assistant: [20250704174835] Generating response
+2025-07-04 17:48:36 [INFO] classroom_assistant: [20250704174835] Generating response with teacher system prompt
+2025-07-04 17:48:57 [INFO] classroom_assistant: [20250704174835] Generation completed successfully
+2025-07-04 17:48:57 [INFO] classroom_assistant: [20250704174835] Generation completed in 21.49s
+2025-07-04 17:48:58 [INFO] classroom_assistant: [20250704174835] Response: 'Global warming is the process ...' (302 chars)

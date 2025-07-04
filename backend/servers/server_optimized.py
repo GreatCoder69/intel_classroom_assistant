@@ -1,25 +1,23 @@
-# Ultra-Optimized Intel Classroom Assistant Server v2
+"""
+Optimized Intel Classroom Assistant Server
 
-from flask import Flask, request, jsonify, Response, stream_with_context
+This optimized version includes:
+- Efficient model loading and caching
+- Memory management and monitoring
+- Batched request processing
+- Context window optimization
+- Improved error handling and logging
+"""
+
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-import queue
-import sounddevice as sd
-import json
 import time
-import gc
 import logging
 import threading
-import psutil
-import re
-import numpy as np
+import os
 from datetime import datetime
-from vosk import Model, KaldiRecognizer
-from collections import OrderedDict
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from openvino.runtime import Core
-from transformers import AutoTokenizer
-from optimum.intel.openvino import OVModelForCausalLM
+from optimized_model_manager import OptimizedModelManager, ModelConfig
+
 
 # Configure enhanced logging
 logging.basicConfig(
@@ -33,338 +31,154 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app, resources={
     r"/api/*": {
-        "origins": ["http://localhost:5173"],
+        "origins": ["http://localhost:5173", "http://localhost:8080"],  # Add Node.js proxy server
         "methods": ["GET", "POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
+        "allow_headers": ["Content-Type", "X-User-Email", "X-User-ID", "X-User-Role"],  # Add proxy headers
+        "expose_headers": ["Content-Type", "Content-Length"]
     }
 })
 
-# ================= Model Configuration =================
-class ModelConfig:
-    def __init__(self, model_id, cache_dir, max_context_length, sliding_window_size, 
-                 max_queue_size, memory_threshold):
-        self.model_id = model_id
-        self.cache_dir = cache_dir
-        self.max_context_length = max_context_length
-        self.sliding_window_size = sliding_window_size
-        self.max_queue_size = max_queue_size
-        self.memory_threshold = memory_threshold
-
-class OptimizedModelManager:
-    def __init__(self, config: ModelConfig):
-        self.config = config
-        self.model = None
-        self.tokenizer = None
-        self.is_model_loaded = False
-        self.ov_core = Core()
-
-    def load_model_cached(self):
-        try:
-            logger.info(f"🚀 Loading OpenVINO model: {self.config.model_id}")
-            
-            # Initialize tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(
-                self.config.model_id, 
-                cache_dir=self.config.cache_dir,
-                use_fast=True  # Optimized tokenizer
-            )
-            
-            # Load OpenVINO model with hardware optimizations
-            self.model = OVModelForCausalLM.from_pretrained(
-                self.config.model_id,
-                cache_dir=self.config.cache_dir,
-                device="CPU",
-                ov_config={
-                    "PERFORMANCE_HINT": "LATENCY",
-                    "INFERENCE_PRECISION_HINT": "f32",
-                    "CACHE_DIR": self.config.cache_dir
-                }
-            )
-            
-            self.is_model_loaded = True
-            logger.info("✅ OpenVINO model loaded and optimized successfully")
-            return True
-        except Exception as e:
-            logger.error(f"❌ Model loading failed: {str(e)}")
-            return False
-
-    def warm_up_model(self):
-        """Warm up model with short inferences"""
-        if not self.is_model_loaded:
-            return
-            
-        logger.info("🔥 Warming up model...")
-        warm_up_prompts = [
-            "What is 1+1?",
-            "Hello, how are you?",
-            "Explain gravity in one sentence."
-        ]
-        
-        for prompt in warm_up_prompts:
-            self.generate_response_optimized(prompt, max_new_tokens=20)
-        
-        logger.info("✅ Model warm-up completed")
-        self.perform_memory_cleanup()
-
-    def perform_memory_cleanup(self):
-        logger.info("🧹 Performing memory cleanup...")
-        gc.collect()
-        logger.info("✅ Memory cleanup completed")
-
-    def get_memory_stats(self):
-        mem = psutil.virtual_memory()
-        return {
-            "total_mb": round(mem.total / (1024 ** 2), 1),
-            "available_mb": round(mem.available / (1024 ** 2), 1),
-            "used_percent": mem.percent
-        }
-
-    def generate_response_optimized(self, input_text: str, 
-                                   max_new_tokens: int = 256,
-                                   temperature: float = 0.7,
-                                   top_p: float = 0.9) -> tuple:
-        """
-        Optimized response generation with OpenVINO
-        
-        Args:
-            input_text: Full input text with context
-            max_new_tokens: Max tokens to generate
-            temperature: Creativity control
-            top_p: Nucleus sampling threshold
-            
-        Returns:
-            tuple: (response, generation_time)
-        """
-        if not self.is_model_loaded:
-            return "Model not loaded. Please try again later.", 0.0
-            
-        start_time = time.time()
-        
-        # Memory management
-        mem_before = self.get_memory_stats()
-        if mem_before['used_percent'] > self.config.memory_threshold:
-            self.perform_memory_cleanup()
-        
-        # Generate response
-        try:
-            # Tokenize input
-            inputs = self.tokenizer(
-                input_text,
-                return_tensors="pt",
-                truncation=True,
-                max_length=self.config.max_context_length
-            )
-            
-            # Generate with OpenVINO
-            outputs = self.model.generate(
-                **inputs,
-                max_new_tokens=max_new_tokens,
-                temperature=temperature,
-                top_p=top_p,
-                do_sample=True,
-                pad_token_id=self.tokenizer.eos_token_id,
-                stopping_criteria=[SentenceLimitStoppingCriteria(self.tokenizer)]  # Pass tokenizer here
-            )
-            
-            # Decode response
-            response = self.tokenizer.batch_decode(outputs, skip_special_tokens=True)[0]
-            generation_time = time.time() - start_time
-            
-            # Post-generation cleanup
-            if self.get_memory_stats()['used_percent'] > self.config.memory_threshold:
-                self.perform_memory_cleanup()
-                
-            return response, generation_time
-        
-        except Exception as e:
-            logger.error(f"❌ Response generation failed: {str(e)}")
-            return "I'm having trouble with that request. Please try again.", 0.0
-
-# ================= Early Termination =================
-class SentenceLimitStoppingCriteria:
-    """Stop generation after 5 complete sentences"""
-    def __init__(self, tokenizer):
-        self.tokenizer = tokenizer
-        self.sentence_count = 0
-        self.last_token_was_punctuation = False
-        
-    def __call__(self, input_ids, scores, **kwargs):
-        current_token = input_ids[0][-1].item()
-        decoded_token = self.tokenizer.decode([current_token])
-        
-        # Check for sentence-ending punctuation
-        if decoded_token in ['.', '?', '!']:
-            if self.last_token_was_punctuation:  # Handle multiple punctuation
-                self.last_token_was_punctuation = True
-                return False
-                
-            self.sentence_count += 1
-            self.last_token_was_punctuation = True
-        else:
-            self.last_token_was_punctuation = False
-        
-        # Stop after 5 sentences
-        return self.sentence_count >= 5
-
-# ================= Server Configuration =================
+# Global configuration
 MODEL_CONFIG = ModelConfig(
-    model_id="OpenVINO/mistral-7b-instruct-v0.1-int4-ov",
+    model_id="microsoft/phi-2",  # Change to a public model that doesn't require auth, old :openvino/phi-2-quant-int4
     cache_dir="./model_cache",
     max_context_length=1024,
     sliding_window_size=512,
+    batch_size=2,  # Smaller batch for real-time responses
     max_queue_size=10,
-    memory_threshold=85.0
+    memory_threshold=95.0,
+    enable_kv_cache=True
 )
 
 # Initialize optimized model manager
 model_manager = OptimizedModelManager(MODEL_CONFIG)
 
-# Vosk setup with optimization
-q = queue.Queue(maxsize=100)
-try:
-    asr_model = Model("vosk-model-small-en-us-0.15")
-    rec = KaldiRecognizer(asr_model, 16000)
-    logger.info("✅ Vosk ASR model loaded successfully")
-except Exception as e:
-    logger.error(f"❌ Error loading Vosk model: {str(e)}")
-    asr_model = None
-    rec = None
 
-# ================= Answer Optimization System =================
-class AnswerOptimizer:
-    def __init__(self):
-        # Predefined responses for common questions
-        self.predefined_responses = {
-            "hello": "Hello! How can I assist you today?",
-            "hi": "Hi there! How can I help?",
-            "hey": "Hey! What can I do for you?",
-            "good morning": "Good morning! How can I assist you today?",
-            "good afternoon": "Good afternoon! How can I help?",
-            "good evening": "Good evening! What can I do for you?",
-            "thank you": "You're welcome!",
-            "thanks": "You're welcome!",
-            "bye": "Goodbye! Have a great day!",
-            "goodbye": "Goodbye! Have a great day!",
-            "see you": "See you later!",
-            "see ya": "See you later!",
-            "whats your name": "I'm Intel Classroom Assistant, your AI teaching helper!",
-            "who are you": "I'm an AI assistant designed to help with educational tasks.",
-            "help": "I can answer questions, explain concepts, and assist with learning materials. What do you need help with?",
-            "how are you": "I'm functioning optimally and ready to assist you!"
-        }
-        
-        # Semantic response cache
-        self.semantic_cache = OrderedDict()
-        self.cache_size = 500
-        self.vectorizer = TfidfVectorizer().fit(list(self.predefined_responses.values()))
-        self.similarity_threshold = 0.85
-        
-        # Short answer detector
-        self.short_patterns = re.compile(
-            r"^(when|where|who|what|is|are|do|does|did|can|could|will|would|"
-            r"should|shall|has|have|had|which|whom|whose)\b|"
-            r"\?$|yes|no|true|false|^\d+$",
-            re.IGNORECASE
-        )
-    
-    def get_predefined_response(self, question):
-        """Check for exact or similar predefined responses"""
-        clean_q = re.sub(r'[^\w\s]', '', question.lower())
-        
-        # Check exact matches
-        if clean_q in self.predefined_responses:
-            return self.predefined_responses[clean_q]
-        
-        # Check semantic similarity
-        q_vec = self.vectorizer.transform([clean_q])
-        for cached_q, response in self.semantic_cache.items():
-            cached_vec = self.vectorizer.transform([cached_q])
-            similarity = cosine_similarity(q_vec, cached_vec)[0][0]
-            if similarity > self.similarity_threshold:
-                return response
-        
-        return None
-    
-    def is_short_question(self, question):
-        """Determine if question can be answered concisely"""
-        return bool(self.short_patterns.search(question)) and len(question.split()) < 12
-    
-    def add_to_cache(self, question, response):
-        """Add response to semantic cache"""
-        clean_q = re.sub(r'[^\w\s]', '', question.lower())
-        if clean_q not in self.semantic_cache:
-            if len(self.semantic_cache) >= self.cache_size:
-                self.semantic_cache.popitem(last=False)
-            self.semantic_cache[clean_q] = response
 
-answer_optimizer = AnswerOptimizer()
-
-# ================= Conversation State Management =================
+# Enhanced conversation state with memory optimization
 class OptimizedConversationState:
-    def __init__(self, max_history: int = 8):
-        self.history = {}
+    """
+    Optimized conversation state management with memory limits.
+    
+    Features:
+    - Automatic history pruning
+    - Memory-efficient storage
+    - Role-based context separation
+    """
+    
+    def __init__(self, max_history: int = 10):
+        """
+        Initialize conversation state with memory limits.
+        
+        Args:
+            max_history (int): Maximum number of messages to keep
+        """
+        self.history = {}  # Role-based history separation
         self.max_history = max_history
         self.lock = threading.Lock()
-        self.user_contexts = {}
     
-    def add_message(self, user_id: str, user_input: str, ai_response: str):
+    def add_message(self, role: str, user_input: str, ai_response: str):
+        """
+        Add message to conversation history with automatic pruning.
+        
+        Args:
+            role (str): User role (student/teacher)
+            user_input (str): User's input message
+            ai_response (str): AI's response message
+        """
         with self.lock:
-            if user_id not in self.history:
-                self.history[user_id] = []
+            if role not in self.history:
+                self.history[role] = []
             
-            # Prune before adding if needed
-            if len(self.history[user_id]) >= self.max_history:
-                self.history[user_id] = self.history[user_id][-self.max_history:]
-            
-            self.history[user_id].append({
-                "timestamp": time.time(),
+            self.history[role].append({
+                "timestamp": datetime.now().isoformat(),
                 "user": user_input,
                 "assistant": ai_response
             })
-    
-    def get_context(self, user_id: str, max_items: int = 3) -> list:
-        """Get context with adaptive length based on complexity"""
-        with self.lock:
-            items = self.history.get(user_id, [])
-            # Return more context for complex questions
-            return items[-max_items:] if len(items) > 2 else items
             
-    def reset_context(self, user_id: str):
-        """Reset conversation context for a user"""
-        with self.lock:
-            if user_id in self.history:
-                del self.history[user_id]
-
-conversation_state = OptimizedConversationState(max_history=10)
-
-# ================= Context Management =================
-_DYNAMIC_CONTEXT = None
-_CONTEXT_LAST_UPDATED = 0
-
-def get_dynamic_context():
-    """Cached dynamic context generation"""
-    global _DYNAMIC_CONTEXT, _CONTEXT_LAST_UPDATED
+            # Prune old messages to maintain memory efficiency
+            if len(self.history[role]) > self.max_history:
+                self.history[role] = self.history[role][-self.max_history:]
     
-    current_time = time.time()  
-    if not _DYNAMIC_CONTEXT or (current_time - _CONTEXT_LAST_UPDATED) > 300:
-        _DYNAMIC_CONTEXT = f"""
+    def get_context(self, role: str) -> list:
+        """
+        Get conversation context for a specific role.
+        
+        Args:
+            role (str): User role
+            
+        Returns:
+            list: Recent conversation messages
+        """
+        with self.lock:
+            return self.history.get(role, [])
+    
+    def clear_history(self, role: str = None):
+        """
+        Clear conversation history for a role or all roles.
+        
+        Args:
+            role (str, optional): Specific role to clear, or None for all
+        """
+        with self.lock:
+            if role:
+                self.history.pop(role, None)
+            else:
+                self.history.clear()
+
+# Global optimized conversation state
+conversation_state = OptimizedConversationState(max_history=8)
+
+# Dynamic context with caching
+_context_cache = {}
+_context_cache_time = 0
+CONTEXT_CACHE_DURATION = 300  # 5 minutes
+
+def get_current_dynamic_context():
+    """
+    Generate dynamic context with caching for performance.
+    
+    Returns:
+        str: Cached or fresh dynamic context
+    """
+    global _context_cache, _context_cache_time
+    
+    current_time = time.time()
+    if current_time - _context_cache_time > CONTEXT_CACHE_DURATION:
+        _context_cache = f"""
 Current date: {datetime.now().strftime('%Y-%m-%d')}
 Current time: {datetime.now().strftime('%H:%M:%S')}
 Current semester: Fall Term
 Current school week: Week 12
 
+You are the Intel Classroom Assistant, an AI designed to help students and teachers with educational content.
+Your responses should be accurate, helpful, and appropriate for an educational setting.
+
+IMPORTANT GUIDELINES:
+- Always identify yourself as the Intel Classroom Assistant, not as any other AI.
+- Focus only on answering the specific question asked.
+- DO NOT make up additional questions to answer.
+- DO NOT generate follow-up questions in your responses.
+- DO NOT ask questions back to the user.
+- Keep responses concise and to the point.
+- Provide factually correct information only.
+- If you don't know something, admit it rather than making up information.
+- Never roleplay as a different entity or character.
+
 Remember:
 - Provide accurate, educational responses
-- For short factual questions, give direct answers
-- For complex questions, provide concise explanations
-- Always maintain academic integrity
-- Tailor responses to user's role (student/teacher)
+- Do not display your thinking process, we need precise answers
+- If you see that the last sentence is exceeding the word limit, don't leave it incomplete. Summarise and incorporate in the previous sentence itself. 
+- No unfinished sentences
+- Tailor explanations to the user's role and level
+- Be concise and helpful
+- Include relevant examples when appropriate
 """
-        _CONTEXT_LAST_UPDATED = current_time
+        _context_cache_time = current_time
     
-    return _DYNAMIC_CONTEXT
+    return _context_cache
 
-# ================= User Configuration =================
+# Enhanced user credentials with role metadata
 users = {
     "student": {
         "password": "student", 
@@ -380,40 +194,89 @@ users = {
     }
 }
 
-# ================= Utility Functions =================
 def extract_assistant_response(full_text: str) -> str:
-    """Optimized response extraction"""
+    """
+    Extract and clean assistant response from model output.
+    
+    Args:
+        full_text (str): Raw model output
+        
+    Returns:
+        str: Cleaned assistant response
+    """
+    # Enhanced response extraction with multiple fallback strategies
     markers = ["Intel Assistant:", "Assistant:", "Response:"]
+    
     for marker in markers:
         if marker in full_text:
-            return full_text.split(marker, 1)[1].strip()
-    return full_text.strip()[:2000]
+            response = full_text.split(marker, 1)[1].strip()
+            break
+    else:
+        response = full_text.strip()
+    
+    # Clean up common artifacts
+    artifacts = ["</think>", "<think>", "User:", "System:", "Question:"]
+    for artifact in artifacts:
+        response = response.replace(artifact, "").strip()
+    
+    # Remove any follow-up questions the AI might generate
+    question_starters = ["Do you have", "Would you like", "What do you", "Can I help", "Is there anything", "Do you want", "Would you like"]
+    for starter in question_starters:
+        if starter in response:
+            # Try to cut off at the point where the AI starts asking a question
+            parts = response.split(starter)
+            response = parts[0].strip()
+    
+    # Remove leading/trailing whitespace and limit length
+    response = response.strip()[:2000]  # Reasonable length limit
+    
+    return response or "I apologize, but I couldn't generate a proper response. Please try again."
 
-def audio_callback(indata, frames, time_info, status):
-    """Optimized audio callback with batching"""
-    if status:
-        logger.warning(f"Audio status: {status}")
+# Initialize speech recognition
+def initialize_speech_recognition():
+    """Initialize Vosk speech recognition model."""
+    global rec
     
     try:
-        if q.qsize() < q.maxsize // 2:  # Only add if queue not overloaded
-            q.put(indata.copy())
+        vosk_model_path = os.path.join("speech_models", "vosk-model-small-en-us-0.15")
+        
+        # Check if model exists
+        if not os.path.exists(vosk_model_path):
+            logger.warning(f"Speech model not found at {vosk_model_path}. Speech recognition will be disabled.")
+            return False
+            
+        # Load speech recognition model
+        logger.info(f"Loading speech recognition model from {vosk_model_path}")
+        speech_model = Model(vosk_model_path)
+        rec = KaldiRecognizer(speech_model, 16000)
+        logger.info("Speech recognition model loaded successfully")
+        return True
+        
     except Exception as e:
-        logger.error(f"Audio error: {str(e)}")
+        logger.error(f"Failed to initialize speech recognition: {str(e)}")
+        rec = None
+        return False
 
-# ================= API Endpoints =================
 @app.route("/api/login", methods=["POST"])
 def login():
-    """Optimized login handler"""
+    """
+    Enhanced login with role-based configuration.
+    
+    Returns:
+        JSON: Login response with user configuration
+    """
     try:
         data = request.get_json()
         username = data.get("username", "").strip()
         password = data.get("password", "").strip()
         
+        if not username or not password:
+            return jsonify({"message": "Username and password are required"}), 400
+        
         user = users.get(username)
         if user and user["password"] == password:
-            # Reset conversation context on login
-            conversation_state.reset_context(username)
-            return jsonify({
+            # Include user-specific configuration
+            response_data = {
                 "username": username,
                 "role": user["role"],
                 "message": "Login successful",
@@ -421,161 +284,292 @@ def login():
                     "context_limit": user.get("context_limit", 512),
                     "response_limit": user.get("response_limit", 256)
                 }
-            })
+            }
+            logger.info(f"Successful login for user: {username} (role: {user['role']})")
+            return jsonify(response_data)
         
+        logger.warning(f"Failed login attempt for username: {username}")
         return jsonify({"message": "Invalid credentials"}), 401
         
     except Exception as e:
         logger.error(f"Login error: {str(e)}")
         return jsonify({"message": "Internal server error"}), 500
 
-@app.route("/api/listen", methods=["GET"])
-def listen():
-    """Optimized speech recognition with streaming"""
-    if not rec:
-        return jsonify({"error": "Speech recognition unavailable"}), 503
-    
-    request_id = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
-    logger.info(f"[{request_id}] 🎤 Starting speech recognition")
-    
-    def generate():
-        last_speech_time = time.time()
-        audio_buffer = bytearray()
-        chunk_size = 4000  # Process in chunks
-        
-        with sd.RawInputStream(
-            samplerate=16000, 
-            blocksize=8000,  # Larger block size
-            dtype='int16',
-            channels=1, 
-            callback=audio_callback
-        ):
-            while time.time() - last_speech_time < 8:  # 8s timeout
-                while not q.empty():
-                    try:
-                        data = q.get_nowait()
-                        audio_chunk = bytes(np.frombuffer(data, dtype=np.int16))
-                        audio_buffer.extend(audio_chunk)
-                        
-                        # Process in chunks
-                        if len(audio_buffer) >= chunk_size:
-                            process_chunk = bytes(audio_buffer[:chunk_size])
-                            audio_buffer = audio_buffer[chunk_size:]
-                            
-                            if rec.AcceptWaveform(process_chunk):
-                                result = rec.Result()
-                                text = json.loads(result).get("text", "").strip()
-                                if text:
-                                    yield f"data: {json.dumps({'transcript': text})}\n\n"
-                                    return
-                            else:
-                                partial = json.loads(rec.PartialResult()).get("partial", "").strip()
-                                if partial:
-                                    yield f"data: {json.dumps({'partial': partial})}\n\n"
-                                    last_speech_time = time.time()
-                    except Exception as e:
-                        logger.error(f"Processing error: {str(e)}")
-                
-                time.sleep(0.02)  # Yield to other threads
-                
-            yield "data: {\"status\": \"timeout\"}\n\n"
-    
-    return Response(stream_with_context(generate()), mimetype="text/event-stream")
-
 @app.route("/api/query", methods=["POST"])
 def query():
-    """Aggressively optimized query processing"""
+    """
+    Optimized query processing with enhanced error handling and monitoring.
+    
+    Returns:
+        JSON: AI response with comprehensive metadata
+    """
     request_id = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
     start_time = time.time()
+    
+    # Get memory stats before processing
+    mem_before = model_manager.get_memory_stats()
+    logger.info(f"[{request_id}] Memory before: {mem_before['used_percent']:.1f}% used")
     
     try:
         data = request.get_json()
         question = data.get("question", "").strip()
         user_role = data.get("role", "student")
-        username = data.get("username", "default")
         
         if not question:
             return jsonify({"error": "No question provided"}), 400
         
-        # 1. Check for predefined response (0ms latency)
-        if predefined := answer_optimizer.get_predefined_response(question):
-            return jsonify({
-                "answer": predefined,
-                "metadata": {
-                    "request_id": request_id,
-                    "processing_time": round(time.time() - start_time, 3),
-                    "source": "predefined"
-                }
-            })
+        if user_role not in ["student", "teacher"]:
+            logger.warning(f"[{request_id}] Invalid role: {user_role}, defaulting to student")
+            user_role = "student"
         
-        # 2. Prepare context
-        context_history = conversation_state.get_context(
-            username, 
-            max_items=3 if len(question.split()) > 8 else 1  # Adaptive context
-        )
+        logger.info(f"[{request_id}] Processing query for {user_role}: '{question[:50]}...'")
+        
+        # Get conversation context
+        context_history = conversation_state.get_context(user_role)
         context_texts = [f"User: {msg['user']}\nAssistant: {msg['assistant']}" 
-                        for msg in context_history]
+                        for msg in context_history[-3:]]  # Last 3 exchanges
         
-        # 3. Determine response strategy
-        is_short = answer_optimizer.is_short_question(question)
-        user_config = users.get(user_role, users['student'])
+        # Prepare input with dynamic context
+        dynamic_context = get_current_dynamic_context()
+        full_input = f"{dynamic_context}\n\nUser: {question}\n\nIntel Assistant:"
         
-        # 4. Generate response
-        if is_short:
-            # Ultra-fast path for short answers
-            response, generation_time = model_manager.generate_response_optimized(
-                input_text=f"User: {question}\nAssistant:",
-                max_new_tokens=48,  # Very short response
-                temperature=0.1,    # Low creativity
-                top_p=0.9
-            )
+        # Generate response using optimized model manager
+        if not model_manager.is_model_loaded:
+            logger.warning(f"[{request_id}] Model not loaded, using fallback response")
+            # Generate fallback response
+            cleaned_response = generate_fallback_response(question)
+            generation_time = 0.01  # Minimal generation time for fallback
         else:
-            # Full context for complex questions
-            full_input = f"{get_dynamic_context()}\n\n" + \
-                         "\n".join(context_texts) + \
-                         f"\n\nUser: {question}\n\nIntel Assistant:"
-            
-            response, generation_time = model_manager.generate_response_optimized(
-                input_text=full_input,
-                max_new_tokens=user_config['response_limit'],
-                temperature=0.7,    # More creative
-                top_p=0.95
-            )
+            # Check for identity questions that should always use fallback
+            identity_questions = ["who are you", "who made you", "what are you", "your name", "who developed you"]
+            if any(q in question.lower() for q in identity_questions):
+                logger.info(f"[{request_id}] Identity question detected, using predefined response")
+                cleaned_response = generate_fallback_response(question)
+                generation_time = 0.01
+            else:
+                # Normal response generation
+                response, generation_time = model_manager.generate_response_optimized(
+                    input_text=full_input,
+                    role=user_role,
+                    conversation_history=context_texts
+                )
+                # Clean up response
+                cleaned_response = extract_assistant_response(response)
         
-        # 5. Process response
-        cleaned_response = extract_assistant_response(response)
-        conversation_state.add_message(username, question, cleaned_response)
-        answer_optimizer.add_to_cache(question, cleaned_response)
+        # Update conversation state
+        conversation_state.add_message(user_role, question, cleaned_response)
         
-        # 6. Stream response for long answers
-        if len(cleaned_response.split()) > 25:
-            def stream_response():
-                words = cleaned_response.split()
-                for i in range(0, len(words), 3):  # Stream in chunks
-                    yield " ".join(words[i:i+3]) + " "
-                    time.sleep(0.05)
-            
-            return Response(stream_with_context(stream_response()), mimetype="text/plain")
-        else:
-            return jsonify({
-                "answer": cleaned_response,
-                "metadata": {
-                    "request_id": request_id,
-                    "processing_time": round(time.time() - start_time, 3),
-                    "response_strategy": "short" if is_short else "full"
-                }
-            })
-            
+        # Get memory stats after processing
+        mem_after = model_manager.get_memory_stats()
+        total_time = time.time() - start_time
+        
+        response_data = {
+            "answer": cleaned_response,
+            "metadata": {
+                "request_id": request_id,
+                "generation_time": round(generation_time, 3),
+                "total_time": round(total_time, 3),
+                "user_role": user_role,
+                "memory_usage": {
+                    "before_percent": round(mem_before['used_percent'], 1),
+                    "after_percent": round(mem_after['used_percent'], 1),
+                    "available_mb": round(mem_after['available_mb'], 1)
+                },
+                "response_length": len(cleaned_response)
+            }
+        }
+        
+        logger.info(f"[{request_id}] Response generated successfully in {total_time:.2f}s")
+        return jsonify(response_data)
+        
     except Exception as e:
-        logger.error(f"[{request_id}] ❌ Query error: {str(e)}")
+        error_time = time.time() - start_time
+        logger.error(f"[{request_id}] Query processing error: {str(e)}")
         return jsonify({
             "error": "Failed to process query",
-            "metadata": {"request_id": request_id}
+            "metadata": {
+                "request_id": request_id,
+                "error_time": round(error_time, 3),
+                "error_type": type(e).__name__
+            }
+        }), 500
+
+@app.route("/api/chat", methods=["GET", "POST"])
+def chat():
+    """
+    Chat endpoint to process conversational requests.
+    Handles both GET and POST methods for compatibility with the proxy.
+    
+    Returns:
+        JSON: AI response similar to the query endpoint
+    """
+    request_id = datetime.now().strftime("%Y%m%d%H%M%S%f")[:-3]
+    start_time = time.time()
+    
+    # Get memory stats before processing
+    mem_before = model_manager.get_memory_stats()
+    logger.info(f"[{request_id}] Memory before: {mem_before['used_percent']:.1f}% used")
+    
+    try:
+        # Handle both GET and POST methods
+        if request.method == "GET":
+            # For GET requests with no parameters, return a welcome message
+            if not request.args:
+                welcome_message = "Welcome to the Intel Classroom Assistant. Send a message to start chatting."
+                return jsonify({
+                    "message": welcome_message,
+                    "answer": welcome_message,
+                    "metadata": {
+                        "request_id": request_id,
+                        "status": "success"
+                    }
+                })
+            
+            # For GET requests with parameters
+            question = request.args.get("message", "").strip()
+            user_role = request.args.get("role", "student")
+        else:  # POST method
+            # Handle different content types
+            content_type = request.headers.get('Content-Type', '')
+            
+            if 'application/json' in content_type:
+                # JSON content type
+                data = request.get_json(silent=True) or {}
+            elif 'application/x-www-form-urlencoded' in content_type:
+                # Form data
+                data = request.form.to_dict() or {}
+            else:
+                # Try to parse as JSON anyway, with a fallback
+                try:
+                    data = request.get_json(silent=True) or {}
+                    if not data:
+                        # If parsing failed, try to get raw data and parse manually
+                        raw_data = request.get_data(as_text=True)
+                        if raw_data:
+                            try:
+                                data = json.loads(raw_data)
+                            except json.JSONDecodeError:
+                                # Last resort: try to parse form data
+                                data = request.form.to_dict() or {}
+                        else:
+                            data = {}
+                except Exception as e:
+                    logger.warning(f"[{request_id}] Failed to parse request body: {str(e)}")
+                    data = {}
+            
+            # Extract message and role from the data
+            question = data.get("message", data.get("question", "")).strip()
+            user_role = data.get("role", "student")
+        
+        # If no message is provided after all attempts, return an error
+        if not question:
+            return jsonify({
+                "error": "No message provided",
+                "message": "Please provide a message to chat with the assistant.",
+                "metadata": {
+                    "request_id": request_id,
+                    "status": "error"
+                }
+            }), 400
+        
+        # Rest of the chat processing
+        if user_role not in ["student", "teacher"]:
+            logger.warning(f"[{request_id}] Invalid role: {user_role}, defaulting to student")
+            user_role = "student"
+        
+        logger.info(f"[{request_id}] Processing chat for {user_role}: '{question[:50]}...'")
+        
+        # Get conversation context
+        context_history = conversation_state.get_context(user_role)
+        context_texts = [f"User: {msg['user']}\nAssistant: {msg['assistant']}" 
+                        for msg in context_history[-3:]]  # Last 3 exchanges
+        
+        # Prepare input with dynamic context
+        dynamic_context = get_current_dynamic_context()
+        full_input = f"{dynamic_context}\n\nUser: {question}\n\nIntel Assistant:"
+        
+        # Generate response using optimized model manager
+        logger.info(f"[{request_id}] Calling model manager for response generation")
+        model_start_time = time.time()
+        
+        # Check if model is loaded before generating response
+        if not model_manager.is_model_loaded:
+            logger.warning(f"[{request_id}] Model not loaded, using fallback response")
+            # Generate fallback response
+            cleaned_response = generate_fallback_response(question)
+            generation_time = 0.01  # Minimal generation time for fallback
+        else:
+            # Check for identity questions that should always use fallback
+            identity_questions = ["who are you", "who made you", "what are you", "your name", "who developed you"]
+            if any(q in question.lower() for q in identity_questions):
+                logger.info(f"[{request_id}] Identity question detected, using predefined response")
+                cleaned_response = generate_fallback_response(question)
+                generation_time = 0.01
+            else:
+                # Normal response generation
+                response, generation_time = model_manager.generate_response_optimized(
+                    input_text=full_input,
+                    role=user_role,
+                    conversation_history=context_texts
+                )
+                # Clean up response
+                cleaned_response = extract_assistant_response(response)
+        
+        model_time = time.time() - model_start_time
+        logger.info(f"[{request_id}] Response generated in {model_time:.2f}s")
+        logger.info(f"[{request_id}] Response length: {len(cleaned_response)} chars")
+        
+        # Update conversation state
+        conversation_state.add_message(user_role, question, cleaned_response)
+        
+        # Get memory stats after processing
+        mem_after = model_manager.get_memory_stats()
+        total_time = time.time() - start_time
+        
+        # Add more fields for Node.js proxy compatibility
+        response_data = {
+            "answer": cleaned_response,
+            "message": cleaned_response,  # Duplicate for compatibility
+            "latency": round(total_time, 3),  # Add latency field for proxy
+            "chatCategory": "general",    # Default category for MongoDB storage
+            "metadata": {
+                "request_id": request_id,
+                "generation_time": round(generation_time, 3),
+                "total_time": round(total_time, 3),
+                "user_role": user_role,
+                "memory_usage": {
+                    "before_percent": round(mem_before['used_percent'], 1),
+                    "after_percent": round(mem_after['used_percent'], 1),
+                    "available_mb": round(mem_after['available_mb'], 1)
+                },
+                "response_length": len(cleaned_response)
+            }
+        }
+        
+        logger.info(f"[{request_id}] Chat response generated successfully in {total_time:.2f}s")
+        return jsonify(response_data)
+        
+    except Exception as e:
+        error_time = time.time() - start_time
+        logger.error(f"[{request_id}] Chat processing error: {str(e)}")
+        return jsonify({
+            "error": "Failed to process chat request",
+            "message": "An error occurred while processing your request",
+            "metadata": {
+                "request_id": request_id,
+                "error_time": round(error_time, 3),
+                "error_type": type(e).__name__
+            }
         }), 500
 
 @app.route("/api/health", methods=["GET"])
 def health_check():
-    """System health check"""
+    """
+    Health check endpoint with system status.
+    
+    Returns:
+        JSON: System health and performance metrics
+    """
     memory_stats = model_manager.get_memory_stats()
     
     health_data = {
@@ -591,12 +585,18 @@ def health_check():
 
 @app.route("/api/stats", methods=["GET"])
 def get_stats():
-    """System statistics endpoint"""
+    """
+    Get detailed system statistics.
+    
+    Returns:
+        JSON: Comprehensive system and model statistics
+    """
     return jsonify({
         "memory": model_manager.get_memory_stats(),
         "model_config": {
             "model_id": MODEL_CONFIG.model_id,
             "max_context_length": MODEL_CONFIG.max_context_length,
+            "batch_size": MODEL_CONFIG.batch_size,
             "memory_threshold": MODEL_CONFIG.memory_threshold
         },
         "conversation_stats": {
@@ -604,37 +604,135 @@ def get_stats():
         }
     })
 
-# ================= Server Initialization =================
+@app.route("/api/debug", methods=["GET"])
+def debug_info():
+    """
+    Debug endpoint for troubleshooting.
+    
+    Returns:
+        JSON: System and request information for debugging
+    """
+    # Collect relevant debug information
+    debug_data = {
+        "server": {
+            "timestamp": datetime.now().isoformat(),
+            "uptime_seconds": int(time.time() - start_time) if 'start_time' in globals() else 0,
+            "python_version": os.sys.version,
+            "platform": os.sys.platform
+        },
+        "model": {
+            "model_id": MODEL_CONFIG.model_id,
+            "is_loaded": model_manager.is_model_loaded,
+            "max_context_length": MODEL_CONFIG.max_context_length,
+            "memory": model_manager.get_memory_stats()
+        },
+        "request": {
+            "headers": dict(request.headers),
+            "remote_addr": request.remote_addr,
+            "method": request.method,
+            "content_type": request.content_type
+        },
+        "conversation_state": {
+            "roles": list(conversation_state.history.keys()),
+            "history_lengths": {role: len(msgs) for role, msgs in conversation_state.history.items()}
+        }
+    }
+    
+    return jsonify(debug_data)
+
+# Add this function for mock responses when model is not available
+def generate_fallback_response(question: str) -> str:
+    """Generate a fallback response when the model is not available."""
+    fallback_responses = {
+        # Identity questions
+        "who are you": "I am the Intel Classroom Assistant, an educational AI developed to help students and teachers with academic questions.",
+        "who made you": "I was created by the Intel Classroom Assistant team as an educational AI assistant.",
+        "who developed you": "I was developed by the Intel Classroom Assistant team specifically for educational purposes.",
+        "what are you": "I am an AI educational assistant designed to provide helpful, accurate information for classroom use.",
+        "your name": "I am the Intel Classroom Assistant, your educational AI companion.",
+        
+        # Technical questions
+        "what is merge sort": "Merge sort is a sorting algorithm that uses the divide and conquer approach. It divides the input array into two halves, recursively sorts them, and then merges the sorted halves to produce the final sorted output. It has a time complexity of O(n log n).",
+        "what is recursion": "Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem. It includes a base case to prevent infinite recursion and is commonly used in algorithms like factorial calculation, tree traversal, and divide-and-conquer strategies.",
+        
+        # Default response
+        "default": "I'm sorry, I can't provide a detailed response at the moment as my language model is currently unavailable. The system is operating in fallback mode. Please try again later or contact support if this issue persists."
+    }
+    
+    # Convert question to lowercase for case-insensitive matching
+    question_lower = question.lower()
+    
+    # Check if question contains any of the fallback response keys
+    for key, response in fallback_responses.items():
+        if key in question_lower:
+            return response
+    
+    # Return default response
+    return fallback_responses["default"]
+
+# Model initialization with startup optimization
 def initialize_server():
-    """Initialize server with optimized model loading"""
+    """Initialize server with optimized model loading and speech recognition."""
     global start_time
     start_time = time.time()
     
-    logger.info("🚀 Starting Ultra-Optimized Intel Classroom Assistant v2")
+    logger.info("🚀 Starting Intel Classroom Assistant Server (Optimized)")
+    logger.info(f"Model: {MODEL_CONFIG.model_id}")
+    logger.info(f"Cache directory: {MODEL_CONFIG.cache_dir}")
     
-    # Load model
-    model_manager.load_model_cached()
-    
-    # Warm up in background thread
-    def warm_up():
-        if model_manager.is_model_loaded:
-            model_manager.warm_up_model()
+    # Load model with caching
+    try:
+        if model_manager.load_model_cached():
+            logger.info("Model loaded successfully")
+            
+            # Warm up model for better first-request performance
+            try:
+                model_manager.warm_up_model()
+                logger.info("Model warm-up completed")
+            except Exception as e:
+                logger.warning(f"Model warm-up failed: {str(e)}")
         else:
-            logger.warning("Skipping warm-up: Model not loaded")
+            logger.error("Failed to load model - Server will operate in fallback mode")
+            logger.info("Fallback mode: Basic responses will be provided")
+    except Exception as e:
+        logger.error(f"Critical error during model loading: {str(e)}")
+        logger.info("Server will operate in fallback mode")
     
-    threading.Thread(target=warm_up).start()
+    # Initialize speech recognition
+    speech_rec_status = initialize_speech_recognition()
+    logger.info(f"Speech recognition initialization: {'Success' if speech_rec_status else 'Failed'}")
     
-    logger.info("✅ Server initialization complete")
+    # Add signal handlers for graceful shutdown
+    try:
+        import signal
+        
+        def signal_handler(sig, frame):
+            logger.info(f"Received signal {sig}, shutting down gracefully...")
+            # Clean up resources if needed
+            try:
+                if model_manager.is_model_loaded:
+                    logger.info("Cleaning up model resources")
+                    # If you have an unload method:
+                    # model_manager.unload_model()
+            except Exception as e:
+                logger.error(f"Error during cleanup: {str(e)}")
+            os._exit(0)
+        
+        signal.signal(signal.SIGINT, signal_handler)
+        signal.signal(signal.SIGTERM, signal_handler)
+        logger.info("Signal handlers registered for graceful shutdown")
+    except Exception as e:
+        logger.warning(f"Failed to set up signal handlers: {str(e)}")
+    
+    logger.info("Server initialization complete")
 
-# ================= Main Execution =================
 if __name__ == "__main__":
     initialize_server()
     
-    # Run with production optimizations
+    # Run with optimized settings
     app.run(
-        debug=False,
+        debug=True,  # Enable debug for development
         port=8000,
         host='127.0.0.1',
-        threaded=True,
-        use_reloader=False
+        threaded=True,  # Enable threading for better concurrency
     )
