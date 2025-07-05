@@ -222,7 +222,30 @@ const ChatPage = () => {
       console.error("Upload or chat error:", err);
     }
   };
-
+  const micDictate = () => {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        toast.error("Speech recognition not supported in this browser");
+        return;
+      }
+  
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
+  
+      recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        setCurrentMessage((prev) => (prev ? `${prev} ${text}` : text));
+        toast.success(`Voice: “${text}”`);
+      };
+  
+      recognition.onerror = (e) =>
+        toast.error(`Speech error: ${e.error || "unknown"}`);
+  
+      recognition.start();
+    };
   const addTopic = async () => {
     const topic = newTopicName.trim();
     if (!topic || topics.includes(topic)) {
@@ -648,7 +671,14 @@ const ChatPage = () => {
             >
               +
             </Button>
-
+            <Button
+                          variant="outline-secondary"
+                          onClick={micDictate}
+                          disabled={loading}
+                          title="Click to speak"
+                        >
+                          🎤
+                        </Button>
             <Button
               onClick={handleSend}
               disabled={!currentMessage.trim() && !imageFile}
