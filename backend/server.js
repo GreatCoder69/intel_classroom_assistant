@@ -31,6 +31,7 @@ require("./app/routes/admin.routes")(app);
 require("./app/routes/log.routes")(app);
 require("./app/routes/subjects.routes")(app);
 require("./app/routes/resources.routes")(app);
+require("./app/routes/suggestion.routes")(app);
 
 const uploadRoutes = require("./app/routes/upload.routes");
 app.use("/api", uploadRoutes);

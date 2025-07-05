@@ -189,3 +189,42 @@
 2025-07-05 05:35:31 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified
 2025-07-05 05:38:01 [INFO] voice_service: Converting C:\Users\gitaa\AppData\Local\Temp\tmp0bqsnbbc.webm to WAV using ffmpeg
 2025-07-05 05:38:01 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified
+2025-07-05 05:57:24 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-05 05:58:05 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-05 05:58:07 [WARNING] classroom_assistant: Voice service not available: No module named 'vosk'
+2025-07-05 05:58:07 [INFO] classroom_assistant: Loading optimized model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-05 05:58:18 [INFO] classroom_assistant: Pre-tokenizing system prompts for optimal performance
+2025-07-05 05:58:18 [INFO] classroom_assistant: Warming up model for optimal performance
+2025-07-05 05:58:22 [INFO] classroom_assistant: Model loaded and ready for optimized inference
+2025-07-05 05:58:22 [INFO] classroom_assistant: Starting Intel Classroom Assistant server
+2025-07-05 05:58:22 [INFO] classroom_assistant: Running in production mode without auto-reloader
+2025-07-05 05:59:16 [INFO] classroom_assistant: [20250705055916] Chat request - Subject: Networking, Role: student, Q: '[Context: This question is abo...'
+2025-07-05 05:59:16 [WARNING] classroom_assistant: [20250705055916] High memory usage: 84.1% (Available: 2559.64 MB)
+2025-07-05 05:59:16 [INFO] classroom_assistant: [20250705055916] Generating response
+2025-07-05 05:59:16 [INFO] classroom_assistant: [20250705055916] Generating response with student system prompt
+2025-07-05 06:00:16 [ERROR] classroom_assistant: [20250705055916] LLM generation timed out after 60 seconds
+2025-07-05 06:00:16 [INFO] classroom_assistant: [20250705055916] Generation completed in 60.02s
+2025-07-05 06:00:18 [INFO] classroom_assistant: [20250705055916] Response: 'Sorry, it's taking longer than...' (105 chars)
+2025-07-05 06:00:33 [INFO] classroom_assistant: [20250705060033] Chat request - Subject: Networking, Role: student, Q: '[Context: This question is abo...'
+2025-07-05 06:00:33 [WARNING] classroom_assistant: [20250705060033] High memory usage: 88.4% (Available: 1858.69 MB)
+2025-07-05 06:00:33 [INFO] classroom_assistant: [20250705060033] Generating response
+2025-07-05 06:00:33 [INFO] classroom_assistant: [20250705060033] Generating response with student system prompt
+2025-07-05 06:01:00 [INFO] classroom_assistant: [20250705060033] Generation completed successfully
+2025-07-05 06:01:00 [INFO] classroom_assistant: [20250705060033] Generation completed in 27.39s
+2025-07-05 06:01:01 [INFO] classroom_assistant: [20250705060033] Response: '1 + 1 is 2. That's pretty stra...' (134 chars)
+2025-07-05 06:08:34 [INFO] classroom_assistant: [20250705060834] Chat request - Subject: Networking, Role: student, Q: '[Context: This question is abo...'
+2025-07-05 06:08:34 [WARNING] classroom_assistant: [20250705060834] High memory usage: 86.2% (Available: 2212.38 MB)
+2025-07-05 06:08:34 [INFO] classroom_assistant: [20250705060834] Fetching subject resources for context
+2025-07-05 06:08:34 [WARNING] classroom_assistant: Failed to fetch subjects: 403
+2025-07-05 06:08:34 [INFO] classroom_assistant: [20250705060834] Generating response
+2025-07-05 06:08:34 [INFO] classroom_assistant: [20250705060834] Generating response with student system prompt
+2025-07-05 06:09:34 [ERROR] classroom_assistant: [20250705060834] LLM generation timed out after 60 seconds
+2025-07-05 06:09:34 [INFO] classroom_assistant: [20250705060834] Generation completed in 60.01s
+2025-07-05 06:09:34 [INFO] classroom_assistant: [20250705060834] Response: 'Sorry, it's taking longer than...' (105 chars)
+2025-07-05 06:10:12 [INFO] classroom_assistant: [20250705061012] Chat request - Subject: Mathematics, Role: student, Q: '[Context: This question is abo...'
+2025-07-05 06:10:12 [WARNING] classroom_assistant: [20250705061012] High memory usage: 88.1% (Available: 1907.59 MB)
+2025-07-05 06:10:12 [INFO] classroom_assistant: [20250705061012] Generating response
+2025-07-05 06:10:12 [INFO] classroom_assistant: [20250705061012] Generating response with student system prompt
+2025-07-05 06:11:12 [ERROR] classroom_assistant: [20250705061012] LLM generation timed out after 60 seconds
+2025-07-05 06:11:12 [INFO] classroom_assistant: [20250705061012] Generation completed in 60.01s
+2025-07-05 06:11:12 [INFO] classroom_assistant: [20250705061012] Response: 'Sorry, it's taking longer than...' (105 chars)
