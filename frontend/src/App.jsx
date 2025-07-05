@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Subjects from "./pages/Subjects";
 import Resources from "./pages/Resources";
 import TeacherChat from "./components/TeacherChat";
+import ProtectedRoute from "./components/ProtectedRoute";
 const App = () => (
   <Routes>
     {/* Public Routes */}
@@ -21,14 +22,22 @@ const App = () => (
     <Route path="/signup" element={<SignupPage />} />
 
     {/* Main App Routes without Layout */}
-    <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/dashboard" element={
+      <ProtectedRoute requiredRole="teacher">
+        <Dashboard />
+      </ProtectedRoute>
+    } />
     <Route path="/subjects" element={<Subjects />} />
     <Route path="/subjects/:subjectId/resources" element={<Resources />} />
     <Route path="/chat" element={<ChatPage />} />
     <Route path="/general-chat" element={<GeneralChat />} />
     <Route path="/history" element={<ChatHistory />} />
     <Route path="/chat-detail" element={<ChatDetail />} />
-    <Route path="/teacher-chat" element={<TeacherChat />} />
+    <Route path="/teacher-chat" element={
+      <ProtectedRoute requiredRole="teacher">
+        <TeacherChat />
+      </ProtectedRoute>
+    } />
 
     {/* Admin routes */}
     <Route path="/admin" element={<AdminPage />} />

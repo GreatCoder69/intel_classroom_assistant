@@ -17,6 +17,18 @@ const SidebarLayout = () => {
     const fetchUserRole = async () => {
       try {
         const token = localStorage.getItem("token");
+        
+        // First try to get role from localStorage user data
+        const userData = localStorage.getItem('user');
+        if (userData) {
+          const parsedUser = JSON.parse(userData);
+          if (parsedUser.role) {
+            setUserRole(parsedUser.role);
+            return;
+          }
+        }
+        
+        // Fallback to API call
         const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/me`, {
           headers: {
             "Content-Type": "application/json",

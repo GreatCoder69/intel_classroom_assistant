@@ -155,3 +155,37 @@
 2025-07-05 02:50:56 [ERROR] classroom_assistant: [20250705024956] LLM generation timed out after 60 seconds
 2025-07-05 02:50:56 [INFO] classroom_assistant: [20250705024956] Generation completed in 60.01s
 2025-07-05 02:50:56 [INFO] classroom_assistant: [20250705024956] Response: 'Sorry, it's taking longer than...' (105 chars)
+2025-07-05 05:27:42 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-05 05:27:50 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-05 05:27:51 [INFO] voice_service: Loading Vosk model from: c:\Users\gitaa\OneDrive\Desktop\Coding\intel_classroom_assistant\vosk-model-small-en-us-0.15
+2025-07-05 05:27:52 [INFO] voice_service: Vosk model loaded successfully
+2025-07-05 05:27:52 [INFO] classroom_assistant: Voice service is available
+2025-07-05 05:27:52 [INFO] classroom_assistant: Voice service endpoints registered
+2025-07-05 05:27:52 [INFO] classroom_assistant: Loading optimized model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-05 05:27:59 [INFO] classroom_assistant: Pre-tokenizing system prompts for optimal performance
+2025-07-05 05:27:59 [INFO] classroom_assistant: Warming up model for optimal performance
+2025-07-05 05:28:01 [INFO] classroom_assistant: Model loaded and ready for optimized inference
+2025-07-05 05:28:01 [INFO] classroom_assistant: Starting Intel Classroom Assistant server
+2025-07-05 05:28:01 [INFO] classroom_assistant: Running in production mode without auto-reloader
+2025-07-05 05:28:20 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-05 05:28:29 [INFO] datasets: PyTorch version 2.7.1 available.
+2025-07-05 05:28:29 [INFO] voice_service: Loading Vosk model from: C:\Users\gitaa\OneDrive\Desktop\Coding\intel_classroom_assistant\vosk-model-small-en-us-0.15
+2025-07-05 05:28:30 [INFO] voice_service: Vosk model loaded successfully
+2025-07-05 05:28:30 [INFO] classroom_assistant: Voice service is available
+2025-07-05 05:28:30 [INFO] classroom_assistant: Voice service endpoints registered
+2025-07-05 05:28:30 [INFO] classroom_assistant: Loading optimized model: OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov
+2025-07-05 05:28:38 [INFO] classroom_assistant: Pre-tokenizing system prompts for optimal performance
+2025-07-05 05:28:38 [INFO] classroom_assistant: Warming up model for optimal performance
+2025-07-05 05:28:40 [INFO] classroom_assistant: Model loaded and ready for optimized inference
+2025-07-05 05:32:18 [INFO] voice_service: Converting C:\Users\gitaa\AppData\Local\Temp\tmp6yd6ouhy.webm to WAV using ffmpeg
+2025-07-05 05:32:18 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified
+2025-07-05 05:32:34 [INFO] voice_service: Converting C:\Users\gitaa\AppData\Local\Temp\tmp9qqxohwl.webm to WAV using ffmpeg
+2025-07-05 05:32:34 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified
+2025-07-05 05:34:36 [INFO] voice_service: Converting C:\Users\gitaa\AppData\Local\Temp\tmpxtxz7o53.webm to WAV using ffmpeg
+2025-07-05 05:34:36 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified
+2025-07-05 05:35:21 [INFO] voice_service: Converting C:\Users\gitaa\AppData\Local\Temp\tmpljhk97rc.webm to WAV using ffmpeg
+2025-07-05 05:35:21 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified
+2025-07-05 05:35:31 [INFO] voice_service: Converting C:\Users\gitaa\AppData\Local\Temp\tmp8vfzc0te.webm to WAV using ffmpeg
+2025-07-05 05:35:31 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified
+2025-07-05 05:38:01 [INFO] voice_service: Converting C:\Users\gitaa\AppData\Local\Temp\tmp0bqsnbbc.webm to WAV using ffmpeg
+2025-07-05 05:38:01 [ERROR] voice_service: Error converting audio: [WinError 2] The system cannot find the file specified

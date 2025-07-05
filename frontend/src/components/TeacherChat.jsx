@@ -480,7 +480,7 @@ const ChatPage = () => {
 
       <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
         <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
-          <h5>{selectedTopic}</h5>
+          <h5>EduAI</h5>
           <Dropdown align="end">
             <Dropdown.Toggle
               variant="outline-secondary"
@@ -512,7 +512,7 @@ const ChatPage = () => {
             <div
               key={i}
               className={`msg-row ${
-                msg.sender === "user" ? "user-left" : "bot-right"
+                msg.sender === "user" ? "user-right" : "bot-left"
               } mb-3`}
             >
               <div

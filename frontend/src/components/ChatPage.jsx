@@ -3,6 +3,7 @@ import { Button, Form, InputGroup, Dropdown, Modal } from "react-bootstrap";
 import { useNavigate, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { toast } from "react-toastify";
+import VoiceToText from "./VoiceToText";
 import "./ChatPage.css";
 
 const apiBase = import.meta.env.VITE_API_URL;
@@ -29,6 +30,18 @@ const ChatPage = () => {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [useResources, setUseResources] = useState(false); // For student to enable/disable resource context
   const [user, setUser] = useState(null); // Store user data to check role
+
+  // Handle voice transcription
+  const handleVoiceTranscription = (transcribedText) => {
+    // Add transcribed text to current message
+    setCurrentMessage(prev => {
+      const newText = prev ? `${prev} ${transcribedText}` : transcribedText;
+      return newText;
+    });
+    
+    // Show success message
+    toast.success(`Voice transcription: "${transcribedText.slice(0, 50)}${transcribedText.length > 50 ? '...' : ''}"`);
+  };
 
   const [profile, setProfile] = useState({
     email: "",
@@ -759,6 +772,12 @@ const ChatPage = () => {
             >
               +
             </Button>
+
+            {/* Voice to Text Button */}
+            <VoiceToText
+              onTranscription={handleVoiceTranscription}
+              disabled={loading}
+            />
 
             <Button
               onClick={handleSend}

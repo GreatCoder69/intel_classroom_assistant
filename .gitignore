@@ -8,7 +8,16 @@
 .Trashes
 ehthumbs.db
 Thumbs.db
-archive/model_cache
+*.tmp
+*.temp
+desktop.ini
+
+# === Project Specific ===
+archive/model_cache/
+vosk-model-small-en-us-0.15/
+setup_voice_service.bat
+setup_voice_service.sh
+VOICE_README.md
 
 # === Python ===
 __pycache__/
@@ -49,8 +58,15 @@ pnpm-debug.log*
 # === Backend (Python/Node.js) ===
 backend/servers/logs/
 backend/servers/model_cache/
+backend/servers/voice_cache/
+backend/servers/temp_audio/
+backend/servers/*.log
 backend/node_modules/
 backend/.env
+backend/.env.local
+backend/.env.development
+backend/.env.test
+backend/.env.production
 backend/.DS_Store
 backend/.vscode/
 backend/.idea/
@@ -63,11 +79,16 @@ backend/app/node_modules/
 backend/app/uploads/
 backend/uploads/
 
+# === Uploads & Cache ===
 uploads/
+*.cache
+cache/
+temp/
 
 # === Frontend (React/Vite) ===
 classroom-assistant/node_modules/
 classroom-assistant/.env
+classroom-assistant/.env.local
 classroom-assistant/.DS_Store
 classroom-assistant/.vscode/
 classroom-assistant/.idea/
@@ -79,6 +100,10 @@ classroom-assistant/.eslintcache
 classroom-assistant/public/models/
 frontend/node_modules/
 frontend/.env
+frontend/.env.local
+frontend/.env.development
+frontend/.env.test
+frontend/.env.production
 frontend/.DS_Store
 frontend/.vscode/
 frontend/.idea/
@@ -92,6 +117,17 @@ frontend/*.log
 frontend/dist/
 frontend/dist-ssr/
 frontend/*.local
+frontend/build/
+frontend/.Vite
+
+# === Development & Testing ===
+coverage/
+.nyc_output/
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+.cache/
 
 # Editor/project files
 .idea/

@@ -207,6 +207,15 @@ from optimum.intel.openvino import OVModelForCausalLM
 import requests
 import json
 
+# Try to import voice service (optional dependency)
+try:
+    from voice_service import voice_bp
+    VOICE_SERVICE_AVAILABLE = True
+    logger.info("Voice service is available")
+except ImportError as e:
+    VOICE_SERVICE_AVAILABLE = False
+    logger.warning(f"Voice service not available: {e}")
+
 # Initialize optimized Flask app
 app = Flask(__name__)
 
@@ -226,6 +235,11 @@ CORS(app, resources={
         "max_age": 86400  # Cache preflight requests for 24 hours
     }
 })
+
+# Register voice service blueprint if available
+if VOICE_SERVICE_AVAILABLE:
+    app.register_blueprint(voice_bp)
+    logger.info("Voice service endpoints registered")
 
 # Thread pool for concurrent operations
 executor = ThreadPoolExecutor(max_workers=MAX_WORKERS, thread_name_prefix="AI_Worker")

@@ -219,13 +219,25 @@ function Subjects() {
           </Alert>
         )}
 
-        {/* Back Button */}
-        <Button 
-          className="back-btn mb-4"
-          onClick={() => navigate('/dashboard')}
-        >
-          ← Back to Dashboard
-        </Button>
+        {/* Back Button - Only show for teachers */}
+        {user?.role === 'teacher' && (
+          <Button 
+            className="back-btn mb-4"
+            onClick={() => navigate('/dashboard')}
+          >
+            ← Back to Dashboard
+          </Button>
+        )}
+
+        {/* Back Button for Students - goes to chat */}
+        {user?.role === 'student' && (
+          <Button 
+            className="back-btn mb-4"
+            onClick={() => navigate('/chat')}
+          >
+            ← Back to Chat
+          </Button>
+        )}
 
         {/* Subjects Grid */}
         <div className="subjects-list">
