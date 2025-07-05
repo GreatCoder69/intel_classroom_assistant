@@ -514,6 +514,14 @@ const ChatPage = () => {
         <>
           <Button
             className="w-100 mb-2"
+            onClick={() => navigate("/suggestions")}
+          >
+            Go to Suggestions
+          </Button>
+        </>
+        <>
+          <Button
+            className="w-100 mb-2"
             onClick={handleOpenNewTopicModal}
           >
             + New Chat

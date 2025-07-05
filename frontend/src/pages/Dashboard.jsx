@@ -151,6 +151,32 @@ const SidebarLayout = () => {
               </Link>
             </li>
 
+            <li className="mb-3">
+              <Link
+                to="/teacher-suggestions"
+                className={`d-flex align-items-center text-decoration-none p-2 rounded ${
+                  isActive("/teacher-suggestions") ? "bg-primary text-white fw-bold" : "text-light"
+                }`}
+                style={{ 
+                  fontSize: "1.05rem",
+                  transition: "all 0.2s ease",
+                  backgroundColor: !isActive("/teacher-suggestions") ? "transparent" : undefined
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive("/teacher-suggestions")) {
+                    e.target.style.backgroundColor = "#404040";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive("/teacher-suggestions")) {
+                    e.target.style.backgroundColor = "transparent";
+                  }
+                }}
+              >
+                <FaComment className="me-3" />
+                Suggestions
+              </Link>
+            </li>
             <li className="mt-4">
               <button
                 onClick={handleLogout}

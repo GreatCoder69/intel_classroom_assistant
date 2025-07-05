@@ -1,11 +1,12 @@
-const express         = require("express");
-const { verifyToken } = require("../middlewares/authJwt");
-const suggCtrl        = require("../controllers/suggestion.controller");
+const express            = require("express");
+const router             = express.Router();
+const suggestionCtrl     = require("../controllers/suggestion.controller");
+const { verifyToken }    = require("../middlewares/authJwt");
 
-const router = express.Router();
+/* existing POST /suggestions */
+router.post("/suggestions", verifyToken, suggestionCtrl.searchSuggestions);
 
-router.post("/suggestions/search", verifyToken, suggCtrl.searchSuggestions);
+/* NEW: GET /suggestions  (all for the user) */
+router.get("/suggestions", verifyToken, suggestionCtrl.getUserSuggestions);
 
-module.exports = (app) => {
-  app.use("/api", router);
-};
+module.exports = (app) => app.use("/api", router);

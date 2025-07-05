@@ -431,6 +431,7 @@ const ChatPage = () => {
             Go to Dashboard
           </Button>
         </>
+        
         <>
           <Button
             className="w-100 mb-2"
