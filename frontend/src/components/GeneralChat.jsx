@@ -297,12 +297,6 @@ const ChatPage = () => {
         ...prev,
         [selectedTopic]: updatedChat,
       }));
-
-      setChat(updatedChat);
-      setChatHistory((prev) => ({
-        ...prev,
-        [selectedTopic]: updatedChat,
-      }));
     } catch (err) {
       console.error("Upload or chat error:", err);
     }
@@ -422,6 +416,7 @@ const ChatPage = () => {
           // DO NOT set 'Content-Type' when using FormData
         },
         body: formData,
+        cache: 'no-cache'
       });
 
       const data = await res.json();

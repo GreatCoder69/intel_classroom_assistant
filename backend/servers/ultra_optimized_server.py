@@ -24,6 +24,14 @@ import json
 import hashlib
 import signal
 import atexit
+import warnings
+
+# Suppress warnings early
+os.environ['TRANSFORMERS_VERBOSITY'] = 'error'
+warnings.filterwarnings("ignore", message="The following generation flags are not valid")
+warnings.filterwarnings("ignore", message=".*dynamic_shapes.*")
+warnings.filterwarnings("ignore", category=UserWarning)
+
 from datetime import datetime, timedelta
 from functools import lru_cache, wraps
 from typing import Dict, Optional, Tuple, Any, List
@@ -34,7 +42,6 @@ from enum import Enum
 import logging
 from logging.handlers import RotatingFileHandler
 
-# Third-party imports
 from flask import Flask, request, jsonify, g
 from flask_cors import CORS
 import psutil
@@ -43,12 +50,12 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 import numpy as np
 
-# Advanced optimization settings
+# Optimization settings
 CACHE_TIMEOUT = 300  # 5 minutes cache for subject content
 REQUEST_POOL_SIZE = 20  # Increased connection pool size
 MAX_WORKERS = 8  # Increased thread pool size
 BATCH_SIZE = 4  # Process multiple requests in batches
-BATCH_TIMEOUT = 0.1  # Wait 100ms before processing incomplete batch
+BATCH_TIMEOUT = 0.15  # Wait 150ms before processing incomplete batch (150%)
 
 # Memory management settings
 MEMORY_CLEANUP_THRESHOLD = 80  # Cleanup when memory usage exceeds 80%
@@ -72,7 +79,7 @@ class BatchedRequest:
     priority: RequestPriority
     future: Future
     timestamp: float
-    timeout: float = 30.0
+    timeout: float = 45.0  # Increased from 30.0 to 45.0 (150%)
 
 class AdvancedMemoryManager:
     """Advanced memory management with predictive cleanup and optimization."""
@@ -92,11 +99,9 @@ class AdvancedMemoryManager:
         memory = psutil.virtual_memory()
         current_percent = memory.percent
         
-        # Store memory history for trend analysis
         now = time.time()
         self.memory_history.append((now, current_percent))
         
-        # Keep only last 60 seconds of history
         cutoff = now - 60
         self.memory_history = [(t, p) for t, p in self.memory_history if t > cutoff]
         
@@ -148,13 +153,12 @@ class AdvancedMemoryManager:
         """Perform aggressive memory cleanup."""
         self._gentle_cleanup()
         
-        # Clear caches
+        # Clearing caches
         if hasattr(content_cache, 'clear'):
             content_cache.clear()
         if hasattr(conversation_state, 'emergency_cleanup'):
             conversation_state.emergency_cleanup()
 
-# Global memory manager
 memory_manager = AdvancedMemoryManager()
 
 class IntelligentBatchProcessor:
@@ -209,11 +213,11 @@ class IntelligentBatchProcessor:
     def _collect_batch(self) -> List[BatchedRequest]:
         """Collect a batch of requests to process together."""
         batch = []
-        deadline = time.time() + self.timeout
+        deadline = time.time() + (self.timeout * 1.5)  # 150% of original timeout
         
         while len(batch) < self.batch_size and time.time() < deadline:
             try:
-                _, _, request = self.queue.get(timeout=0.01)
+                _, _, request = self.queue.get(timeout=0.015)  # Increased from 0.01 to 0.015
                 if not request.future.cancelled():
                     batch.append(request)
                 self.queue.task_done()
@@ -230,7 +234,6 @@ class IntelligentBatchProcessor:
             return
             
         try:
-            # Group requests by role for similar processing
             role_groups = {}
             for req in batch:
                 role = req.role
@@ -261,7 +264,6 @@ class IntelligentBatchProcessor:
                 continue
                 
             try:
-                # Process individual request
                 result = self._process_single_request(request)
                 request.future.set_result(result)
             except Exception as e:
@@ -302,7 +304,7 @@ def create_ultra_optimized_session() -> requests.Session:
     session.mount("https://", adapter)
     
     # Optimized timeouts
-    session.timeout = (3, 8)  # (connect, read) timeout
+    session.timeout = (4.5, 12)  # Increased from (3, 8) to (4.5, 12) - 150%
     
     # Compression support
     session.headers.update({
@@ -407,9 +409,7 @@ LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 # Console handler with ultra filter
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
-console_handler.addFilter(UltraLogFilter())
-console_handler.setLevel(logging.INFO)
-
+console_handler.addFilter(UltraLogFilter())  # Reduce console nois
 # File handler with rotation
 file_handler = RotatingFileHandler(
     os.path.join(log_dir, 'ultra_optimized.log'),
@@ -426,15 +426,21 @@ logging.basicConfig(level=logging.INFO, handlers=[console_handler, file_handler]
 for lib in ['werkzeug', 'urllib3', 'transformers', 'optimum', 'requests']:
     logging.getLogger(lib).setLevel(logging.WARNING)
 
+# Suppress transformer generation warnings
+import warnings
+warnings.filterwarnings("ignore", message="The following generation flags are not valid")
+warnings.filterwarnings("ignore", message=".*temperature.*")
+warnings.filterwarnings("ignore", message=".*top_p.*")
+
 logger = logging.getLogger('ultra_classroom_assistant')
-logger.info("Ultra-optimized logging system initialized")
+logger.info("Logging system initialized")
 
 # Import ML dependencies with error handling
 try:
     from transformers import AutoTokenizer
     from optimum.intel.openvino import OVModelForCausalLM
     ML_AVAILABLE = True
-    logger.info("ML dependencies loaded successfully")
+    logger.info("ML dependencies loaded")
 except ImportError as e:
     logger.warning(f"ML dependencies not available: {e}")
     ML_AVAILABLE = False
@@ -812,13 +818,17 @@ class UltraModelManager:
                 return True
             
             try:
-                logger.info(f"Loading ultra-optimized model: {model_id}")
+                logger.info(f"Loading model: {model_id}")
                 start_time = time.time()
                 
                 # Suppress transformer warnings during loading
                 transformers_logger = logging.getLogger("transformers")
                 original_level = transformers_logger.level
                 transformers_logger.setLevel(logging.ERROR)
+                
+                # Also suppress the specific generation warnings
+                import warnings
+                warnings.filterwarnings("ignore", message="The following generation flags are not valid")
                 
                 # Load tokenizer with optimizations
                 tokenizer = AutoTokenizer.from_pretrained(
@@ -917,19 +927,17 @@ class UltraModelManager:
                     padding=True
                 )
                 
-                # Generate with optimized parameters
+                # Generate with OpenVINO-compatible parameters (remove problematic ones)
                 outputs = model.generate(
                     **inputs,
                     max_new_tokens=512,  # Limit response length
                     min_new_tokens=10,
-                    do_sample=True,
-                    temperature=0.7,
-                    top_p=0.9,
+                    do_sample=False,  # Use deterministic generation for OpenVINO compatibility
                     repetition_penalty=1.1,
                     no_repeat_ngram_size=3,
                     pad_token_id=tokenizer.eos_token_id,
-                    eos_token_id=tokenizer.eos_token_id,
-                    early_stopping=True
+                    eos_token_id=tokenizer.eos_token_id
+                    # Removed: temperature, top_p, early_stopping (not supported by OpenVINO)
                 )
                 
                 # Decode response
@@ -1085,7 +1093,7 @@ def fetch_subject_content_by_name(subject_name: str, use_resources: bool = False
         response = http_session.get(
             "http://localhost:8080/api/subjects/user",
             headers={'Content-Type': 'application/json'},
-            timeout=(2, 4)
+            timeout=(3, 6)  # Increased from (2, 4) to (3, 6) - 150%
         )
         
         if response.status_code != 200:
@@ -1120,24 +1128,36 @@ def fetch_subject_content_by_name(subject_name: str, use_resources: bool = False
 def fetch_subject_content(subject_id: str, use_resources: bool = False) -> str:
     """Optimized fetch of extracted PDF content."""
     if not use_resources or not subject_id:
+        logger.debug(f"Skipping subject content fetch - use_resources: {use_resources}, subject_id: {bool(subject_id)}")
         return ""
     
     cache_key = f"subject_id:{subject_id}:resources:{use_resources}"
     cached_content = content_cache.get(cache_key)
     if cached_content is not None:
+        logger.debug(f"Cache hit for subject content: {subject_id}")
         return cached_content
     
+    logger.info(f"Fetching subject content from Node.js backend: {subject_id}")
+    
     try:
+        start_time = time.time()
         response = http_session.get(
             f"http://localhost:8080/api/subjects/{subject_id}/content",
             headers={'Content-Type': 'application/json'},
-            timeout=(2, 5)
+            timeout=(3, 7.5)  # Increased from (2, 5) to (3, 7.5) - 150%
         )
+        fetch_time = time.time() - start_time
+        
+        logger.debug(f"HTTP request completed in {fetch_time:.2f}s - Status: {response.status_code}")
         
         if response.status_code == 200:
             content_data = response.json()
             
-            if content_data.get('totalResources', 0) == 0:
+            total_resources = content_data.get('totalResources', 0)
+            logger.info(f"Subject content received: {total_resources} resources")
+            
+            if total_resources == 0:
+                logger.debug(f"No resources found for subject: {subject_id}")
                 content_cache.set(cache_key, "")
                 return ""
             
@@ -1145,20 +1165,26 @@ def fetch_subject_content(subject_id: str, use_resources: bool = False) -> str:
             context_parts = [
                 "\n=== SUBJECT RESOURCES CONTEXT ===",
                 f"Subject: {content_data.get('subjectName', 'Unknown')}",
-                f"Total Resources: {content_data.get('totalResources', 0)}",
+                f"Total Resources: {total_resources}",
                 ""
             ]
             
             # Process resources efficiently
+            processed_resources = 0
             for resource in content_data.get('resources', []):
                 if resource.get('chunks'):
+                    processed_resources += 1
                     context_parts.extend([
                         f"--- {resource.get('name', 'Unknown')} ---",
                         f"Keywords: {', '.join(kw['word'] for chunk in resource.get('chunks', [])[:2] for kw in chunk.get('keywords', [])[:3])}",
                         ""
                     ])
-                    
-                    # Process top chunks
+            
+            logger.debug(f"Processed {processed_resources} resources with content")
+            
+            # Process top chunks for each resource
+            for resource in content_data.get('resources', []):
+                if resource.get('chunks'):
                     for chunk in resource.get('chunks', [])[:2]:
                         content = chunk.get('content', '')[:500]
                         context_parts.extend([
@@ -1169,12 +1195,24 @@ def fetch_subject_content(subject_id: str, use_resources: bool = False) -> str:
             context_parts.append("=== END RESOURCES ===\n")
             result = "\n".join(context_parts)
             
+            logger.info(f"Subject content built: {len(result)} characters")
             content_cache.set(cache_key, result)
             return result
+        elif response.status_code == 403:
+            logger.warning(f"Access denied when fetching subject content for: {subject_id}")
+        elif response.status_code == 404:
+            logger.warning(f"Subject not found: {subject_id}")
+        else:
+            logger.warning(f"Unexpected status when fetching subject content: {response.status_code}")
             
+    except requests.exceptions.Timeout:
+        logger.error(f"Timeout fetching subject content for: {subject_id}")
+    except requests.exceptions.ConnectionError:
+        logger.error(f"Connection error fetching subject content for: {subject_id}")
     except Exception as e:
-        logger.warning(f"Error fetching subject content: {e}")
+        logger.error(f"Error fetching subject content for {subject_id}: {e}")
     
+    # Cache empty result to avoid repeated failed requests
     content_cache.set(cache_key, "")
     return ""
 
@@ -1230,23 +1268,32 @@ def ultra_chat():
         use_resources = data.get("useResources", False)
         user_role = data.get("role", request.headers.get("X-User-Role", "student"))
         
+        logger.debug(f"[{request_id}] Chat request: role={user_role}, subject={subject[:30]}, length={len(question)}")
+        
         if not question:
+            logger.warning(f"[{request_id}] No question provided")
             return jsonify({"error": "No question provided"}), 400
         
         if user_role not in ["student", "teacher"]:
+            logger.warning(f"[{request_id}] Invalid role '{user_role}', defaulting to 'student'")
             user_role = "student"
-        
-        logger.info(f"[{request_id}] {user_role} - {subject} - {question[:30]}...")
         
         # Check memory before processing
         memory_stats = memory_manager.monitor_memory()
+        
         if memory_stats["current_percent"] > 90:
+            logger.error(f"[{request_id}] Server overloaded - memory at {memory_stats['current_percent']:.1f}%")
             return jsonify({"error": "Server temporarily overloaded"}), 503
         
         # Fetch subject content if needed
         subject_content = ""
         if use_resources and user_role == "student" and chat_subject:
-            subject_content = fetch_subject_content_by_name(chat_subject, use_resources)
+            try:
+                subject_content = fetch_subject_content_by_name(chat_subject, use_resources)
+                if subject_content:
+                    logger.debug(f"[{request_id}] Subject content loaded: {len(subject_content)} chars")
+            except Exception as e:
+                logger.error(f"[{request_id}] Failed to fetch subject content: {e}")
         
         # Build input context
         base_context = f"{get_current_dynamic_context()}\n\nSubject: {subject}"
@@ -1255,53 +1302,81 @@ def ultra_chat():
         else:
             input_text = f"{get_system_prompt(user_role)}\n\n{base_context}\n\nUser: {question}\n\nIntel Assistant:"
         
-        # Create batched request
-        future = Future()
-        batched_request = BatchedRequest(
-            request_id=request_id,
-            input_text=input_text,
-            role=user_role,
-            priority=RequestPriority.NORMAL,
-            future=future,
-            timestamp=time.time()
-        )
+        logger.debug(f"[{request_id}] Input context prepared: {len(input_text)} total chars")
+        
+        # Check model availability
+        available_models = len(model_manager.models) if hasattr(model_manager, 'models') else 0
         
         # Submit for batch processing or process directly if model available
-        if len(model_manager.models) > 0:
+        if available_models > 0:
             try:
+                logger.debug(f"[{request_id}] Starting model inference...")
+                generation_start = time.time()
+                
                 # Direct processing for now
                 response = model_manager.generate_response(input_text, user_role)
                 answer = extract_assistant_response(response)
+                
+                generation_time = time.time() - generation_start
+                logger.debug(f"[{request_id}] Model inference completed in {generation_time:.2f}s")
+                
             except Exception as e:
-                logger.error(f"[{request_id}] Model error: {e}")
+                logger.error(f"[{request_id}] Model error: {e}", exc_info=True)
                 answer = "I'm experiencing technical difficulties. Please try again."
         else:
+            logger.error(f"[{request_id}] No models available")
             answer = "AI model is not available. Please try again later."
         
         # Calculate response time
         process_time = round(time.time() - start_time, 3)
         
-        # Log completion
-        logger.info(f"[{request_id}] Completed in {process_time}s - {len(answer)} chars")
+        logger.debug(f"[{request_id}] Request completed in {process_time}s")
         
-        return jsonify({
+        if process_time > 45:  # Increased threshold from 30 to 45 seconds (150%)
+            logger.warning(f"[{request_id}] Slow response: {process_time}s")
+        
+        response_data = {
             "answer": answer,
             "chatCategory": "general",
             "latency": process_time,
             "metadata": {
                 "request_id": request_id,
-                "model_used": list(model_manager.models.keys())[0] if model_manager.models else "none",
-                "cache_hit": subject_content and content_cache.get_stats()["hit_rate"] > 0,
-                "memory_usage": memory_stats["current_percent"]
+                "model_used": list(model_manager.models.keys())[0] if hasattr(model_manager, 'models') and model_manager.models else "none",
+                "cache_hit": subject_content and hasattr(content_cache, 'get_stats') and content_cache.get_stats().get("hit_rate", 0) > 0,
+                "memory_usage": memory_stats["current_percent"],
+                "processing_time": process_time
             }
-        })
+        }
+        
+        return jsonify(response_data)
         
     except Exception as e:
         process_time = round(time.time() - start_time, 3)
-        logger.error(f"[{request_id}] Error after {process_time}s: {e}")
+        
+        error_context = {
+            "request_id": request_id,
+            "error_type": type(e).__name__,
+            "error_message": str(e),
+            "processing_time": f"{process_time}s",
+            "stack_trace": traceback.format_exc()
+        }
+        
+        if isinstance(e, ConnectionError):
+            logger.error(f"[{request_id}] Connection error: {e}")
+        elif isinstance(e, TimeoutError):
+            logger.error(f"[{request_id}] Timeout error after {process_time}s: {e}")
+        elif isinstance(e, MemoryError):
+            logger.error(f"[{request_id}] Memory error: {e}")
+        elif "CUDA" in str(e) or "GPU" in str(e):
+            logger.error(f"[{request_id}] GPU/CUDA error: {e}")
+        else:
+            logger.error(f"[{request_id}] Unexpected error: {e}", extra=error_context)
+        
         return jsonify({
             "error": "Server error",
-            "message": "Please try again"
+            "message": "Please try again",
+            "request_id": request_id,
+            "processing_time": process_time
         }), 500
 
 @app.route("/api/query", methods=["POST"])
@@ -1312,36 +1387,49 @@ def ultra_query():
 @app.route("/api/health", methods=["GET"])
 def ultra_health():
     """Ultra-comprehensive health check."""
+    request_id = f"health-{int(time.time())}"
+    
     try:
+        logger.debug(f"[{request_id}] Health check requested")
+        
+        # Quick health assessment
+        memory_stats = memory_manager.monitor_memory()
+        model_available = hasattr(model_manager, 'models') and len(model_manager.models) > 0
+        
         status = {
             "status": "healthy",
             "timestamp": datetime.now().isoformat(),
             "uptime": time.time() - start_time if 'start_time' in globals() else 0,
             "components": {
                 "server": "up",
-                "llm": "up" if model_manager.models else "down",
+                "llm": "up" if model_available else "down",
                 "cache": "up",
                 "memory_manager": "up"
             },
-            "memory": memory_manager.monitor_memory(),
-            "cache_stats": content_cache.get_stats(),
-            "model_stats": model_manager.get_stats(),
-            "batch_stats": batch_processor.stats
+            "memory": memory_stats,
+            "cache_stats": content_cache.get_stats() if hasattr(content_cache, 'get_stats') else {"status": "unknown"},
+            "model_stats": model_manager.get_stats() if hasattr(model_manager, 'get_stats') else {"models": 0},
+            "batch_stats": batch_processor.stats if hasattr(batch_processor, 'stats') else {"pending": 0}
         }
         
         # Determine overall status
-        if not status["components"]["llm"] == "up":
+        if not model_available:
             status["status"] = "degraded"
-        elif status["memory"]["current_percent"] > 90:
+            logger.warning(f"[{request_id}] Service degraded - no models available")
+        elif memory_stats["current_percent"] > 90:
             status["status"] = "degraded"
+            logger.warning(f"[{request_id}] Service degraded - high memory usage: {memory_stats['current_percent']:.1f}%")
         
+        logger.debug(f"[{request_id}] Health check completed - status: {status['status']}")
         return jsonify(status)
         
     except Exception as e:
-        logger.error(f"Health check error: {e}")
+        logger.error(f"[{request_id}] Health check failed: {e}", exc_info=True)
         return jsonify({
             "status": "unhealthy",
-            "error": str(e)
+            "error": str(e),
+            "timestamp": datetime.now().isoformat(),
+            "request_id": request_id
         }), 500
 
 @app.route("/api/stats", methods=["GET"])
@@ -1392,26 +1480,63 @@ atexit.register(lambda: logger.info("Server shutdown"))
 
 if __name__ == "__main__":
     start_time = time.time()
-    logger.info("Starting Ultra-Optimized Intel Classroom Assistant Server")
+    
+    # Basic startup logging
+    logger.info("Starting Intel Classroom Assistant Server")
+    logger.info(f"Python version: {sys.version}")
+    logger.info(f"Platform: {sys.platform}")
+    logger.info(f"Available CPU cores: {psutil.cpu_count()}")
+    logger.info(f"Total memory: {psutil.virtual_memory().total / (1024**3):.1f} GB")
+    logger.info(f"Working directory: {os.getcwd()}")
+    logger.info(f"ML dependencies: {'Available' if ML_AVAILABLE else 'Not available'}")
+    
+    # Check environment
+    env_mode = os.environ.get("FLASK_ENV", "production")
+    logger.info(f"Environment mode: {env_mode}")
+    
+    # Validate configuration
+    port = int(os.environ.get("PORT", 8000))
+    host = os.environ.get("HOST", "0.0.0.0")
+    
+    logger.info(f"Server will bind to: {host}:{port}")
     
     # Development vs production mode
-    if os.environ.get("FLASK_ENV") == "development":
-        logger.info("Running in development mode")
-        app.run(debug=True, port=8000, host='0.0.0.0', threaded=True)
+    if env_mode == "development":
+        logger.info("Running in development mode with debug enabled")
+        logger.warning("Development mode should not be used in production!")
+        
+        try:
+            app.run(debug=True, port=port, host=host, threaded=True)
+        except Exception as e:
+            logger.error(f"Failed to start development server: {e}")
+            sys.exit(1)
     else:
-        logger.info("Running in production mode")
+        logger.info("Running in production mode with optimizations")
         
         # Disable Flask's built-in logging in production
         werkzeug_logger = logging.getLogger('werkzeug')
         werkzeug_logger.disabled = True
         app.logger.disabled = True
         
-        # Run with optimizations
-        app.run(
-            debug=False,
-            port=8000,
-            host='0.0.0.0',
-            threaded=True,
-            use_reloader=False,
-            processes=1  # Use threading instead of multiprocessing
-        )
+        logger.info("Flask built-in logging disabled for performance")
+        logger.info("Server startup completed - ready to accept requests")
+        
+        try:
+            # Run with optimizations
+            app.run(
+                debug=False,
+                port=port,
+                host=host,
+                threaded=True,
+                use_reloader=False,
+                processes=1  # Use threading instead of multiprocessing
+            )
+        except KeyboardInterrupt:
+            logger.info("Server shutdown requested by user")
+        except Exception as e:
+            logger.error(f"Server crashed: {e}", exc_info=True)
+            sys.exit(1)
+        finally:
+            uptime = time.time() - start_time
+            logger.info(f"Server ran for {uptime:.1f} seconds")
+            logger.info("Intel Classroom Assistant Server stopped")

@@ -1,0 +1,83 @@
+2025-07-12 00:57:59 [INFO] 🔌 Connecting to MongoDB...
+2025-07-12 00:57:59 [INFO] 🛣️  Loading routes...
+2025-07-12 00:57:59 [INFO] ✅ All routes loaded successfully
+2025-07-12 00:57:59 [INFO] 🔄 Starting server...
+2025-07-12 00:57:59 [INFO] 🚀 Intel Classroom Assistant Backend Server started
+2025-07-12 00:57:59 [INFO] 📍 Server running on port 8080
+2025-07-12 00:57:59 [INFO] 🌍 Environment: development
+2025-07-12 00:57:59 [INFO] 🔧 Log level: info
+2025-07-12 00:57:59 [INFO] 📂 Upload directory: uploads
+2025-07-12 00:57:59 [INFO] 🐍 Python server URL: http://localhost:8000
+2025-07-12 00:57:59 [INFO] 🔗 Mongoose connected to MongoDB
+2025-07-12 00:57:59 [INFO] ✅ MongoDB connected successfully
+2025-07-12 01:00:05 [INFO] 🛑 SIGINT received, shutting down gracefully...
+2025-07-12 01:04:45 [INFO] 🔌 Connecting to MongoDB...
+2025-07-12 01:04:45 [INFO] 🛣️  Loading routes...
+2025-07-12 01:04:45 [INFO] ✅ All routes loaded successfully
+2025-07-12 01:04:45 [INFO] 🔄 Starting server...
+2025-07-12 01:04:45 [INFO] 🚀 Intel Classroom Assistant Backend Server started
+2025-07-12 01:04:45 [INFO] 📍 Server running on port 8080
+2025-07-12 01:04:45 [INFO] 🌍 Environment: development
+2025-07-12 01:04:45 [INFO] 🔧 Log level: info
+2025-07-12 01:04:45 [INFO] 📂 Upload directory: uploads
+2025-07-12 01:04:45 [INFO] 🐍 Python server URL: http://localhost:8000
+2025-07-12 01:04:45 [INFO] 🔗 Mongoose connected to MongoDB
+2025-07-12 01:04:45 [INFO] ✅ MongoDB connected successfully
+2025-07-12 01:09:02 [INFO] [tkvk8nlml] GET /api/auth/me - Request started
+2025-07-12 01:09:02 [INFO] [tkvk8nlml] GET /api/auth/me - 🟢 200 (28ms)
+2025-07-12 01:09:02 [INFO] [0qphed2nr] GET /api/subjects - Request started
+2025-07-12 01:09:02 [INFO] [xna50bew4] GET /api/chat - Request started
+2025-07-12 01:09:02 [INFO] [0qphed2nr] GET /api/subjects - 🟢 200 (15ms)
+2025-07-12 01:09:02 [INFO] [xna50bew4] GET /chat - 🟢 200 (24ms)
+2025-07-12 01:09:23 [INFO] [dc6vum814] POST /api/chat - Request started
+2025-07-12 01:09:23 [INFO] [dc6vum814] 💬 Chat request initiated
+2025-07-12 01:09:23 [INFO] [dc6vum814] 🐍 Calling Python Flask server...
+2025-07-12 01:09:53 [ERROR] [dc6vum814] ⏱️ Request timeout - Python server took too long
+2025-07-12 01:09:53 [WARN] [dc6vum814] POST /chat - 🔴 500 (30054ms)
+2025-07-12 01:10:40 [INFO] [nhhxpfj9o] POST /api/chat - Request started
+2025-07-12 01:10:40 [INFO] [nhhxpfj9o] 💬 Chat request initiated
+2025-07-12 01:10:40 [INFO] [nhhxpfj9o] 🐍 Calling Python Flask server...
+2025-07-12 01:10:41 [INFO] [1ptj5n1z2] GET /api/subjects/user - Request started
+2025-07-12 01:10:41 [WARN] [1ptj5n1z2] GET /api/subjects/user - 🟡 403 (2ms)
+2025-07-12 01:11:10 [ERROR] [nhhxpfj9o] ⏱️ Request timeout - Python server took too long
+2025-07-12 01:11:10 [WARN] [nhhxpfj9o] POST /chat - 🔴 500 (30011ms)
+2025-07-12 01:19:51 [INFO] 🛑 SIGINT received, shutting down gracefully...
+2025-07-12 01:19:53 [INFO] 🔌 Connecting to MongoDB...
+2025-07-12 01:19:53 [INFO] 🛣️  Loading routes...
+2025-07-12 01:19:53 [INFO] ✅ All routes loaded successfully
+2025-07-12 01:19:53 [INFO] 🔄 Starting server...
+2025-07-12 01:19:53 [INFO] 🚀 Intel Classroom Assistant Backend Server started
+2025-07-12 01:19:53 [INFO] 📍 Server running on port 8080
+2025-07-12 01:19:53 [INFO] 🌍 Environment: development
+2025-07-12 01:19:53 [INFO] 🔧 Log level: info
+2025-07-12 01:19:53 [INFO] 📂 Upload directory: uploads
+2025-07-12 01:19:53 [INFO] 🐍 Python server URL: http://localhost:8000
+2025-07-12 01:19:53 [INFO] 🔗 Mongoose connected to MongoDB
+2025-07-12 01:19:53 [INFO] ✅ MongoDB connected successfully
+2025-07-12 01:19:58 [INFO] [g1hplftol] GET /api/auth/me - Request started
+2025-07-12 01:19:58 [INFO] [g1hplftol] GET /api/auth/me - 🟢 200 (13ms)
+2025-07-12 01:19:58 [INFO] [vkq4d3zrf] GET /api/subjects - Request started
+2025-07-12 01:19:58 [INFO] [hs469dx0d] GET /api/chat - Request started
+2025-07-12 01:19:58 [INFO] [vkq4d3zrf] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 01:19:58 [INFO] [hs469dx0d] GET /chat - 🟢 200 (14ms)
+2025-07-12 01:20:12 [INFO] [hv1pqjuw3] POST /api/chat - Request started
+2025-07-12 01:20:12 [INFO] [hv1pqjuw3] 💬 Chat request initiated
+2025-07-12 01:20:12 [INFO] [hv1pqjuw3] 🐍 Calling Python Flask server...
+2025-07-12 01:20:12 [INFO] [2jk6920ds] GET /api/subjects/user - Request started
+2025-07-12 01:20:12 [WARN] [2jk6920ds] GET /api/subjects/user - 🟡 403 (1ms)
+2025-07-12 01:20:42 [ERROR] [hv1pqjuw3] ⏱️ Request timeout - Python server took too long
+2025-07-12 01:20:42 [WARN] [hv1pqjuw3] POST /chat - 🔴 500 (30054ms)
+2025-07-12 01:22:35 [INFO] 🔌 Connecting to MongoDB...
+2025-07-12 01:22:35 [INFO] 🛣️  Loading routes...
+2025-07-12 01:22:35 [INFO] ✅ All routes loaded successfully
+2025-07-12 01:22:35 [INFO] 🔄 Starting server...
+2025-07-12 01:22:35 [INFO] 🚀 Intel Classroom Assistant Backend Server started
+2025-07-12 01:22:35 [INFO] 📍 Server running on port 8080
+2025-07-12 01:22:35 [INFO] 🌍 Environment: development
+2025-07-12 01:22:35 [INFO] 🔧 Log level: info
+2025-07-12 01:22:35 [INFO] 📂 Upload directory: uploads
+2025-07-12 01:22:35 [INFO] 🐍 Python server URL: http://localhost:8000
+2025-07-12 01:22:35 [INFO] 🔗 Mongoose connected to MongoDB
+2025-07-12 01:22:35 [INFO] ✅ MongoDB connected successfully
+2025-07-12 01:22:38 [INFO] 🛑 SIGINT received, shutting down gracefully...
+2025-07-12 01:22:42 [INFO] 🛑 SIGINT received, shutting down gracefully...

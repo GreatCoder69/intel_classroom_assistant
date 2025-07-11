@@ -180,6 +180,7 @@ const ChatPage = () => {
           "x-access-token": token, // ✅ Only token here, don't set 'Content-Type'
         },
         body: formData,
+        cache: 'no-cache'
       });
 
       const data = await res.json();

@@ -48,8 +48,26 @@ const MESSAGES_PER_PAGE = 5;
 exports.addChat = async (req, res) => {
   const { subject, question, chatSubject, useResources } = req.body;
   const email = req.userEmail;
+  const requestId = req.requestId || 'unknown';
+  const logger = req.logger || console;
+
+  // Enhanced logging with request context
+  logger.info(`[${requestId}] 💬 Chat request initiated`, {
+    subject: subject?.substring(0, 30),
+    hasQuestion: !!question,
+    hasFile: !!req.file,
+    chatSubject,
+    useResources,
+    userEmail: email?.substring(0, 3) + '***'
+  });
 
   if (!subject || (!question && !req.file) || !email) {
+    logger.warn(`[${requestId}] ❌ Missing required fields`, {
+      hasSubject: !!subject,
+      hasQuestion: !!question,
+      hasFile: !!req.file,
+      hasEmail: !!email
+    });
     return res
       .status(400)
       .json({ message: "Missing subject, question/image/pdf, or email" });
@@ -111,13 +129,33 @@ exports.addChat = async (req, res) => {
     /* ------------------------------------------------------------------ */
     /* 2️⃣  Call the Flask backend                                        */
     /* ------------------------------------------------------------------ */
+    logger.info(`[${requestId}] 🐍 Calling Python Flask server...`, {
+      flaskServer: FLASK_SERVER,
+      hasImage: !!base64Body,
+      questionLength: question?.length || 0
+    });
+
     const t0 = Date.now();
     const flaskRes = await axios.post(
       `${FLASK_SERVER}/api/chat`,
       flaskPayload,
-      { headers: { "Content-Type": "application/json" } }
+      { 
+        headers: { "Content-Type": "application/json" },
+        timeout: 45000, // 45 second timeout (150% increase)
+        // Add keep-alive configuration
+        httpAgent: new (require('http').Agent)({ 
+          keepAlive: true,
+          maxSockets: 5
+        })
+      }
     );
     const responseTime = Date.now() - t0;
+    
+    logger.info(`[${requestId}] ✅ Flask response received`, {
+      responseTime: responseTime + 'ms',
+      statusCode: flaskRes.status,
+      answerLength: flaskRes.data.answer?.length || 0
+    });
 
     const answer       = flaskRes.data.answer || "No answer";
     const chatCategory = flaskRes.data.chatCategory || "general";
@@ -182,11 +220,68 @@ exports.addChat = async (req, res) => {
       meta   : { chatCategory },
     });
 
+    // Set headers to prevent response buffering
+    res.set({
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'X-Accel-Buffering': 'no' // Disable nginx buffering if present
+    });
+
     res.status(200).json({ answer, file: imageUrl, chatCategory });
+    
+    logger.info(`[${requestId}] 🎯 Chat request completed successfully`, {
+      responseTime: responseTime + 'ms',
+      answerLength: answer?.length || 0,
+      chatCategory
+    });
   } catch (err) {
+    const responseTime = Date.now() - (req.startTime || Date.now());
+    
+    // Enhanced error logging with context
+    if (err.code === 'ECONNREFUSED') {
+      logger.error(`[${requestId}] 🔌 Connection refused - Python server not accessible`, {
+        error: err.message,
+        flaskServer: FLASK_SERVER,
+        responseTime: responseTime + 'ms'
+      });
+    } else if (err.code === 'ECONNRESET') {
+      logger.error(`[${requestId}] 🔌 Connection reset - Python server dropped connection`, {
+        error: err.message,
+        responseTime: responseTime + 'ms'
+      });
+    } else if (err.code === 'ENOTFOUND') {
+      logger.error(`[${requestId}] 🌐 DNS resolution failed - Check Flask server URL`, {
+        error: err.message,
+        flaskServer: FLASK_SERVER
+      });
+    } else if (err.message?.includes('timeout')) {
+      logger.error(`[${requestId}] ⏱️ Request timeout - Python server took too long`, {
+        error: err.message,
+        timeoutMs: 45000,
+        responseTime: responseTime + 'ms'
+      });
+    } else if (err.response?.status === 503) {
+      logger.error(`[${requestId}] 🚫 Service unavailable - Python server overloaded`, {
+        status: err.response.status,
+        statusText: err.response.statusText,
+        responseTime: responseTime + 'ms'
+      });
+    } else {
+      logger.error(`[${requestId}] 💥 Unexpected LLM/Flask error`, {
+        error: err.message,
+        status: err.response?.status,
+        stack: err.stack?.split('\n').slice(0, 3).join('\n'),
+        responseTime: responseTime + 'ms'
+      });
+    }
+
     console.error("LLM / Flask error:", err.message);
     await LogLLMError({ email, subject, prompt: question, error: err });
-    res.status(500).json({ message: "LLM failure", detail: err.message });
+    res.status(500).json({ 
+      message: "LLM failure", 
+      detail: err.message,
+      requestId: requestId
+    });
   }
 };
 

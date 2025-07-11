@@ -181,10 +181,16 @@ const ChatPage = () => {
     setCurrentMessage("");
     setImageFile(null); // Reset image file after send
 
+    // Force immediate UI update
+    setTimeout(() => {
+      // This ensures the UI updates immediately
+      setChat([...newChat]);
+    }, 0);
+
     try {
       const formData = new FormData();
       formData.append("subject", selectedTopic);
-      formData.append("model", selectedModel); // 👈 Add this line
+      formData.append("model", selectedModel);
       // Use "General" as fallback if no specific subject selected
       formData.append("chatSubject", selectedSubject || "General");
       // Add useResources parameter for students
@@ -194,16 +200,42 @@ const ChatPage = () => {
       if (currentMessage.trim()) formData.append("question", currentMessage);
       if (imageFile) formData.append("image", imageFile);
 
+      // Create abort controller for request cancellation
+      const abortController = new AbortController();
+      const timeoutId = setTimeout(() => abortController.abort(), 60000); // 60s timeout
+
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
         method: "POST",
         headers: {
           "x-access-token": token,
         },
         body: formData,
+        signal: abortController.signal,
+        // Add cache control
+        cache: 'no-cache'
       });
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
 
       const data = await res.json();
       let updatedChat = [...newChat];
+
+      // Add loading message
+      const loadingMsg = {
+        sender: "bot",
+        message: "Thinking...",
+        timestamp: new Date().toISOString(),
+        loading: true
+      };
+      setChat([...newChat, loadingMsg]);
+      setChatHistory((prev) => ({
+        ...prev,
+        [selectedTopic]: [...(prev[selectedTopic] || []), loadingMsg],
+      }));
 
       // Replace only the last temporary user image message with the backend URL
       if (imageFile && data.imageUrl) {
@@ -221,27 +253,44 @@ const ChatPage = () => {
         }
       }
 
-      // Add bot reply
+      // Remove loading message and add bot reply
       const botMsg = {
         sender: "bot",
         message: data.answer || "No response.",
         timestamp: new Date().toISOString(),
       };
-      updatedChat = [...updatedChat, botMsg];
+      
+      // Remove loading message and add real response
+      const finalChat = [...updatedChat, botMsg];
 
-      setChat(updatedChat);
+      setChat(finalChat);
       setChatHistory((prev) => ({
         ...prev,
-        [selectedTopic]: updatedChat,
-      }));
-
-      setChat(updatedChat);
-      setChatHistory((prev) => ({
-        ...prev,
-        [selectedTopic]: updatedChat,
+        [selectedTopic]: finalChat,
       }));
     } catch (err) {
       console.error("Upload or chat error:", err);
+      
+      // Remove loading message if there was an error
+      setChat((prevChat) => prevChat.filter(msg => !msg.loading));
+      setChatHistory((prev) => ({
+        ...prev,
+        [selectedTopic]: prev[selectedTopic]?.filter(msg => !msg.loading) || [],
+      }));
+      
+      // Add error message
+      const errorMsg = {
+        sender: "bot",
+        message: "Sorry, there was an error processing your message. Please try again.",
+        timestamp: new Date().toISOString(),
+        error: true
+      };
+      
+      setChat((prevChat) => [...prevChat, errorMsg]);
+      setChatHistory((prev) => ({
+        ...prev,
+        [selectedTopic]: [...(prev[selectedTopic] || []), errorMsg],
+      }));
     }
   };
 
