@@ -244,7 +244,7 @@ exports.deleteChatBySubject = async (req, res) => {
 
     await LogEvent({
       email,
-      action: "chat_delete",
+      action: "chat",
       message: `Chat '${subject}' deleted by user`,
       meta: { subject },
     });

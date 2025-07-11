@@ -54,11 +54,15 @@ exports.SignIn = async (req, res) => {
       return res.status(401).send({ accessToken: null, message: "Invalid Password!" });
     }
 
-    const accessToken = jwt.sign({ id: user.id }, config.secret, { expiresIn: 86400 });
+    const accessToken = jwt.sign({ 
+      id: user.id, 
+      email: user.email, 
+      role: user.role 
+    }, config.secret, { expiresIn: 86400 });
 
     await LogEvent({
       email: user.email,
-      action: "signin",
+      action: "login",
       message: "User logged in"
     });
 
@@ -131,7 +135,7 @@ exports.UpdateProfile = async (req, res) => {
 
     await LogEvent({
       email: updatedUser.email,
-      action: "profile_update",
+      action: "edit_profile",
       message: "Profile updated"
     });
 
@@ -156,7 +160,7 @@ exports.SignOut = async (req, res) => {
     if (userEmail) {
       await LogEvent({
         email: userEmail,
-        action: "signout",
+        action: "logout",
         message: "User logged out"
       });
     }

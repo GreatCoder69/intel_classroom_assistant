@@ -15,11 +15,27 @@ verifyToken = (req, res, next) => {
       return res.status(401).send({ message: "Unauthorized!" });
     }
 
-    req.userId = decoded.id;
-    req.userEmail = decoded.email; // Make sure email is set here
-    req.userRole = decoded.role;   // And role if available
-
-    next();
+    try {
+      req.userId = decoded.id;
+      
+      // If email and role are in the token, use them (new tokens)
+      if (decoded.email && decoded.role) {
+        req.userEmail = decoded.email;
+        req.userRole = decoded.role;
+        next();
+      } else {
+        // If not in token, fetch from database (older tokens)
+        const user = await User.findById(decoded.id);
+        if (!user) {
+          return res.status(401).send({ message: "User not found!" });
+        }
+        req.userEmail = user.email;
+        req.userRole = user.role;
+        next();
+      }
+    } catch (error) {
+      return res.status(500).send({ message: "Internal server error" });
+    }
   });
 };
 

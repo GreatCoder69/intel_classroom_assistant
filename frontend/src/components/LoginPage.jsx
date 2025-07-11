@@ -24,18 +24,18 @@ const handleLogin = async (values) => {
     const data = await res.json();
 
     // ✳️ Validate role: prevent student logging in as teacher, and vice versa
-    if (data.user && data.user.role !== selectedRole) {
+    if (data.role && data.role !== selectedRole) {
       setLoginError(
-        `You selected “${selectedRole}” but this account is a “${data.user.role}”.`
+        `You selected "${selectedRole}" but this account is a "${data.role}".`
       );
       return;
     }
 
-    if (data.accessToken && data.user) {
+    if (data.accessToken && data.id) {
       localStorage.setItem("token", data.accessToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("user", JSON.stringify(data));
 
-      if (data.user.role == "teacher") {
+      if (data.role === "teacher") {
         navigate("/dashboard");
       } else {
         navigate("/chat");
