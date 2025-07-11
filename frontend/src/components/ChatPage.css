@@ -126,6 +126,34 @@ body, .vh-100 {
   color: #fff !important;
 }
 
+/* Voice Recording Animation */
+.pulse-animation {
+  animation: pulse-red 1.5s infinite !important;
+}
+
+@keyframes pulse-red {
+  0% {
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(220, 53, 69, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+  }
+}
+
+/* Additional button styling for recording state */
+.btn-danger.pulse-animation {
+  background-color: #dc3545 !important;
+  border-color: #dc3545 !important;
+}
+
+.btn-danger.pulse-animation:hover {
+  background-color: #c82333 !important;
+  border-color: #bd2130 !important;
+}
+
 /* Dropdown Styling */
 .dropdown-menu {
   background: #2a2a2a !important;

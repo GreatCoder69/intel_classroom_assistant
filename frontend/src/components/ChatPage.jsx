@@ -29,6 +29,8 @@ const ChatPage = () => {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [useResources, setUseResources] = useState(false); // For student to enable/disable resource context
   const [user, setUser] = useState(null); // Store user data to check role
+  const [isRecording, setIsRecording] = useState(false); // Track recording state
+  const [recognition, setRecognition] = useState(null); // Store recognition instance
 
   // Handle voice transcription
   const handleVoiceTranscription = (transcribedText) => {
@@ -510,29 +512,123 @@ const ChatPage = () => {
     }
   };
   // ---- inside ChatPage.jsx ----
-  const micDictate = () => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      toast.error("Speech recognition not supported in this browser");
+  const micDictate = async () => {
+    // If currently recording, stop the recording
+    if (isRecording && recognition) {
+      recognition.stop();
+      setIsRecording(false);
+      toast.info("🎤 Stopped recording");
       return;
     }
 
-    const recognition = new SpeechRecognition();
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = "en-US";
+    try {
+      // Check for browser support
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      
+      if (!SpeechRecognition) {
+        toast.error("Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.");
+        return;
+      }
 
-    recognition.onresult = (e) => {
-      const text = e.results[0][0].transcript;
-      setCurrentMessage((prev) => (prev ? `${prev} ${text}` : text));
-      toast.success(`Voice: “${text}”`);
-    };
+      // Check for HTTPS or localhost
+      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+        toast.error("Voice input requires HTTPS. Please access the site over HTTPS.");
+        return;
+      }
 
-    recognition.onerror = (e) =>
-      toast.error(`Speech error: ${e.error || "unknown"}`);
+      // Request microphone permission
+      try {
+        await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (permissionError) {
+        toast.error("Microphone permission denied. Please allow microphone access and try again.");
+        return;
+      }
 
-    recognition.start();
+      toast.info("🎤 Recording... Click again to stop");
+      setIsRecording(true);
+
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = true; // Keep listening continuously
+      recognitionInstance.interimResults = true; // Show interim results
+      recognitionInstance.lang = "en-US";
+
+      // Store recognition instance for stopping later
+      setRecognition(recognitionInstance);
+
+      recognitionInstance.onresult = (e) => {
+        let interimTranscript = '';
+        let finalTranscript = '';
+
+        // Process all results
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const transcript = e.results[i][0].transcript;
+          if (e.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        // Update message with final transcript
+        if (finalTranscript) {
+          setCurrentMessage((prev) => {
+            const newText = prev ? `${prev} ${finalTranscript}` : finalTranscript;
+            return newText;
+          });
+        }
+      };
+
+      recognitionInstance.onerror = (e) => {
+        console.error("Speech recognition error:", e);
+        setIsRecording(false);
+        setRecognition(null);
+        
+        switch (e.error) {
+          case 'not-allowed':
+            toast.error("Microphone permission denied. Please allow microphone access.");
+            break;
+          case 'no-speech':
+            toast.warning("No speech detected. Microphone is still active.");
+            // Don't stop recording on no-speech, just warn
+            return;
+          case 'network':
+            toast.error("Network error. Please check your internet connection.");
+            break;
+          case 'service-not-allowed':
+            toast.error("Speech service not allowed. Please use HTTPS.");
+            break;
+          case 'aborted':
+            // This is normal when user clicks stop
+            break;
+          default:
+            toast.error(`Speech error: ${e.error || "unknown"}`);
+        }
+      };
+
+      recognitionInstance.onstart = () => {
+        console.log("Speech recognition started");
+        setIsRecording(true);
+      };
+
+      recognitionInstance.onend = () => {
+        console.log("Speech recognition ended");
+        setIsRecording(false);
+        setRecognition(null);
+        
+        // Only show stopped message if it wasn't manually stopped
+        if (isRecording) {
+          toast.info("🎤 Recording stopped");
+        }
+      };
+
+      recognitionInstance.start();
+    } catch (error) {
+      console.error("Voice recognition error:", error);
+      setIsRecording(false);
+      setRecognition(null);
+      toast.error("Failed to start voice recognition. Please try again.");
+    }
   };
 
   if (loading) return <div className="text-center">Loading...</div>;
@@ -827,12 +923,13 @@ const ChatPage = () => {
 
             {/* Voice to Text Button */}
             <Button
-              variant="outline-secondary"
+              variant={isRecording ? "danger" : "outline-secondary"}
               onClick={micDictate}
               disabled={loading}
-              title="Click to speak"
+              title={isRecording ? "Click to stop recording" : "Click to start recording"}
+              className={isRecording ? "pulse-animation" : ""}
             >
-              🎤
+              {isRecording ? "🛑" : "🎤"}
             </Button>
 
             <Button

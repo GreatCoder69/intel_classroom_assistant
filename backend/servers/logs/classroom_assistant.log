@@ -228,3 +228,5 @@
 2025-07-05 06:11:12 [ERROR] classroom_assistant: [20250705061012] LLM generation timed out after 60 seconds
 2025-07-05 06:11:12 [INFO] classroom_assistant: [20250705061012] Generation completed in 60.01s
 2025-07-05 06:11:12 [INFO] classroom_assistant: [20250705061012] Response: 'Sorry, it's taking longer than...' (105 chars)
+2025-07-08 16:23:57 [INFO] classroom_assistant: Starting logging system with improved configuration
+2025-07-08 16:25:32 [INFO] datasets: PyTorch version 2.7.1 available.

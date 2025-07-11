@@ -49,37 +49,18 @@ export default function SubjectWiseChart({ userRole = "student" }) {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await fetch(`${api}/api/admin/users-chats`, {
+        const res = await fetch(`${api}/api/subject-statistics`, {
           headers: { "x-access-token": token },
         });
-        const users = await res.json();                // [{ name,email,chats:[{subject,history}]}]
-
-        /* --------- aggregate counts --------- */
-        const currentEmail =
-          userRole === "student"
-            ? JSON.parse(localStorage.getItem("user") || "{}").email
-            : null;
-
-        const totals = {}; // { subject: count }
-
-        users.forEach((u) => {
-          if (userRole === "student" && u.email !== currentEmail) return; // skip others
-
-          u.chats.forEach((c) => {
-            const n = (c.history || []).length;
-            if (n) totals[c.subject] = (totals[c.subject] || 0) + n;
-          });
-        });
+        const statsArray = await res.json();                // [{ subject, count }]
 
         /* transform → array & add percentages */
-        const grand = Object.values(totals).reduce((a, b) => a + b, 0) || 1;
-        const rows = Object.entries(totals)
-          .map(([subject, count]) => ({
-            subject,
-            count,
-            percent: (count / grand) * 100,
-          }))
-          .sort((a, b) => b.count - a.count);
+        const grand = statsArray.reduce((sum, item) => sum + item.count, 0) || 1;
+        const rows = statsArray.map((item) => ({
+          subject: item.subject,
+          count: item.count,
+          percent: (item.count / grand) * 100,
+        }));
 
         setData(rows);
       } catch (err) {
@@ -101,8 +82,8 @@ export default function SubjectWiseChart({ userRole = "student" }) {
       </h3>
       <p className="text-center mb-4" style={{ color: "#ccc" }}>
         {userRole === "teacher"
-          ? "Aggregated statistics from all student questions across subjects"
-          : "Number of questions you have asked by subject context"}
+          ? "Aggregated question count by subject category from all student interactions"
+          : "Number of questions you have asked organized by subject category"}
       </p>
 
       {data.length === 0 ? (
@@ -131,7 +112,7 @@ export default function SubjectWiseChart({ userRole = "student" }) {
               axisLine={{ stroke: "#666" }}
               tickLine={false}
               label={{
-                value: "Number of Doubts",
+                value: "Number of Questions",
                 position: "insideBottom",
                 dy: 10,
                 fill: "#ccc",

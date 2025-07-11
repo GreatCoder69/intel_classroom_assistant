@@ -1,4 +1,3 @@
-// SuggestionsPage.jsx  —  grab subjects from /api/chat AND /api/suggestions
 import React, { useEffect, useState } from "react";
 
 import {
@@ -12,8 +11,7 @@ import {
 } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-const api   = import.meta.env.VITE_API_URL;
-const token = localStorage.getItem("token");
+const api = import.meta.env.VITE_API_URL;
 
 /* helper – convert a normal YT URL to embed */
 const toEmbed = (u) => {
@@ -39,16 +37,30 @@ export default function SuggestionsPage() {
   const [loading, setLoading] = useState(false);
   const [error,   setError]   = useState("");
 
-  /* ── fetch chat subjects & suggestions on mount ── */
+  /* ── fetch subjects & suggestions on mount ── */
   useEffect(() => {
     const fetchAll = async () => {
       try {
-        // ① subjects from chat collection
-        const chatRes = await fetch(`${api}/api/chat`, {
-          headers: { "x-access-token": token },
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("Authentication required. Please log in.");
+          return;
+        }
+
+        // ① subjects from subjects API (independent of Python server)
+        const subjectsRes = await fetch(`${api}/api/subjects`, {
+          headers: { 
+            "Content-Type": "application/json",
+            "x-access-token": token 
+          },
         });
-        const chatData = await chatRes.json();           // [{ _id:subject , … }]
-        const chatSubjects = chatData.map((c) => c._id);
+
+        if (!subjectsRes.ok) {
+          throw new Error(`Failed to fetch subjects: ${subjectsRes.status} ${subjectsRes.statusText}`);
+        }
+
+        const subjectsData = await subjectsRes.json();
+        const subjectNames = subjectsData.map((s) => s.name);
 
         // ② existing suggestions (grouped)
         const sugRes = await fetch(`${api}/api/suggestions`, {
@@ -60,10 +72,11 @@ export default function SuggestionsPage() {
         const sugSubjects = sugGroups.map((g) => g.subject);
 
         // merge & dedupe
-        const combined = Array.from(new Set([...chatSubjects, ...sugSubjects]));
+        const combined = Array.from(new Set([...subjectNames, ...sugSubjects]));
         setSubjects(combined);
       } catch (e) {
         console.error("init fetch error:", e);
+        setError("Failed to load subjects. Please try again.");
       }
     };
     fetchAll();
@@ -79,6 +92,11 @@ export default function SuggestionsPage() {
     setLoading(true);
 
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication required. Please log in.");
+      }
+
       const res = await fetch(`${api}/api/suggestions`, {
         method : "POST",
         headers: {
@@ -109,7 +127,8 @@ export default function SuggestionsPage() {
       setTopic("");
       setShowForm(false);
     } catch (e) {
-      setError(e.message);
+      console.error("Search error:", e);
+      setError(e.message || "Lookup failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -228,6 +247,14 @@ export default function SuggestionsPage() {
             <h4 className="mb-3">
               {active.subject} / {active.suggestion.topic}
             </h4>
+
+            {/* Show info if placeholder results */}
+            {active.suggestion.videos.length === 1 && active.suggestion.videos[0].title.includes('Learn about') && (
+              <div className="alert alert-info mb-3">
+                <i className="fas fa-info-circle me-2"></i>
+                Advanced search features are not fully configured. Basic search links are provided below.
+              </div>
+            )}
 
             {/* resources */}
             <Row xs={1} md={2} lg={3} className="g-3 mb-4">

@@ -149,13 +149,7 @@ const handleLogin = async (values) => {
                       </Form.Group>
                       
                       <div className="my-3 d-flex justify-content-between align-items-center">
-                        <div className="form-check">
-                          <label className="form-check-label text-muted">
-                            <input type="checkbox" className="form-check-input" />
-                            <i className="input-helper"></i>
-                            Keep me signed in
-                          </label>
-                        </div>
+                        
                         <a
                           href="!#"
                           onClick={(e) => e.preventDefault()}

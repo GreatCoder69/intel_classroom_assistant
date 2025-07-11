@@ -17,12 +17,16 @@ import TeacherChat from "./components/TeacherChat";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SuggestionsPage from "./pages/SuggestionsPage";
 import TeacherSuggestion from "./pages/TeacherSuggestions";
+import VoiceTestComponent from "./components/VoiceTestComponent";
 
 const App = () => (
   <Routes>
     {/* Public Routes */}
     <Route path="/login" element={<LoginPage />} />
     <Route path="/signup" element={<SignupPage />} />
+
+    {/* Debug Route */}
+    <Route path="/voice-test" element={<VoiceTestComponent />} />
 
     {/* Main App Routes without Layout */}
     <Route path="/dashboard" element={
