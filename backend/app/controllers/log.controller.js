@@ -1,6 +1,11 @@
 const UserLog = require('../models/log.model');
 
-exports.addLog = async (req, res) => {
+/**
+ * Add a new log entry
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.AddLog = async (req, res) => {
   try {
     const { email, action, message, meta } = req.body;
 
@@ -13,7 +18,12 @@ exports.addLog = async (req, res) => {
   }
 };
 
-exports.getLogsByUser = async (req, res) => {
+/**
+ * Get logs by user email (from params)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.GetLogsByUser = async (req, res) => {
   try {
     const { email } = req.params;
     const logs = await UserLog.find({ email }).sort({ timestamp: -1 });
@@ -23,7 +33,12 @@ exports.getLogsByUser = async (req, res) => {
   }
 };
 
-exports.getAllLogs = async (req, res) => {
+/**
+ * Get all logs
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.GetAllLogs = async (req, res) => {
   try {
     const logs = await UserLog.find({}).sort({ timestamp: -1 });
     res.status(200).json({ success: true, logs });
@@ -32,7 +47,12 @@ exports.getAllLogs = async (req, res) => {
   }
 };
 
-exports.getLogsByEmailQuery = async (req, res) => {
+/**
+ * Get logs by user email (from query)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+exports.GetLogsByEmailQuery = async (req, res) => {
   try {
     const { email } = req.query;
     if (!email) {

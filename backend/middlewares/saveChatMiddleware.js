@@ -4,7 +4,7 @@
  */
 const mongoose = require('mongoose');
 const Chat = require('../app/models/chat.model');
-const logEvent = require('../app/utils/logEvent');
+const LogEvent = require('../app/utils/logEvent');
 
 module.exports = function() {
   return async function saveChatMiddleware(req, res, next) {
@@ -57,10 +57,9 @@ module.exports = function() {
                   { upsert: true, new: true }
                 );
                 
-                console.log(`Chat saved to MongoDB: ${email} - ${subject}`);
+
                 
-                // Log the event
-                await logEvent({
+                await LogEvent({
                   email,
                   action: "create_chat",
                   message: `Message added to '${subject}'`,

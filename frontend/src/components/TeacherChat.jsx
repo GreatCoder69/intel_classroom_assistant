@@ -319,12 +319,12 @@ const ChatPage = () => {
       };
 
       recognitionInstance.onstart = () => {
-        console.log("Speech recognition started");
+
         setIsRecording(true);
       };
 
       recognitionInstance.onend = () => {
-        console.log("Speech recognition ended");
+
         setIsRecording(false);
         setRecognition(null);
         
@@ -581,7 +581,7 @@ const ChatPage = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       setTopicToDelete(topic);
-                      setShowConfirmDelete(true); // ✅ this matches the actual modal trigger
+                      setShowConfirmDelete(true);
                     }}
                   >
                     ×
@@ -650,7 +650,7 @@ const ChatPage = () => {
                   (msg.image.toLowerCase().endsWith(".pdf") ? (
                     <div className="d-flex flex-column align-items-start mb-2">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <span style={{ fontSize: 20 }}>📄</span>
+                        <span style={{ fontSize: 20 }}>PDF</span>
                         <a
                           href={msg.image}
                           target="_blank"
@@ -714,7 +714,7 @@ const ChatPage = () => {
             <div className="mb-2 d-flex align-items-center gap-3">
               {imageFile.type === "application/pdf" ? (
                 <>
-                  <span style={{ fontSize: 32 }}>📄</span>
+                  <span style={{ fontSize: 32 }}>PDF</span>
                   <span style={{ fontWeight: "bold" }}>{imageFile.name}</span>
                   <a
                     href={URL.createObjectURL(imageFile)}

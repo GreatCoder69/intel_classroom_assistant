@@ -154,7 +154,7 @@ exports.adminUpdateUser = async (req, res) => {
         try {
           if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log("🗑️ Old image deleted:", filename);
+
           } else {
             console.warn("⚠️ File not found for deletion:", filePath);
           }

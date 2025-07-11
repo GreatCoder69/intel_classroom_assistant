@@ -96,7 +96,7 @@ async function seedSubjects() {
     
     const createdSubjects = await Subject.insertMany(subjectsWithTeacher);
     
-    console.log(`✅ Successfully created ${createdSubjects.length} subjects:`);
+    console.log(`Successfully created ${createdSubjects.length} subjects:`);
     createdSubjects.forEach(subject => {
       console.log(`  - ${subject.name} (${subject.color})`);
     });

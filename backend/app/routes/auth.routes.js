@@ -8,7 +8,7 @@ const path = require("path");
 // Multer storage config
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, "..", "..", "uploads")); // ✅ Absolute path to app/uploads // ensure this folder exists
+    cb(null, path.join(__dirname, "..", "..", "uploads"));
   },
   filename: function (req, file, cb) {
     const uniqueName = Date.now() + "-" + file.originalname;
@@ -30,17 +30,16 @@ module.exports = function (app) {
   app.post(
     "/api/auth/signup",
     [verifySignUp.checkDuplicateUsernameOrEmail],
-    controller.signup
+    controller.SignUp
   );
 
-  app.post("/api/auth/signin", controller.signin);
+  app.post("/api/auth/signin", controller.SignIn);
 
-  // ✅ Updated: uses Multer + Token Middleware
   app.put(
     "/api/auth/update",
     [verifyToken, upload.single("profileimg")],
-    controller.updateUser
+    controller.UpdateProfile
   );
 
-  app.get("/api/auth/me", verifyToken, controller.getMe);
+  app.get("/api/auth/me", verifyToken, controller.GetMe);
 };

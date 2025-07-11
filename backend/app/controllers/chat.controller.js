@@ -5,8 +5,8 @@ const Chat = require("../models/chat.model");
 const ChatMessage = require("../models/chatMessage.model"); // New chat message model
 const User = require("../models/user.model");
 const pdfParse = require("pdf-parse");
-const logEvent = require("../utils/logEvent");
-const logLLMError = require("../utils/logError");
+const LogEvent = require("../utils/logEvent");
+const LogLLMError = require("../utils/logError");
 
 const axios   = require("axios");
 const FLASK_SERVER = process.env.FLASK_SERVER || "http://localhost:8000";
@@ -167,11 +167,6 @@ exports.addChat = async (req, res) => {
       });
       
       await newChatMessage.save();
-      console.log('💾 Chat message saved for statistics:', {
-        userRole: role,
-        chatSubject: chatSubject || 'General',
-        subject: subject
-      });
     } catch (saveError) {
       console.error('Error saving chat message for statistics:', saveError);
       // Don't fail the main request if statistics save fails
@@ -180,7 +175,7 @@ exports.addChat = async (req, res) => {
     /* ------------------------------------------------------------------ */
     /* 4️⃣  Log event + return to client                                  */
     /* ------------------------------------------------------------------ */
-    await logEvent({
+    await LogEvent({
       email,
       action : "create_chat",
       message: `Message added to '${subject}'`,
@@ -190,7 +185,7 @@ exports.addChat = async (req, res) => {
     res.status(200).json({ answer, file: imageUrl, chatCategory });
   } catch (err) {
     console.error("LLM / Flask error:", err.message);
-    await logLLMError({ email, subject, prompt: question, error: err });
+    await LogLLMError({ email, subject, prompt: question, error: err });
     res.status(500).json({ message: "LLM failure", detail: err.message });
   }
 };
@@ -247,8 +242,7 @@ exports.deleteChatBySubject = async (req, res) => {
         .send({ message: "Chat not found or already deleted" });
     }
 
-    // ✅ Log the chat deletion
-    await logEvent({
+    await LogEvent({
       email,
       action: "chat_delete",
       message: `Chat '${subject}' deleted by user`,
@@ -389,21 +383,20 @@ exports.getSubjectStatistics = async (req, res) => {
     if (userRole === 'teacher') {
       // For teachers, show aggregated statistics from all students only
       matchFilter = { userRole: 'student' };
-      console.log("Teacher view: filtering for student messages only");
+
     } else {
       // For students, show only their own statistics
       matchFilter = { userEmail: email };
-      console.log("Student view: filtering for own messages only");
+
     }
     
-    console.log("Match filter:", matchFilter);
+
     
     // Use the new ChatMessage model for statistics
     const messageCount = await ChatMessage.countDocuments(matchFilter);
-    console.log("Total messages found:", messageCount);
+
     
     if (messageCount === 0) {
-      console.log("No messages found, returning empty array");
       return res.status(200).json([]);
     }
     
@@ -426,10 +419,10 @@ exports.getSubjectStatistics = async (req, res) => {
       { $sort: { count: -1 } }
     ];
     
-    console.log("Aggregation pipeline:", JSON.stringify(pipeline, null, 2));
+
     
     const statsArray = await ChatMessage.aggregate(pipeline);
-    console.log("Aggregation result:", statsArray);
+
 
     res.status(200).json(statsArray);
   } catch (err) {

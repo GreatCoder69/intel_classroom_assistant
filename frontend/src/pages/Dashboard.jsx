@@ -65,7 +65,7 @@ const SidebarLayout = () => {
         }}
       >
         <h5 className="mb-4 text-white" style={{ fontSize: "1.3rem", fontWeight: "600" }}>
-          🎓 Classroom Assistant
+          Classroom Assistant
         </h5>
 
         <nav className="flex-grow-1">
@@ -210,7 +210,7 @@ const SidebarLayout = () => {
       >
         <div className="mb-4">
           <h2 className="text-white mb-3" style={{ fontSize: "2.2rem", fontWeight: "600" }}>
-            📊 Dashboard
+            Dashboard
           </h2>
           {userRole === 'teacher' ? (
             <p className="text-light mb-4" style={{ fontSize: "1.1rem", opacity: "0.9", lineHeight: "1.6" }}>

@@ -119,7 +119,7 @@ const ErrorLogs = () => {
         </Col>
       </Row>
 
-      {/* 📋 Logs */}
+      {/* Logs */}
       {(searchTriggered ? filteredLogs : getPaginatedLogs()).length === 0 ? (
         <p className="text-muted">No error logs found.</p>
       ) : (
@@ -164,7 +164,7 @@ const ErrorLogs = () => {
         )
       )}
 
-      {/* 📌 Pagination */}
+      {/* Pagination */}
       {!searchTriggered && totalPages > 1 && (
         <Pagination className="mt-3">
           {[...Array(totalPages).keys()].map((n) => (

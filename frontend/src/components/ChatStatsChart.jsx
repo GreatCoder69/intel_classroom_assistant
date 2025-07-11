@@ -75,7 +75,7 @@ export default function SubjectWiseChart({ userRole = "student" }) {
   return (
     <div className="my-5">
       <h3 className="text-center mb-4" style={{ color: "#fff" }}>
-        📊{" "}
+        Chart:{" "}
         {userRole === "teacher"
           ? "Student Questions by Subject"
           : "Your Questions by Subject"}

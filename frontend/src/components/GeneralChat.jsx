@@ -451,7 +451,7 @@ const ChatPage = () => {
           "Content-Type": "application/json",
           "x-access-token": token,
         },
-        body: JSON.stringify({ subject: topicToDelete }), // ✅ send subject
+        body: JSON.stringify({ subject: topicToDelete }),
       });
 
       if (res.ok) {

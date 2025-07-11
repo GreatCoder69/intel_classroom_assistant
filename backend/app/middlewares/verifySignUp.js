@@ -3,7 +3,7 @@ const User = db.user;
 
 const checkDuplicateUsernameOrEmail = async (req, res, next) => {
   try {
-    console.log("🔍 Checking for duplicates with:", req.body);
+
 
     const existingName = await User.findOne({ name: req.body.name });
     if (existingName) {
@@ -15,7 +15,7 @@ const checkDuplicateUsernameOrEmail = async (req, res, next) => {
       return res.status(400).send({ message: "Failed! Email is already in use!" });
     }
 
-    console.log("✅ No duplicates found. Proceeding...");
+
     next();
   } catch (err) {
     console.error("❌ Error in checkDuplicateUsernameOrEmail:", err);

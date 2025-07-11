@@ -5,7 +5,8 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "react-toastify";
 import "./ChatPage.css";
 
-const apiBase = import.meta.env.VITE_API_URL;
+const API_BASE = import.meta.env.VITE_API_URL;
+
 const ChatPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -19,34 +20,18 @@ const ChatPage = () => {
   const [showImageInput, setShowImageInput] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [topicMeta, setTopicMeta] = useState({});
-  const [showConfirmDelete, setShowConfirmDelete] = useState(false); // ✅ fix mismatch
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
   const [topicToDelete, setTopicToDelete] = useState(null);
-  const [selectedModel, setSelectedModel] = useState("gemini"); // Default model
+  const [selectedModel, setSelectedModel] = useState("gemini");
   const [imageFile, setImageFile] = useState(null);
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [useResources, setUseResources] = useState(false); // For student to enable/disable resource context
-  const [user, setUser] = useState(null); // Store user data to check role
-  const [isRecording, setIsRecording] = useState(false); // Track recording state
-  const [recognition, setRecognition] = useState(null); // Store recognition instance
-
-  // Handle voice transcription
-  const handleVoiceTranscription = (transcribedText) => {
-    // Add transcribed text to current message
-    setCurrentMessage((prev) => {
-      const newText = prev ? `${prev} ${transcribedText}` : transcribedText;
-      return newText;
-    });
-
-    // Show success message
-    toast.success(
-      `Voice transcription: "${transcribedText.slice(0, 50)}${
-        transcribedText.length > 50 ? "..." : ""
-      }"`
-    );
-  };
+  const [useResources, setUseResources] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [recognition, setRecognition] = useState(null);
 
   const [profile, setProfile] = useState({
     email: "",
@@ -67,7 +52,7 @@ const ChatPage = () => {
     const userData = localStorage.getItem("user");
     if (userData) {
       const parsedUser = JSON.parse(userData);
-      console.log("User data from localStorage:", parsedUser); // Debug log
+
       setUser(parsedUser);
     }
 
@@ -106,7 +91,7 @@ const ChatPage = () => {
         const topic = c._id;
         history[topic] = [];
 
-        // ✅ Store subject-level metadata like category
+        
         meta[topic] = {
           category: c.subjectCategory || "Uncategorized",
           isPublic: c.isPublic !== undefined ? c.isPublic : true,
@@ -212,7 +197,7 @@ const ChatPage = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
         method: "POST",
         headers: {
-          "x-access-token": token, // ✅ Only token here, don't set 'Content-Type'
+          "x-access-token": token,
         },
         body: formData,
       });
@@ -450,7 +435,7 @@ const ChatPage = () => {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/chat`, {
         method: "POST",
         headers: {
-          "x-access-token": token, // ✅ Add this
+          "x-access-token": token,
           // DO NOT set 'Content-Type' when using FormData
         },
         body: formData,
@@ -480,12 +465,12 @@ const ChatPage = () => {
       const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/deletechat`,
         {
-          method: "POST", // ✅ use PUT here
+          method: "POST",
           headers: {
             "Content-Type": "application/json",
             "x-access-token": token,
           },
-          body: JSON.stringify({ subject: topicToDelete }), // ✅ send subject
+          body: JSON.stringify({ subject: topicToDelete }),
         }
       );
 
@@ -517,7 +502,7 @@ const ChatPage = () => {
     if (isRecording && recognition) {
       recognition.stop();
       setIsRecording(false);
-      toast.info("🎤 Stopped recording");
+      toast.info("Stopped recording");
       return;
     }
 
@@ -545,7 +530,7 @@ const ChatPage = () => {
         return;
       }
 
-      toast.info("🎤 Recording... Click again to stop");
+      toast.info("Recording... Click again to stop");
       setIsRecording(true);
 
       const recognitionInstance = new SpeechRecognition();
@@ -607,18 +592,18 @@ const ChatPage = () => {
       };
 
       recognitionInstance.onstart = () => {
-        console.log("Speech recognition started");
+
         setIsRecording(true);
       };
 
       recognitionInstance.onend = () => {
-        console.log("Speech recognition ended");
+
         setIsRecording(false);
         setRecognition(null);
         
         // Only show stopped message if it wasn't manually stopped
         if (isRecording) {
-          toast.info("🎤 Recording stopped");
+          toast.info("Recording stopped");
         }
       };
 
@@ -674,7 +659,7 @@ const ChatPage = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       setTopicToDelete(topic);
-                      setShowConfirmDelete(true); // ✅ this matches the actual modal trigger
+                      setShowConfirmDelete(true);
                     }}
                   >
                     ×
@@ -706,7 +691,7 @@ const ChatPage = () => {
               🤖 eduAI
             </h5>
             <Link to="/subjects" className="btn btn-outline-primary btn-sm">
-              📚 Subjects
+              Subjects
             </Link>
           </div>
           <Dropdown align="end">
@@ -757,7 +742,7 @@ const ChatPage = () => {
                   (msg.image.toLowerCase().endsWith(".pdf") ? (
                     <div className="d-flex flex-column align-items-start mb-2">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <span style={{ fontSize: 20 }}>📄</span>
+                        <span style={{ fontSize: 20 }}>PDF</span>
                         <a
                           href={msg.image}
                           target="_blank"
@@ -821,7 +806,7 @@ const ChatPage = () => {
             <div className="mb-2 d-flex align-items-center gap-3">
               {imageFile.type === "application/pdf" ? (
                 <>
-                  <span style={{ fontSize: 32 }}>📄</span>
+                  <span style={{ fontSize: 32 }}>PDF</span>
                   <span style={{ fontWeight: "bold" }}>{imageFile.name}</span>
                   <a
                     href={URL.createObjectURL(imageFile)}
@@ -896,7 +881,7 @@ const ChatPage = () => {
                           fontWeight: "500",
                         }}
                       >
-                        📚 Use PDFs
+                        Use PDFs
                       </span>
                     }
                   />
@@ -929,7 +914,7 @@ const ChatPage = () => {
               title={isRecording ? "Click to stop recording" : "Click to start recording"}
               className={isRecording ? "pulse-animation" : ""}
             >
-              {isRecording ? "🛑" : "🎤"}
+              {isRecording ? "Stop" : "Mic"}
             </Button>
 
             <Button

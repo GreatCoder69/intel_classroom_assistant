@@ -53,7 +53,7 @@ function Resources() {
     const interval = setInterval(() => {
       const token = localStorage.getItem('token');
       if (token) {
-        console.log('🔄 Auto-refreshing resources status...');
+
         fetchResources(token);
       }
     }, 5000); // Refresh every 5 seconds
@@ -147,13 +147,7 @@ function Resources() {
     formData.append('file', uploadData.file);
     formData.append('subjectId', subjectId);
 
-    console.log('Uploading file:', {
-      name: uploadData.name,
-      fileName: uploadData.file.name,
-      fileSize: uploadData.file.size,
-      fileType: uploadData.file.type,
-      subjectId: subjectId
-    });
+
 
     try {
       setUploading(true);
@@ -166,7 +160,7 @@ function Resources() {
       });
 
       const responseData = await response.json();
-      console.log('Upload response:', { status: response.status, data: responseData });
+
 
       if (response.ok) {
         setShowUploadModal(false);
