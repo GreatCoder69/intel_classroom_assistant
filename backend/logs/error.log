@@ -87,3 +87,68 @@
 2025-07-12 16:27:41 [ERROR] ReferenceError: logger is not defined
     at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:328:7)
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:28:23 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:28:54 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+2025-07-12 16:30:09 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:30:39 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:31:58 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:33:27 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:34:20 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:34:37 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:35:17 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:35:37 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:38:14 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:328:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:38:52 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:40:26 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:41:13 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:41:57 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:42:59 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:44:11 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:51:10 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:51:57 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:52:37 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:337:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:56:37 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:339:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 16:59:11 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:348:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)

@@ -80,14 +80,10 @@ exports.getAllUsersWithChats = async (req, res) => {
 const MESSAGES_PER_PAGE = 5;
 
 exports.addChat = async (req, res) => {
-  const { subject, question, chatSubject, useResources, resourceContents } =
-    req.body;
+  const { subject, question, chatSubject, useResources, resourceContents } = req.body;
   const email = req.userEmail;
-  const requestId = `req_${Date.now()}_${Math.random()
-    .toString(36)
-    .substr(2, 9)}`;
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  // Enhanced logging with emojis and context
   chatLogger.info(`[${requestId}] Chat request started`, {
     userEmail: email?.substring(0, 3) + "***",
     subject: subject?.substring(0, 30),
@@ -105,33 +101,24 @@ exports.addChat = async (req, res) => {
       hasFile: !!req.file,
       hasEmail: !!email,
     });
-    return res
-      .status(400)
-      .json({ message: "Missing subject, question/image/pdf, or email" });
+    return res.status(400).json({ message: "Missing subject, question/image/pdf, or email" });
   }
 
   try {
-    /* ------------------------------------------------------------------ */
-    /* 1️⃣  Prepare payload for the Flask LLM                             */
-    /* ------------------------------------------------------------------ */
-    const role = req.userRole || "student"; // default role
+    const role = req.userRole || "student";
     const flaskPayload = { subject, question, role };
 
-    // Add chatSubject context if provided
     if (chatSubject) {
       flaskPayload.chatSubject = chatSubject;
-      // Enhance the question with subject context
       flaskPayload.question = question
         ? `[Context: This question is about ${chatSubject}] ${question}`
         : `Please provide information about ${chatSubject}`;
     }
 
-    // Add useResources parameter for student context enhancement
     if (useResources === "true" || useResources === true) {
       flaskPayload.useResources = true;
     }
 
-    // Forward resourceContents if provided
     if (resourceContents) {
       flaskPayload.resourceContents = resourceContents;
       chatLogger.info(`📄 [${requestId}] Forwarding resource contents`, {
@@ -140,7 +127,7 @@ exports.addChat = async (req, res) => {
       });
     }
 
-    let imageUrl = null; // for DB
+    let imageUrl = null;
     let mimeType = null;
     let base64Body = null;
 
@@ -159,29 +146,26 @@ exports.addChat = async (req, res) => {
       mimeType = req.file.mimetype;
 
       if (mimeType === "application/pdf") {
-        // read PDF text and append to question, same logic as before
         const pdfText = (await pdfParse(fs.readFileSync(req.file.path))).text;
         console.log("📄 Extracted PDF content preview:", pdfText.slice(0, 300));
         flaskPayload.question = question
           ? `${question}\n\nThe user also uploaded the following document. Please analyze it:\n\n${pdfText}`
           : `The user uploaded a document. Analyze the content:\n\n${pdfText}`;
       } else {
-        // image → base64
         base64Body = fs.readFileSync(req.file.path).toString("base64");
         flaskPayload.mimeType = mimeType;
         flaskPayload.base64Image = base64Body;
       }
     }
 
-    /* ------------------------------------------------------------------ */
-    /* 2️⃣  Call the Flask backend                                        */
-    /* ------------------------------------------------------------------ */
     chatLogger.info(`🐍 [${requestId}] Calling Python Flask server`, {
       flaskServer: FLASK_SERVER,
       hasImage: !!base64Body,
-      questionLength: question?.length || 0,
+      questionLength: flaskPayload.question?.length || 0,
       payloadSize: JSON.stringify(flaskPayload).length,
     });
+
+    console.log("🔍 Final prompt sent to LLM:\n", flaskPayload.question);
 
     const t0 = Date.now();
     const flaskRes = await axios.post(
@@ -190,10 +174,9 @@ exports.addChat = async (req, res) => {
       {
         headers: {
           "Content-Type": "application/json",
-          "x-access-token": req.headers["x-access-token"] || req.token || "", // Forward the authentication token
+          "x-access-token": req.headers["x-access-token"] || req.token || "",
         },
-        timeout: 45000, // 45 second timeout (150% increase)
-        // Add keep-alive configuration
+        timeout: 45000,
         httpAgent: new (require("http").Agent)({
           keepAlive: true,
           maxSockets: 5,
@@ -212,9 +195,6 @@ exports.addChat = async (req, res) => {
     const answer = flaskRes.data.answer || "No answer";
     const chatCategory = flaskRes.data.chatCategory || "general";
 
-    /* ------------------------------------------------------------------ */
-    /* 3️⃣  Persist in MongoDB exactly like before                        */
-    /* ------------------------------------------------------------------ */
     const existing = await Chat.findOne({ _id: subject, email });
     const count = existing ? existing.chat.length : 0;
 
@@ -227,8 +207,8 @@ exports.addChat = async (req, res) => {
       entryNumber: (count % MESSAGES_PER_PAGE) + 1,
       responseTime,
       chatCategory,
-      chatSubject: chatSubject || null, // Store the selected subject
-      userRole: role, // Store the user role
+      chatSubject: chatSubject || null,
+      userRole: role,
     };
 
     await Chat.findOneAndUpdate(
@@ -237,9 +217,6 @@ exports.addChat = async (req, res) => {
       { upsert: true, new: true }
     );
 
-    /* ------------------------------------------------------------------ */
-    /* 3.5️⃣  Also save to new ChatMessage model for statistics            */
-    /* ------------------------------------------------------------------ */
     try {
       const user = await User.findOne({ email });
       const newChatMessage = new ChatMessage({
@@ -259,12 +236,8 @@ exports.addChat = async (req, res) => {
       await newChatMessage.save();
     } catch (saveError) {
       console.error("Error saving chat message for statistics:", saveError);
-      // Don't fail the main request if statistics save fails
     }
 
-    /* ------------------------------------------------------------------ */
-    /* 4️⃣  Log event + return to client                                  */
-    /* ------------------------------------------------------------------ */
     await LogEvent({
       email,
       action: "create_chat",
@@ -272,11 +245,10 @@ exports.addChat = async (req, res) => {
       meta: { chatCategory },
     });
 
-    // Set headers to prevent response buffering
     res.set({
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
-      "X-Accel-Buffering": "no", // Disable nginx buffering if present
+      "X-Accel-Buffering": "no",
     });
 
     res.status(200).json({ answer, file: imageUrl, chatCategory });
@@ -286,71 +258,26 @@ exports.addChat = async (req, res) => {
       answerLength: answer?.length || 0,
       chatCategory,
     });
-  } catch (err) {
-    const responseTime = Date.now() - (req.startTime || Date.now());
 
-    // Enhanced error logging with context
-    if (err.code === "ECONNREFUSED") {
-      logger.error(
-        `[${requestId}] 🔌 Connection refused - Python server not accessible`,
-        {
-          error: err.message,
-          flaskServer: FLASK_SERVER,
-          responseTime: responseTime + "ms",
-        }
-      );
-    } else if (err.code === "ECONNRESET") {
-      logger.error(
-        `[${requestId}] 🔌 Connection reset - Python server dropped connection`,
-        {
-          error: err.message,
-          responseTime: responseTime + "ms",
-        }
-      );
-    } else if (err.code === "ENOTFOUND") {
-      logger.error(
-        `[${requestId}] 🌐 DNS resolution failed - Check Flask server URL`,
-        {
-          error: err.message,
-          flaskServer: FLASK_SERVER,
-        }
-      );
-    } else if (err.message?.includes("timeout")) {
-      logger.error(
-        `[${requestId}] ⏱️ Request timeout - Python server took too long`,
-        {
-          error: err.message,
-          timeoutMs: 45000,
-          responseTime: responseTime + "ms",
-        }
-      );
-    } else if (err.response?.status === 503) {
-      logger.error(
-        `[${requestId}] 🚫 Service unavailable - Python server overloaded`,
-        {
-          status: err.response.status,
-          statusText: err.response.statusText,
-          responseTime: responseTime + "ms",
-        }
-      );
-    } else {
-      logger.error(`[${requestId}] 💥 Unexpected LLM/Flask error`, {
-        error: err.message,
-        status: err.response?.status,
-        stack: err.stack?.split("\n").slice(0, 3).join("\n"),
-        responseTime: responseTime + "ms",
+    return; // ✅ prevents further execution
+  } catch (err) {
+    if (!res.headersSent) {
+      res.status(500).json({
+        message: "LLM failure",
+        detail: err.message,
+        requestId: requestId,
       });
     }
 
-    console.error("LLM / Flask error:", err.message);
-    await LogLLMError({ email, subject, prompt: question, error: err });
-    res.status(500).json({
-      message: "LLM failure",
-      detail: err.message,
-      requestId: requestId,
+    logger.error(`[${requestId}] Chat request failed`, {
+      error: err.message,
+      stack: err.stack?.split("\n").slice(0, 3).join("\n"),
     });
+
+    await LogLLMError({ email, subject, prompt: question, error: err });
   }
 };
+
 
 exports.getChatBySubject = async (req, res) => {
   const email = req.userEmail;
