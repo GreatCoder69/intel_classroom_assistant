@@ -1,0 +1,164 @@
+{
+  "demonstration": {
+    "before": {
+      "resource": {
+        "totalPages": 4,
+        "totalWords": 2,
+        "totalChunks": 1
+      },
+      "chunks": [
+        {
+          "content": " ",
+          "wordCount": 2,
+          "type": "word_group"
+        }
+      ]
+    },
+    "after": {
+      "resource": {
+        "fileName": "document.pdf",
+        "extractionDate": "2025-07-12T12:45:31.397083",
+        "totalPages": 1,
+        "totalWords": 147,
+        "totalChunks": 4,
+        "averageConfidence": 1.0,
+        "processingMethod": "fallback_text_extraction"
+      },
+      "metadata": {
+        "title": "",
+        "author": "",
+        "subject": "",
+        "creator": "",
+        "producer": "",
+        "creation_date": "",
+        "modification_date": "",
+        "page_count": 1,
+        "file_size": 1233,
+        "language": "en",
+        "has_images": false,
+        "has_tables": true,
+        "has_forms": false
+      },
+      "summary": {
+        "chunkTypes": {
+          "table": 3,
+          "list": 1
+        },
+        "averageWordsPerChunk": 37,
+        "contentOverview": "Data Structures and Algorithms Cheat Sheet\n    \n    Arrays and Lists\n    • Array: Fixed-size sequ... | readth-First Search (BFS): Queue-based\n    \n    Sorting Algorithms\n    Algorithm    Best     Aver... | • Optimal substructure\n    • Overlapping subproblems\n    • Memoization or tabulation.",
+        "extractionQuality": {
+          "score": 44,
+          "level": "fair",
+          "confidence": 1.0,
+          "wordsPerPage": 147,
+          "notes": [
+            "Fallback text extraction used"
+          ]
+        }
+      },
+      "chunks": [
+        {
+          "id": "chunk_1",
+          "section": 1,
+          "content_type": "table",
+          "content": "Data Structures and Algorithms Cheat Sheet\n    \n    Arrays and Lists\n    • Array: Fixed-size sequential collection\n    • Dynamic Array: Resizable array (ArrayList, vector)\n    • Linked List: Nodes connected via pointers\n    \n    Time Complexities:\n    Operation    Array    Linked List\n    Access       O(1)     O(n)\n    Insert       O(n)     O(1) at head\n    Delete       O(n)     O(1) at head\n    \n    Trees and Graphs\n    • Binary Tree: Each node has at most 2 children\n    • BST: Binary Search Tree with ordering property\n    • Heap: Complete binary tree with heap property\n    \n    Graph Traversal:",
+          "word_count": 78,
+          "summary": "Data Structures and Algorithms Cheat Sheet\n    \n    Arrays and Lists\n    • Array: Fixed-size sequ...",
+          "keywords": [
+            {
+              "word": "array",
+              "frequency": 4
+            },
+            {
+              "word": "binary",
+              "frequency": 3
+            },
+            {
+              "word": "tree",
+              "frequency": 3
+            },
+            {
+              "word": "linked",
+              "frequency": 2
+            },
+            {
+              "word": "list",
+              "frequency": 2
+            },
+            {
+              "word": "head",
+              "frequency": 2
+            },
+            {
+              "word": "property",
+              "frequency": 2
+            },
+            {
+              "word": "heap",
+              "frequency": 2
+            }
+          ],
+          "confidence": 1.0
+        },
+        {
+          "id": "chunk_2",
+          "section": 3,
+          "content_type": "table",
+          "content": "readth-First Search (BFS): Queue-based\n    \n    Sorting Algorithms\n    Algorithm    Best     Average  Worst    Space\n    QuickSort    O(n log n) O(n log n) O(n²)   O(log n)\n    MergeSort    O(n log n) O(n log n) O(n log n) O(n)\n    HeapSort     O(n log n) O(n log n) O(n log n) O(1)\n    \n    Dynamic Programming",
+          "word_count": 45,
+          "summary": "readth-First Search (BFS): Queue-based\n    \n    Sorting Algorithms\n    Algorithm    Best     Aver...",
+          "keywords": [
+            {
+              "word": "log",
+              "frequency": 9
+            }
+          ],
+          "confidence": 1.0
+        },
+        {
+          "id": "chunk_3",
+          "section": 4,
+          "content_type": "table",
+          "content": "• Optimal substructure\n    • Overlapping subproblems\n    • Memoization or tabulation",
+          "word_count": 10,
+          "summary": "• Optimal substructure\n    • Overlapping subproblems\n    • Memoization or tabulation.",
+          "keywords": [],
+          "confidence": 1.0
+        },
+        {
+          "id": "chunk_4",
+          "section": 5,
+          "content_type": "list",
+          "content": "- Fibonacci sequence\n    - Longest Common Subsequence\n    - Knapsack problem\n    - Coin change problem",
+          "word_count": 14,
+          "summary": "- Fibonacci sequence\n    - Longest Common Subsequence\n    - Knapsack problem\n    - Coin change pr...",
+          "keywords": [
+            {
+              "word": "problem",
+              "frequency": 2
+            }
+          ],
+          "confidence": 1.0
+        }
+      ],
+      "processingNotes": {
+        "timestamp": "2025-07-12T12:45:31.397116",
+        "ocrUsed": false,
+        "languageDetected": "en",
+        "specialContent": {
+          "hasImages": false,
+          "hasTables": true,
+          "hasForms": false
+        },
+        "fallbackMode": true,
+        "message": "Enhanced PDF processing libraries not available. Using fallback text extraction."
+      }
+    },
+    "improvements": {
+      "content_multiplier": 73.5,
+      "structure_types": 2,
+      "semantic_chunks": 4,
+      "quality_level": "fair"
+    }
+  }
+}

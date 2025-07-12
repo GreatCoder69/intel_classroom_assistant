@@ -11,6 +11,41 @@ const LogLLMError = require("../utils/logError");
 const axios   = require("axios");
 const FLASK_SERVER = process.env.FLASK_SERVER || "http://localhost:8000";
 
+// Enhanced logging for chat operations
+const createChatLogger = () => {
+  const winston = require('winston');
+  const path = require('path');
+  
+  return winston.createLogger({
+    level: 'info',
+    format: winston.format.combine(
+      winston.format.timestamp(),
+      winston.format.json()
+    ),
+    transports: [
+      new winston.transports.File({ 
+        filename: path.join(__dirname, '../../logs/chat.log'),
+        maxsize: 10485760, // 10MB
+        maxFiles: 3
+      }),
+      new winston.transports.Console({
+        format: winston.format.combine(
+          winston.format.colorize(),
+          winston.format.simple()
+        )
+      })
+    ]
+  });
+};
+
+let chatLogger;
+try {
+  chatLogger = createChatLogger();
+} catch (error) {
+  console.warn('Could not initialize Winston logger, falling back to console');
+  chatLogger = console;
+}
+
 exports.getAllUsersWithChats = async (req, res) => {
   try {
     const chats = await Chat.find({}).sort({ lastUpdated: -1 });
@@ -46,23 +81,23 @@ const MESSAGES_PER_PAGE = 5;
 
 
 exports.addChat = async (req, res) => {
-  const { subject, question, chatSubject, useResources } = req.body;
+  const { subject, question, chatSubject, useResources, resourceContents } = req.body;
   const email = req.userEmail;
-  const requestId = req.requestId || 'unknown';
-  const logger = req.logger || console;
+  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-  // Enhanced logging with request context
-  logger.info(`[${requestId}] 💬 Chat request initiated`, {
+  // Enhanced logging with emojis and context
+  chatLogger.info(`💬 [${requestId}] Chat request started`, {
+    userEmail: email?.substring(0, 3) + '***',
     subject: subject?.substring(0, 30),
     hasQuestion: !!question,
     hasFile: !!req.file,
     chatSubject,
     useResources,
-    userEmail: email?.substring(0, 3) + '***'
+    questionLength: question?.length || 0
   });
 
   if (!subject || (!question && !req.file) || !email) {
-    logger.warn(`[${requestId}] ❌ Missing required fields`, {
+    chatLogger.warn(`❌ [${requestId}] Missing required fields`, {
       hasSubject: !!subject,
       hasQuestion: !!question,
       hasFile: !!req.file,
@@ -92,6 +127,15 @@ exports.addChat = async (req, res) => {
     // Add useResources parameter for student context enhancement
     if (useResources === 'true' || useResources === true) {
       flaskPayload.useResources = true;
+    }
+    
+    // Forward resourceContents if provided
+    if (resourceContents) {
+      flaskPayload.resourceContents = resourceContents;
+      chatLogger.info(`📄 [${requestId}] Forwarding resource contents`, {
+        contentLength: resourceContents.length,
+        isString: typeof resourceContents === 'string'
+      });
     }
     
     let imageUrl   = null;                        // for DB
@@ -129,10 +173,11 @@ exports.addChat = async (req, res) => {
     /* ------------------------------------------------------------------ */
     /* 2️⃣  Call the Flask backend                                        */
     /* ------------------------------------------------------------------ */
-    logger.info(`[${requestId}] 🐍 Calling Python Flask server...`, {
+    chatLogger.info(`🐍 [${requestId}] Calling Python Flask server`, {
       flaskServer: FLASK_SERVER,
       hasImage: !!base64Body,
-      questionLength: question?.length || 0
+      questionLength: question?.length || 0,
+      payloadSize: JSON.stringify(flaskPayload).length
     });
 
     const t0 = Date.now();
@@ -140,7 +185,10 @@ exports.addChat = async (req, res) => {
       `${FLASK_SERVER}/api/chat`,
       flaskPayload,
       { 
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "x-access-token": req.headers["x-access-token"] || req.token || "" // Forward the authentication token
+        },
         timeout: 45000, // 45 second timeout (150% increase)
         // Add keep-alive configuration
         httpAgent: new (require('http').Agent)({ 
@@ -151,10 +199,11 @@ exports.addChat = async (req, res) => {
     );
     const responseTime = Date.now() - t0;
     
-    logger.info(`[${requestId}] ✅ Flask response received`, {
+    chatLogger.info(`✅ [${requestId}] AI response generated`, {
       responseTime: responseTime + 'ms',
       statusCode: flaskRes.status,
-      answerLength: flaskRes.data.answer?.length || 0
+      answerLength: flaskRes.data.answer?.length || 0,
+      answerPreview: flaskRes.data.answer?.substring(0, 100) + '...'
     });
 
     const answer       = flaskRes.data.answer || "No answer";

@@ -317,123 +317,103 @@ def create_ultra_optimized_session() -> requests.Session:
 # Global optimized HTTP session
 http_session = create_ultra_optimized_session()
 
-# Advanced logging system
-class UltraLogFilter(logging.Filter):
-    """Ultra-advanced logging filter with ML-based pattern detection."""
+# Simplified and balanced logging system
+class BalancedLogFilter(logging.Filter):
+    """Balanced logging filter - reduces noise but keeps important info."""
     
     def __init__(self):
         super().__init__()
-        self.message_patterns = {}
-        self.burst_protection = {}
-        self.learning_mode = True
-        self.pattern_threshold = 5
-        self.burst_window = 60  # 1 minute
-        self.max_burst_messages = 10
+        self.last_messages = {}
+        self.message_counts = {}
+        self.max_duplicates = 3
+        self.reset_interval = 300  # 5 minutes
+        self.last_reset = time.time()
         
     def filter(self, record):
         now = time.time()
         message = record.getMessage()
         
-        # Extract message pattern
-        pattern = self._extract_pattern(message)
+        # Reset counters periodically
+        if now - self.last_reset > self.reset_interval:
+            self.message_counts.clear()
+            self.last_reset = now
         
-        # Burst protection
-        if self._is_burst_message(pattern, now):
-            return False
-        
-        # Learn patterns in learning mode
-        if self.learning_mode:
-            self._learn_pattern(pattern, now)
-        
-        # Filter based on learned patterns
-        return self._should_log_pattern(pattern)
-    
-    def _extract_pattern(self, message: str) -> str:
-        """Extract a pattern from the log message."""
-        # Simple pattern extraction - replace numbers and variables
-        import re
-        pattern = re.sub(r'\d+', 'NUM', message)
-        pattern = re.sub(r'\b\w+@\w+\.\w+\b', 'EMAIL', pattern)
-        pattern = re.sub(r'\b[a-f0-9]{8,}\b', 'HASH', pattern)
-        return pattern[:100]  # Limit pattern length
-    
-    def _is_burst_message(self, pattern: str, now: float) -> bool:
-        """Check if this is part of a message burst."""
-        if pattern not in self.burst_protection:
-            self.burst_protection[pattern] = []
-        
-        # Clean old timestamps
-        cutoff = now - self.burst_window
-        self.burst_protection[pattern] = [
-            ts for ts in self.burst_protection[pattern] if ts > cutoff
-        ]
-        
-        # Check burst threshold
-        if len(self.burst_protection[pattern]) >= self.max_burst_messages:
+        # Allow all ERROR and WARNING messages
+        if record.levelno >= logging.WARNING:
             return True
         
-        # Add current timestamp
-        self.burst_protection[pattern].append(now)
-        return False
-    
-    def _learn_pattern(self, pattern: str, now: float):
-        """Learn about message patterns."""
-        if pattern not in self.message_patterns:
-            self.message_patterns[pattern] = {"count": 0, "first_seen": now, "last_seen": now}
+        # Simple duplicate detection for INFO messages
+        message_key = message[:100]  # First 100 chars
         
-        self.message_patterns[pattern]["count"] += 1
-        self.message_patterns[pattern]["last_seen"] = now
-    
-    def _should_log_pattern(self, pattern: str) -> bool:
-        """Determine if a pattern should be logged."""
-        if not self.learning_mode or pattern not in self.message_patterns:
-            return True
+        if message_key in self.message_counts:
+            self.message_counts[message_key] += 1
+            # Allow first few occurrences, then throttle
+            if self.message_counts[message_key] > self.max_duplicates:
+                return self.message_counts[message_key] % 10 == 0  # Every 10th message
+        else:
+            self.message_counts[message_key] = 1
         
-        pattern_info = self.message_patterns[pattern]
-        
-        # Always log first few occurrences
-        if pattern_info["count"] <= self.pattern_threshold:
-            return True
-        
-        # For frequent patterns, log every Nth occurrence
-        frequency_divisor = max(1, pattern_info["count"] // 10)
-        return pattern_info["count"] % frequency_divisor == 0
+        return True
 
-# Set up ultra-optimized logging
+# Set up balanced logging
 log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 os.makedirs(log_dir, exist_ok=True)
 
 LOG_FORMAT = '%(asctime)s [%(levelname)s] %(name)s: %(message)s'
 LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
-# Console handler with ultra filter
+# Console handler with balanced filter
 console_handler = logging.StreamHandler()
 console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
-console_handler.addFilter(UltraLogFilter())  # Reduce console nois
+console_handler.addFilter(BalancedLogFilter())
+
 # File handler with rotation
 file_handler = RotatingFileHandler(
-    os.path.join(log_dir, 'ultra_optimized.log'),
-    maxBytes=20*1024*1024,  # 20MB
-    backupCount=10
+    os.path.join(log_dir, 'server.log'),
+    maxBytes=10*1024*1024,  # 10MB
+    backupCount=5
 )
 file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT))
 file_handler.setLevel(logging.DEBUG)
 
+# Chat-specific file handler
+chat_handler = RotatingFileHandler(
+    os.path.join(log_dir, 'chat_activity.log'),
+    maxBytes=5*1024*1024,  # 5MB
+    backupCount=3
+)
+chat_handler.setFormatter(logging.Formatter(
+    '%(asctime)s [CHAT] %(message)s', 
+    datefmt=LOG_DATE_FORMAT
+))
+chat_handler.setLevel(logging.INFO)
+
 # Configure logging
 logging.basicConfig(level=logging.INFO, handlers=[console_handler, file_handler])
+
+# Create chat logger
+chat_logger = logging.getLogger('chat')
+chat_logger.addHandler(chat_handler)
+chat_logger.setLevel(logging.INFO)
+chat_logger.propagate = False  # Don't duplicate to root logger
 
 # Reduce noise from third-party libraries
 for lib in ['werkzeug', 'urllib3', 'transformers', 'optimum', 'requests']:
     logging.getLogger(lib).setLevel(logging.WARNING)
 
-# Suppress transformer generation warnings
+# Suppress transformer warnings
 import warnings
 warnings.filterwarnings("ignore", message="The following generation flags are not valid")
 warnings.filterwarnings("ignore", message=".*temperature.*")
-warnings.filterwarnings("ignore", message=".*top_p.*")
 
-logger = logging.getLogger('ultra_classroom_assistant')
-logger.info("Logging system initialized")
+logger = logging.getLogger('intel_classroom_assistant')
+logger.info("🚀 Intel Classroom Assistant server starting...")
+
+def log_chat_activity(user_info, question_length, response_length, processing_time, success=True):
+    """Log chat activity with balanced detail"""
+    status = "✅" if success else "❌"
+    chat_logger.info(f"{status} Chat: user={user_info}, q_len={question_length}, "
+                     f"resp_len={response_length}, time={processing_time:.2f}s")
 
 # Import ML dependencies with error handling
 try:
@@ -1089,10 +1069,20 @@ def fetch_subject_content_by_name(subject_name: str, use_resources: bool = False
         return cached_content
     
     try:
-        # Fetch subjects with timeout
+        # Get user token from request headers
+        user_token = request.headers.get('x-access-token', '')
+        if not user_token:
+            logger.warning(f"No authentication token provided for subject fetch: {subject_name}")
+            content_cache.set(cache_key, "")
+            return ""
+        
+        # Fetch subjects with timeout and authentication
         response = http_session.get(
             "http://localhost:8080/api/subjects/user",
-            headers={'Content-Type': 'application/json'},
+            headers={
+                'Content-Type': 'application/json',
+                'x-access-token': user_token
+            },
             timeout=(3, 6)  # Increased from (2, 4) to (3, 6) - 150%
         )
         
@@ -1140,10 +1130,20 @@ def fetch_subject_content(subject_id: str, use_resources: bool = False) -> str:
     logger.info(f"Fetching subject content from Node.js backend: {subject_id}")
     
     try:
+        # Get user token from request headers
+        user_token = request.headers.get('x-access-token', '')
+        if not user_token:
+            logger.warning(f"No authentication token provided for subject content fetch: {subject_id}")
+            content_cache.set(cache_key, "")
+            return ""
+        
         start_time = time.time()
         response = http_session.get(
             f"http://localhost:8080/api/subjects/{subject_id}/content",
-            headers={'Content-Type': 'application/json'},
+            headers={
+                'Content-Type': 'application/json',
+                'x-access-token': user_token
+            },
             timeout=(3, 7.5)  # Increased from (2, 5) to (3, 7.5) - 150%
         )
         fetch_time = time.time() - start_time
@@ -1258,20 +1258,30 @@ def ultra_chat():
     start_time = time.time()
     
     try:
-        # Fast request parsing
-        data = request.get_json(silent=True) or {}
+        # Handle both JSON and FormData requests
+        if request.content_type and 'application/json' in request.content_type:
+            data = request.get_json(silent=True) or {}
+        else:
+            # Handle FormData
+            data = request.form.to_dict()
         
         # Extract and validate parameters
         question = data.get("question", "").strip()
         subject = data.get("subject", "General")
         chat_subject = data.get("chatSubject", "")
         use_resources = data.get("useResources", False)
+        resource_contents = data.get("resourceContents", "")
         user_role = data.get("role", request.headers.get("X-User-Role", "student"))
         
-        logger.debug(f"[{request_id}] Chat request: role={user_role}, subject={subject[:30]}, length={len(question)}")
+        # Enhanced chat logging with emojis
+        user_token = request.headers.get('x-access-token', '')
+        user_info = user_token[:8] + '***' if user_token else 'anonymous'
+        
+        logger.info(f"💬 [{request_id}] Chat request started - role: {user_role}, subject: {subject[:20]}")
+        log_chat_activity(user_info, len(question), 0, 0.0, False)  # Log start
         
         if not question:
-            logger.warning(f"[{request_id}] No question provided")
+            logger.warning(f"❌ [{request_id}] No question provided")
             return jsonify({"error": "No question provided"}), 400
         
         if user_role not in ["student", "teacher"]:
@@ -1285,15 +1295,69 @@ def ultra_chat():
             logger.error(f"[{request_id}] Server overloaded - memory at {memory_stats['current_percent']:.1f}%")
             return jsonify({"error": "Server temporarily overloaded"}), 503
         
-        # Fetch subject content if needed
+        # Build subject content from provided resources or fetch if needed
         subject_content = ""
-        if use_resources and user_role == "student" and chat_subject:
+        if use_resources and user_role == "student":
             try:
-                subject_content = fetch_subject_content_by_name(chat_subject, use_resources)
-                if subject_content:
-                    logger.debug(f"[{request_id}] Subject content loaded: {len(subject_content)} chars")
+                # Use provided resource contents if available
+                if resource_contents:
+                    import json
+                    try:
+                        resources_data = json.loads(resource_contents)
+                        logger.info(f"📄 [{request_id}] Using provided resource contents: {len(resources_data)} resources")
+                        
+                        # Build context from provided resources
+                        context_parts = [
+                            "\n=== UPLOADED PDF RESOURCES (JSON CONTENT) ===",
+                            f"Total Resources: {len(resources_data)}",
+                            ""
+                        ]
+                        
+                        for resource in resources_data:
+                            context_parts.extend([
+                                f"--- {resource.get('name', 'Unknown')} ---",
+                                f"File: {resource.get('fileName', 'Unknown')}",
+                                f"Pages: {resource.get('pageCount', 'Unknown')}",
+                                f"Words: {resource.get('wordCount', 'Unknown')}",
+                                ""
+                            ])
+                            
+                            # Add extracted text chunks
+                            if resource.get('textChunks'):
+                                for i, chunk in enumerate(resource['textChunks'][:3]):  # Limit to first 3 chunks
+                                    content = chunk.get('content', '')[:800]  # Limit chunk size
+                                    context_parts.extend([
+                                        f"Chunk {i+1}: {content}",
+                                        ""
+                                    ])
+                            elif resource.get('extractedText'):
+                                # Fallback to full extracted text (limited)
+                                extracted = resource['extractedText'][:2000]
+                                context_parts.extend([
+                                    f"Content: {extracted}",
+                                    ""
+                                ])
+                        
+                        context_parts.append("=== END UPLOADED RESOURCES ===\n")
+                        subject_content = "\n".join(context_parts)
+                        
+                        logger.info(f"[{request_id}] Built context from uploaded JSON resources: {len(subject_content)} chars")
+                        
+                    except json.JSONDecodeError as e:
+                        logger.error(f"[{request_id}] Error parsing resource contents JSON: {e}")
+                        subject_content = ""
+                
+                # Only use fallback if no resource contents were provided
+                elif chat_subject and not resource_contents:
+                    logger.info(f"[{request_id}] No JSON resource contents provided, falling back to backend fetch")
+                    subject_content = fetch_subject_content_by_name(chat_subject, use_resources)
+                    if subject_content:
+                        logger.debug(f"[{request_id}] Subject content fetched from backend: {len(subject_content)} chars")
+                else:
+                    logger.debug(f"[{request_id}] No resource processing: chat_subject={bool(chat_subject)}, resource_contents={bool(resource_contents)}")
+                        
             except Exception as e:
-                logger.error(f"[{request_id}] Failed to fetch subject content: {e}")
+                logger.error(f"[{request_id}] Failed to process subject content: {e}")
         
         # Build input context
         base_context = f"{get_current_dynamic_context()}\n\nSubject: {subject}"
@@ -1310,7 +1374,7 @@ def ultra_chat():
         # Submit for batch processing or process directly if model available
         if available_models > 0:
             try:
-                logger.debug(f"[{request_id}] Starting model inference...")
+                logger.info(f"🤖 [{request_id}] Starting AI response generation...")
                 generation_start = time.time()
                 
                 # Direct processing for now
@@ -1318,22 +1382,25 @@ def ultra_chat():
                 answer = extract_assistant_response(response)
                 
                 generation_time = time.time() - generation_start
-                logger.debug(f"[{request_id}] Model inference completed in {generation_time:.2f}s")
+                logger.info(f"✅ [{request_id}] AI response generated in {generation_time:.2f}s - length: {len(answer)} chars")
                 
             except Exception as e:
-                logger.error(f"[{request_id}] Model error: {e}", exc_info=True)
+                logger.error(f"❌ [{request_id}] Model error: {e}", exc_info=True)
                 answer = "I'm experiencing technical difficulties. Please try again."
         else:
             logger.error(f"[{request_id}] No models available")
             answer = "AI model is not available. Please try again later."
         
-        # Calculate response time
+        # Calculate response time and log completion
         process_time = round(time.time() - start_time, 3)
         
-        logger.debug(f"[{request_id}] Request completed in {process_time}s")
+        # Log successful chat completion
+        log_chat_activity(user_info, len(question), len(answer), process_time, True)
         
         if process_time > 45:  # Increased threshold from 30 to 45 seconds (150%)
-            logger.warning(f"[{request_id}] Slow response: {process_time}s")
+            logger.warning(f"🐌 [{request_id}] Slow response: {process_time}s")
+        else:
+            logger.info(f"⚡ [{request_id}] Chat completed in {process_time}s")
         
         response_data = {
             "answer": answer,

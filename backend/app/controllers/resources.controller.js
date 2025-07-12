@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const pdfParse = require('pdf-parse');
+const { spawn } = require('child_process');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -207,43 +208,151 @@ function extractKeywords(text) {
 }
 
 /**
- * Extract text content from PDF file
+ * Enhanced PDF text extraction using Python processor
  */
-async function extractPDFText(filePath) {
+async function extractPDFTextEnhanced(filePath) {
+  return new Promise((resolve) => {
+    try {
+      console.log('🔄 Starting enhanced PDF extraction for:', filePath);
+      
+      // Path to Python processor
+      const pythonScript = path.join(__dirname, '../../content/pdf_processor.py');
+      const outputPath = filePath.replace('.pdf', '_enhanced_content.json');
+      
+      // Try enhanced processing first
+      const pythonProcess = spawn('python', [pythonScript, filePath, '-o', outputPath]);
+      
+      let stdout = '';
+      let stderr = '';
+      
+      pythonProcess.stdout.on('data', (data) => {
+        stdout += data.toString();
+      });
+      
+      pythonProcess.stderr.on('data', (data) => {
+        stderr += data.toString();
+      });
+      
+      pythonProcess.on('close', async (code) => {
+        if (code === 0 && fs.existsSync(outputPath)) {
+          try {
+            // Read the enhanced JSON output
+            const enhancedData = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
+            console.log('✅ Enhanced PDF extraction completed successfully');
+            
+            // Convert to format expected by existing code
+            const chunks = enhancedData.chunks.map(chunk => ({
+              id: chunk.id,
+              section: chunk.section || 1,
+              content: chunk.content,
+              wordCount: chunk.word_count || chunk.wordCount,
+              type: chunk.content_type || chunk.type || 'paragraph',
+              summary: chunk.summary,
+              keywords: chunk.keywords || []
+            }));
+            
+            resolve({
+              extractedText: chunks.map(c => c.content).join('\n\n'),
+              textChunks: chunks,
+              pageCount: enhancedData.resource.totalPages,
+              wordCount: enhancedData.resource.totalWords,
+              status: 'completed',
+              enhancedData: enhancedData,
+              processingMethod: 'enhanced'
+            });
+            
+          } catch (parseError) {
+            console.error('❌ Error parsing enhanced extraction results:', parseError);
+            // Fall back to basic extraction
+            resolve(await extractPDFTextBasic(filePath));
+          }
+        } else {
+          console.log('⚠️  Enhanced extraction failed, falling back to basic extraction');
+          console.log('Python output:', stdout);
+          console.log('Python errors:', stderr);
+          // Fall back to basic extraction
+          resolve(await extractPDFTextBasic(filePath));
+        }
+      });
+      
+      pythonProcess.on('error', (error) => {
+        console.log('⚠️  Python process error, falling back to basic extraction:', error.message);
+        // Fall back to basic extraction
+        resolve(extractPDFTextBasic(filePath));
+      });
+      
+    } catch (error) {
+      console.error('❌ Error in enhanced PDF extraction:', error);
+      // Fall back to basic extraction
+      resolve(extractPDFTextBasic(filePath));
+    }
+  });
+}
+
+/**
+ * Basic PDF text extraction using pdf-parse (fallback)
+ */
+async function extractPDFTextBasic(filePath) {
   try {
-    console.log('Starting PDF text extraction for:', filePath);
+    console.log('🔄 Starting basic PDF extraction for:', filePath);
     
-    // Read the PDF file
     const dataBuffer = fs.readFileSync(filePath);
-    
-    // Parse the PDF
     const data = await pdfParse(dataBuffer);
     
     const fullText = data.text;
     const pageCount = data.numpages;
     
-    // Intelligent chunking for AI processing
+    // Use existing chunking logic
     const textChunks = createIntelligentChunks(fullText, pageCount);
     const wordCount = fullText.split(/\s+/).length;
     
-    console.log(`PDF extraction completed: ${pageCount} pages, ${wordCount} words`);
+    console.log(`✅ Basic PDF extraction completed: ${pageCount} pages, ${wordCount} words`);
     
     return {
       extractedText: fullText,
       textChunks: textChunks,
       pageCount: pageCount,
       wordCount: wordCount,
-      status: 'completed'
+      status: 'completed',
+      processingMethod: 'basic'
     };
   } catch (error) {
-    console.error('Error extracting PDF text:', error);
+    console.error('❌ Error in basic PDF extraction:', error);
     return {
       extractedText: '',
       textChunks: [],
       pageCount: 0,
       wordCount: 0,
       status: 'failed',
-      error: error.message
+      error: error.message,
+      processingMethod: 'failed'
+    };
+  }
+}
+
+/**
+ * Extract text content from PDF file (Enhanced version with fallback)
+ */
+async function extractPDFText(filePath) {
+  try {
+    console.log('Starting PDF text extraction for:', filePath);
+    
+    // Try enhanced extraction first, fall back to basic if needed
+    const result = await extractPDFTextEnhanced(filePath);
+    
+    console.log(`PDF extraction completed using ${result.processingMethod} method: ${result.pageCount} pages, ${result.wordCount} words`);
+    
+    return result;
+  } catch (error) {
+    console.error('Error in PDF text extraction:', error);
+    return {
+      extractedText: '',
+      textChunks: [],
+      pageCount: 0,
+      wordCount: 0,
+      status: 'failed',
+      error: error.message,
+      processingMethod: 'failed'
     };
   }
 }
@@ -341,44 +450,62 @@ exports.uploadResource = async (req, res) => {
         const jsonFilePath = req.file.path.replace('.pdf', '_content.json');
         console.log('💾 Creating JSON file at:', jsonFilePath);
         
-        const contentData = {
-          resource: {
-            id: resource._id,
-            name: resource.name,
-            fileName: resource.fileName,
-            subject: subject.name,
-            subjectId: resource.subjectId,
-            extractionDate: new Date(),
-            totalPages: extractionResult.pageCount,
-            totalWords: extractionResult.wordCount,
-            totalChunks: extractionResult.textChunks.length
-          },
-          summary: {
-            chunkTypes: extractionResult.textChunks.reduce((acc, chunk) => {
-              acc[chunk.type] = (acc[chunk.type] || 0) + 1;
-              return acc;
-            }, {}),
-            averageWordsPerChunk: Math.round(extractionResult.wordCount / extractionResult.textChunks.length),
-            contentOverview: extractionResult.textChunks.slice(0, 3).map(c => c.summary).join(' | ')
-          },
-          chunks: extractionResult.textChunks.map(chunk => ({
-            id: chunk.id,
-            section: chunk.section,
-            type: chunk.type,
-            summary: chunk.summary,
-            content: chunk.content,
-            wordCount: chunk.wordCount,
-            // Add search keywords extracted from content
-            keywords: extractKeywords(chunk.content)
-          })),
-          // Remove the full text to avoid redundancy - it's already in chunks
-          metadata: {
-            fileSize: resource.fileSize,
-            uploadDate: resource.uploadDate,
-            uploadedBy: resource.uploadedBy,
-            processingNote: "This content has been intelligently chunked for optimal AI processing. Each chunk represents a semantic section of the document."
-          }
-        };
+        let contentData;
+        
+        // Check if we have enhanced extraction data
+        if (extractionResult.enhancedData) {
+          // Use the enhanced data structure
+          contentData = extractionResult.enhancedData;
+          // Update with our resource info
+          contentData.resource.id = resource._id;
+          contentData.resource.name = resource.name;
+          contentData.resource.subject = subject.name;
+          contentData.resource.subjectId = resource.subjectId;
+        } else {
+          // Create standard structure for basic extraction
+          contentData = {
+            resource: {
+              id: resource._id,
+              name: resource.name,
+              fileName: resource.fileName,
+              subject: subject.name,
+              subjectId: resource.subjectId,
+              extractionDate: new Date(),
+              totalPages: extractionResult.pageCount,
+              totalWords: extractionResult.wordCount,
+              totalChunks: extractionResult.textChunks.length,
+              processingMethod: extractionResult.processingMethod || 'basic'
+            },
+            summary: {
+              chunkTypes: extractionResult.textChunks.reduce((acc, chunk) => {
+                acc[chunk.type] = (acc[chunk.type] || 0) + 1;
+                return acc;
+              }, {}),
+              averageWordsPerChunk: Math.round(extractionResult.wordCount / extractionResult.textChunks.length),
+              contentOverview: extractionResult.textChunks.slice(0, 3).map(c => c.summary).join(' | '),
+              extractionQuality: {
+                score: extractionResult.wordCount > 100 ? 80 : 40,
+                level: extractionResult.wordCount > 100 ? "good" : "fair",
+                method: extractionResult.processingMethod
+              }
+            },
+            chunks: extractionResult.textChunks.map(chunk => ({
+              id: chunk.id,
+              section: chunk.section,
+              type: chunk.type,
+              summary: chunk.summary,
+              content: chunk.content,
+              wordCount: chunk.wordCount,
+              keywords: chunk.keywords || extractKeywords(chunk.content)
+            })),
+            metadata: {
+              fileSize: resource.fileSize,
+              uploadDate: resource.uploadDate,
+              uploadedBy: resource.uploadedBy,
+              processingNote: `Content processed using ${extractionResult.processingMethod} extraction method. Each chunk represents a semantic section of the document.`
+            }
+          };
+        }
         
         fs.writeFileSync(jsonFilePath, JSON.stringify(contentData, null, 2));
         console.log('💾 JSON content file saved:', jsonFilePath);

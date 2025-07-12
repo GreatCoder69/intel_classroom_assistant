@@ -29,6 +29,9 @@ const ChatPage = () => {
   const [subjects, setSubjects] = useState([]);
   const [selectedSubject, setSelectedSubject] = useState("");
   const [useResources, setUseResources] = useState(false);
+  const [subjectResources, setSubjectResources] = useState([]);
+  const [loadingResources, setLoadingResources] = useState(false);
+  const [showResourceDetails, setShowResourceDetails] = useState(false);
   const [user, setUser] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState(null);
@@ -68,6 +71,25 @@ const ChatPage = () => {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chat]);
+
+  // Fetch resources when selected subject changes
+  useEffect(() => {
+    if (selectedSubject) {
+      fetchSubjectResources(selectedSubject);
+      // Reset useResources and resource details when changing subjects
+      setUseResources(false);
+      setShowResourceDetails(false);
+    }
+  }, [selectedSubject, subjects]);
+
+  // Reset resource details when useResources is unchecked
+  useEffect(() => {
+    if (!useResources) {
+      setShowResourceDetails(false);
+    } else if (useResources && subjectResources.length > 0) {
+      // Resources are now displayed above input, no system messages needed
+    }
+  }, [useResources]);
 
   const fetchAllChats = async () => {
     setLoading(true);
@@ -193,10 +215,80 @@ const ChatPage = () => {
       formData.append("model", selectedModel);
       // Use "General" as fallback if no specific subject selected
       formData.append("chatSubject", selectedSubject || "General");
-      // Add useResources parameter for students
-      if (user?.role === "student" && useResources) {
+      
+      // Add resource content as JSON if resources are being used
+      if (user?.role === "student" && useResources && subjectResources.length > 0) {
+        console.log("🔄 Starting resource content fetch for", subjectResources.length, "resources");
         formData.append("useResources", "true");
+        
+        // Fetch and include JSON content for each resource
+        const resourceContents = await Promise.all(
+          subjectResources.map(async (resource) => {
+            try {
+              console.log(`🔄 Fetching content for resource: ${resource.name} (ID: ${resource._id})`);
+              const res = await fetch(`${import.meta.env.VITE_API_URL}/api/resources/${resource._id}/content`, {
+                headers: {
+                  "Content-Type": "application/json",
+                  "x-access-token": token,
+                },
+              });
+              
+              console.log(`📡 Resource ${resource.name} response status:`, res.status);
+              
+              if (res.ok) {
+                const content = await res.json();
+                console.log(`✅ Resource ${resource.name} content:`, {
+                  hasExtractedText: !!content.extractedText,
+                  hasTextChunks: !!content.textChunks,
+                  wordCount: content.wordCount,
+                  pageCount: content.pageCount
+                });
+                
+                return {
+                  id: resource._id,
+                  name: resource.name,
+                  fileName: resource.fileName,
+                  extractedText: content.extractedText,
+                  textChunks: content.textChunks,
+                  pageCount: content.pageCount,
+                  wordCount: content.wordCount
+                };
+              } else {
+                console.error(`❌ Failed to fetch resource ${resource.name}:`, res.status, res.statusText);
+              }
+              return null;
+            } catch (error) {
+              console.error(`💥 Error fetching content for resource ${resource.name}:`, error);
+              return null;
+            }
+          })
+        );
+        
+        // Filter out failed requests and append valid content
+        const validContents = resourceContents.filter(content => content !== null);
+        if (validContents.length > 0) {
+          const resourcesJson = JSON.stringify(validContents);
+          formData.append("resourceContents", resourcesJson);
+          console.log("✅ Sending JSON resource contents:", validContents.length, "resources");
+          console.log("📊 Resource details:", validContents.map(r => ({
+            name: r.name,
+            fileName: r.fileName,
+            wordCount: r.wordCount,
+            hasContent: !!r.extractedText || !!r.textChunks
+          })));
+          console.log("📦 Total word count:", validContents.reduce((sum, r) => sum + (r.wordCount || 0), 0));
+          console.log("📋 FormData resourceContents length:", resourcesJson.length, "characters");
+        } else {
+          console.log("❌ No valid resource contents to send");
+        }
+      } else {
+        console.log("🚫 Resource conditions not met:", {
+          userRole: user?.role,
+          useResources: useResources,
+          resourceCount: subjectResources.length
+        });
       }
+      
       if (currentMessage.trim()) formData.append("question", currentMessage);
       if (imageFile) formData.append("image", imageFile);
 
@@ -665,6 +757,101 @@ const ChatPage = () => {
     }
   };
 
+  const fetchSubjectResources = async (subjectName) => {
+    if (!subjectName || subjectName === "General") {
+      setSubjectResources([]);
+      return;
+    }
+
+    try {
+      setLoadingResources(true);
+      // First get the subject ID from the subjects list
+      const subject = subjects.find(s => s.name === subjectName);
+      if (!subject) {
+        setSubjectResources([]);
+        return;
+      }
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/subjects/${subject._id}/resources`, {
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token,
+        },
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        // Only include resources that have been successfully processed
+        const processedResources = data.filter(resource => 
+          resource.extractionStatus === 'completed' && resource.hasExtractedContent
+        );
+        setSubjectResources(processedResources);
+      } else {
+        setSubjectResources([]);
+      }
+    } catch (err) {
+      console.error("Error fetching subject resources:", err);
+      setSubjectResources([]);
+    } finally {
+      setLoadingResources(false);
+    }
+  };
+
+  const handleRemoveResource = (resourceId) => {
+    setSubjectResources(prev => {
+      const updated = prev.filter(resource => resource._id !== resourceId);
+      
+      // If no resources left, uncheck useResources
+      if (updated.length === 0) {
+        setUseResources(false);
+      }
+      
+      // Update the system message in chat to reflect new count
+      setChat(prevChat => {
+        const updatedChat = [...prevChat];
+        // Find the last system message about resources and update it
+        for (let i = updatedChat.length - 1; i >= 0; i--) {
+          if (updatedChat[i].sender === "system" && updatedChat[i].message.includes("JSON resource")) {
+            if (updated.length === 0) {
+              // Remove the system message if no resources left
+              updatedChat.splice(i, 1);
+            } else {
+              // Update the message and resources
+              updatedChat[i] = {
+                ...updatedChat[i],
+                message: `� Loaded ${updated.length} JSON resource${updated.length !== 1 ? 's' : ''} from ${selectedSubject}`,
+                resources: updated
+              };
+            }
+            break;
+          }
+        }
+        return updatedChat;
+      });
+      
+      // Update chat history too
+      setChatHistory((prev) => ({
+        ...prev,
+        [selectedTopic]: prev[selectedTopic]?.map(msg => {
+          if (msg.sender === "system" && msg.message.includes("PDF resource")) {
+            if (updated.length === 0) {
+              return null; // Mark for removal
+            } else {
+              return {
+                ...msg,
+                message: `📁 Loaded ${updated.length} PDF resource${updated.length !== 1 ? 's' : ''} from ${selectedSubject}`,
+                resources: updated
+              };
+            }
+          }
+          return msg;
+        }).filter(msg => msg !== null) || [],
+      }));
+      
+      return updated;
+    });
+  };
+
   if (loading) return <div className="text-center">Loading...</div>;
 
   return (
@@ -770,7 +957,7 @@ const ChatPage = () => {
         </div>
 
         <div className="flex-grow-1 p-3 overflow-auto">
-          {(chat || []).map((msg, i) => (
+          {(chat || []).filter(msg => msg.sender !== "system").map((msg, i) => (
             <div
               key={i}
               className={`msg-row ${
@@ -784,14 +971,16 @@ const ChatPage = () => {
                 style={{
                   maxWidth: "90%",
                   whiteSpace: "pre-wrap",
-                  wordBreak: "break-word",
+                  wordBreak: "break-word"
                 }}
               >
+                
+                {/* Regular image handling */}
                 {msg.image &&
                   (msg.image.toLowerCase().endsWith(".pdf") ? (
                     <div className="d-flex flex-column align-items-start mb-2">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <span style={{ fontSize: 20 }}>PDF</span>
+                        <span style={{ fontSize: 20 }}>📄</span>
                         <a
                           href={msg.image}
                           target="_blank"
@@ -917,23 +1106,34 @@ const ChatPage = () => {
                   className="d-flex align-items-center"
                   style={{ padding: "0 8px", whiteSpace: "nowrap" }}
                 >
-                  <Form.Check
-                    type="checkbox"
-                    id="use-resources-checkbox"
-                    checked={useResources}
-                    onChange={(e) => setUseResources(e.target.checked)}
-                    label={
-                      <span
-                        style={{
-                          fontSize: "0.85rem",
-                          color: "#adb5bd",
-                          fontWeight: "500",
-                        }}
-                      >
-                        Use PDFs
+                  {loadingResources ? (
+                    <div className="d-flex align-items-center">
+                      <div className="spinner-border spinner-border-sm me-2" role="status" style={{ width: "12px", height: "12px" }}>
+                        <span className="visually-hidden">Loading...</span>
+                      </div>
+                      <span style={{ fontSize: "0.85rem", color: "#adb5bd" }}>
+                        Loading PDFs...
                       </span>
-                    }
-                  />
+                    </div>
+                  ) : subjectResources.length > 0 ? (
+                    <Form.Check
+                      type="checkbox"
+                      id="use-resources-checkbox"
+                      checked={useResources}
+                      onChange={(e) => setUseResources(e.target.checked)}
+                      label={
+                        <span
+                          style={{
+                            fontSize: "0.85rem",
+                            color: "#adb5bd",
+                            fontWeight: "500",
+                          }}
+                        >
+                          Use PDFs ({subjectResources.length})
+                        </span>
+                      }
+                    />
+                  ) : null}
                 </div>
               )}
 
@@ -973,6 +1173,45 @@ const ChatPage = () => {
               Send
             </Button>
           </InputGroup>
+
+          {/* Enhanced resource display below input */}
+          {useResources && subjectResources && subjectResources.length > 0 && (
+            <div className="enhanced-resources-display mt-3">
+              <div className="text-muted fw-bold mb-2">
+                📄 Using {subjectResources.length} JSON resource{subjectResources.length !== 1 ? 's' : ''} from {selectedSubject}
+              </div>
+              <div className="row g-2">
+                {subjectResources.map(resource => (
+                  <div key={resource._id} className="col-md-6 col-lg-4">
+                    <div className="enhanced-resource-card">
+                      <div className="d-flex align-items-start justify-content-between">
+                        <div className="flex-grow-1">
+                          <div className="fw-bold text-truncate" title={resource.filename || resource.name}>
+                            📄 {resource.filename || resource.name}
+                          </div>
+                          {resource.pageCount && (
+                            <small className="text-muted">({resource.pageCount} pages)</small>
+                          )}
+                          {resource.wordCount && (
+                            <small className="text-muted d-block">{resource.wordCount.toLocaleString()} words</small>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          className="btn-close-enhanced"
+                          onClick={() => handleRemoveResource(resource._id)}
+                          aria-label="Remove resource"
+                          title="Remove resource"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <Modal
