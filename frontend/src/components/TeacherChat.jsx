@@ -1,11 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Form, InputGroup, Dropdown, Modal } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { toast } from "react-toastify";
 import "./ChatPage.css";
 
-const apiBase = import.meta.env.VITE_API_URL;
 const ChatPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -25,8 +24,26 @@ const ChatPage = () => {
   const [imageFile, setImageFile] = useState(null);
   const [showNewTopicModal, setShowNewTopicModal] = useState(false);
   const [newTopicName, setNewTopicName] = useState("");
-  const [isRecording, setIsRecording] = useState(false); // Track recording state
-  const [recognition, setRecognition] = useState(null); // Store recognition instance
+  const [subjects, setSubjects] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [useResources, setUseResources] = useState(false); // For student to enable/disable resource context
+  const [user, setUser] = useState(null); // Store user data to check role
+
+  // Handle voice transcription
+  const handleVoiceTranscription = (transcribedText) => {
+    // Add transcribed text to current message
+    setCurrentMessage((prev) => {
+      const newText = prev ? `${prev} ${transcribedText}` : transcribedText;
+      return newText;
+    });
+
+    // Show success message
+    toast.success(
+      `Voice transcription: "${transcribedText.slice(0, 50)}${
+        transcribedText.length > 50 ? "..." : ""
+      }"`
+    );
+  };
 
   const [profile, setProfile] = useState({
     email: "",
@@ -43,7 +60,16 @@ const ChatPage = () => {
       return;
     }
 
+    // Get user data from localStorage
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const parsedUser = JSON.parse(userData);
+      console.log("User data from localStorage:", parsedUser); // Debug log
+      setUser(parsedUser);
+    }
+
     fetchUserProfile();
+    fetchSubjects();
     const savedOrder = localStorage.getItem("topicsOrder");
     if (savedOrder) {
       setTopics(JSON.parse(savedOrder));
@@ -84,12 +110,12 @@ const ChatPage = () => {
         };
 
         (c.chat || []).forEach((entry) => {
-          if (entry.question || entry.imageURL) {
+          if (entry.question || entry.imageUrl) {
             history[topic].push({
               sender: "user",
               message: entry.question || "",
-              image: entry.imageURL
-                ? `http://localhost:8080${entry.imageURL}`
+              image: entry.imageUrl
+                ? `http://localhost:8080${entry.imageUrl}`
                 : null,
               timestamp: entry.timestamp,
             });
@@ -101,8 +127,8 @@ const ChatPage = () => {
               message: entry.answer,
               timestamp: entry.timestamp,
               _id: entry._id,
-              image: entry.imageURL
-                ? `http://localhost:8080${entry.imageURL}`
+              image: entry.imageUrl
+                ? `http://localhost:8080${entry.imageUrl}`
                 : null,
               downloadCount: entry.downloadCount || 0,
             });
@@ -171,6 +197,12 @@ const ChatPage = () => {
       const formData = new FormData();
       formData.append("subject", selectedTopic);
       formData.append("model", selectedModel); // 👈 Add this line
+      // Use "General" as fallback if no specific subject selected
+      formData.append("chatSubject", selectedSubject || "General");
+      // Add useResources parameter for students
+      if (user?.role === "student" && useResources) {
+        formData.append("useResources", "true");
+      }
       if (currentMessage.trim()) formData.append("question", currentMessage);
       if (imageFile) formData.append("image", imageFile);
 
@@ -180,7 +212,6 @@ const ChatPage = () => {
           "x-access-token": token, // ✅ Only token here, don't set 'Content-Type'
         },
         body: formData,
-        cache: 'no-cache'
       });
 
       const data = await res.json();
@@ -225,147 +256,60 @@ const ChatPage = () => {
       console.error("Upload or chat error:", err);
     }
   };
-  const micDictate = async () => {
-    // If currently recording, stop the recording
-    if (isRecording && recognition) {
-      recognition.stop();
-      setIsRecording(false);
-      toast.info("🎤 Stopped recording");
+
+  const addTopic = async () => {
+    const topic = newTopicName.trim();
+
+    // Validation checks
+    if (!topic) {
+      toast.warn("Please enter a topic name.");
+      return;
+    }
+
+    if (topics.includes(topic)) {
+      toast.warn("Topic already exists. Please choose a different name.");
       return;
     }
 
     try {
-      // Check for browser support
-      const SpeechRecognition =
-        window.SpeechRecognition || window.webkitSpeechRecognition;
-      
-      if (!SpeechRecognition) {
-        toast.error("Speech recognition not supported in this browser. Please use Chrome, Edge, or Safari.");
-        return;
-      }
+      // Create initial chat entry
+      const now = new Date();
+      const initialChatPair = [
+        { sender: "user", message: "Hello", timestamp: now.toISOString() },
+        {
+          sender: "bot",
+          message: "Hello! How can I help you today?",
+          timestamp: now.toISOString(),
+        },
+      ];
 
-      // Check for HTTPS or localhost
-      if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
-        toast.error("Voice input requires HTTPS. Please access the site over HTTPS.");
-        return;
-      }
+      // Update topics list
+      const updatedTopics = [topic, ...topics];
 
-      // Request microphone permission
-      try {
-        await navigator.mediaDevices.getUserMedia({ audio: true });
-      } catch (permissionError) {
-        toast.error("Microphone permission denied. Please allow microphone access and try again.");
-        return;
-      }
+      // Update all states
+      setTopics(updatedTopics);
+      localStorage.setItem("topicsOrder", JSON.stringify(updatedTopics));
+      setSelectedTopic(topic);
+      setChatHistory((prev) => ({
+        ...prev,
+        [topic]: initialChatPair,
+      }));
+      setChat(initialChatPair);
 
-      toast.info("🎤 Recording... Click again to stop");
-      setIsRecording(true);
+      // Reset form and close modal
+      setNewTopicName("");
+      setShowNewTopicModal(false);
 
-      const recognitionInstance = new SpeechRecognition();
-      recognitionInstance.continuous = true; // Keep listening continuously
-      recognitionInstance.interimResults = true; // Show interim results
-      recognitionInstance.lang = "en-US";
-
-      // Store recognition instance for stopping later
-      setRecognition(recognitionInstance);
-
-      recognitionInstance.onresult = (e) => {
-        let interimTranscript = '';
-        let finalTranscript = '';
-
-        // Process all results
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const transcript = e.results[i][0].transcript;
-          if (e.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        // Update message with final transcript
-        if (finalTranscript) {
-          setCurrentMessage((prev) => {
-            const newText = prev ? `${prev} ${finalTranscript}` : finalTranscript;
-            return newText;
-          });
-        }
-      };
-
-      recognitionInstance.onerror = (e) => {
-        console.error("Speech recognition error:", e);
-        setIsRecording(false);
-        setRecognition(null);
-        
-        switch (e.error) {
-          case 'not-allowed':
-            toast.error("Microphone permission denied. Please allow microphone access.");
-            break;
-          case 'no-speech':
-            toast.warning("No speech detected. Microphone is still active.");
-            // Don't stop recording on no-speech, just warn
-            return;
-          case 'network':
-            toast.error("Network error. Please check your internet connection.");
-            break;
-          case 'service-not-allowed':
-            toast.error("Speech service not allowed. Please use HTTPS.");
-            break;
-          case 'aborted':
-            // This is normal when user clicks stop
-            break;
-          default:
-            toast.error(`Speech error: ${e.error || "unknown"}`);
-        }
-      };
-
-      recognitionInstance.onstart = () => {
-
-        setIsRecording(true);
-      };
-
-      recognitionInstance.onend = () => {
-
-        setIsRecording(false);
-        setRecognition(null);
-        
-        // Only show stopped message if it wasn't manually stopped
-        if (isRecording) {
-          toast.info("🎤 Recording stopped");
-        }
-      };
-
-      recognitionInstance.start();
+      toast.success(`Topic "${topic}" created successfully!`);
     } catch (error) {
-      console.error("Voice recognition error:", error);
-      setIsRecording(false);
-      setRecognition(null);
-      toast.error("Failed to start voice recognition. Please try again.");
+      console.error("Error creating topic:", error);
+      toast.error("Failed to create topic. Please try again.");
     }
   };
 
-  const addTopic = async () => {
-    const topic = newTopicName.trim();
-    if (!topic || topics.includes(topic)) {
-      toast.warn("Topic is empty or already exists.");
-      return;
-    }
-
-    const now = new Date();
-    const chatPair = [
-      { sender: "user", message: "Hello", timestamp: now },
-      { sender: "bot", message: "Hello, how are you?", timestamp: now },
-    ];
-
-    const updatedTopics = [topic, ...topics];
-    setTopics(updatedTopics);
-    localStorage.setItem("topicsOrder", JSON.stringify(updatedTopics));
-    setSelectedTopic(topic);
-    setChatHistory((prev) => ({ ...prev, [topic]: chatPair }));
-    setChat(chatPair);
-    setNewTopicName("");
-    setShowNewTopicModal(false);
-    toast.success("New topic created.");
+  const handleOpenNewTopicModal = () => {
+    setNewTopicName(""); // Reset the input field
+    setShowNewTopicModal(true);
   };
 
   const selectTopic = (topic) => {
@@ -396,8 +340,42 @@ const ChatPage = () => {
           "https://www.shutterstock.com/image-vector/vector-flat-illustration-grayscale-avatar-600nw-2281862025.jpg",
         password: "",
       });
+
+      // Also set user data for role checking
+      setUser({
+        email: data.email,
+        name: data.name,
+        role: data.role || "student", // Default to student if role is missing
+      });
     } catch (err) {
       console.error("Error fetching user profile:", err);
+      // Set default user data on error
+      setUser({
+        email: "",
+        name: "",
+        role: "student",
+      });
+    }
+  };
+
+  const fetchSubjects = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/subjects`, {
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token,
+        },
+      });
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setSubjects(data);
+        // Set default subject to "General" if none selected
+        if (!selectedSubject) {
+          setSelectedSubject("General");
+        }
+      }
+    } catch (err) {
+      console.error("Error fetching subjects:", err);
     }
   };
 
@@ -530,6 +508,31 @@ const ChatPage = () => {
       console.error("Error deleting chat:", err);
     }
   };
+  // ---- inside ChatPage.jsx ----
+  const micDictate = () => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      toast.error("Speech recognition not supported in this browser");
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = "en-US";
+
+    recognition.onresult = (e) => {
+      const text = e.results[0][0].transcript;
+      setCurrentMessage((prev) => (prev ? `${prev} ${text}` : text));
+      toast.success(`Voice: “${text}”`);
+    };
+
+    recognition.onerror = (e) =>
+      toast.error(`Speech error: ${e.error || "unknown"}`);
+
+    recognition.start();
+  };
 
   if (loading) return <div className="text-center">Loading...</div>;
 
@@ -552,12 +555,8 @@ const ChatPage = () => {
             Go to Dashboard
           </Button>
         </>
-        
         <>
-          <Button
-            className="w-100 mb-2"
-            onClick={() => setShowNewTopicModal(true)}
-          >
+          <Button className="w-100 mb-2" onClick={handleOpenNewTopicModal}>
             + New Chat
           </Button>
         </>
@@ -582,7 +581,7 @@ const ChatPage = () => {
                     onClick={(e) => {
                       e.stopPropagation();
                       setTopicToDelete(topic);
-                      setShowConfirmDelete(true);
+                      setShowConfirmDelete(true); // ✅ this matches the actual modal trigger
                     }}
                   >
                     ×
@@ -602,7 +601,21 @@ const ChatPage = () => {
 
       <div className="flex-grow-1 d-flex flex-column" style={{ minWidth: 0 }}>
         <div className="p-3 border-bottom d-flex justify-content-between align-items-center">
-          <h5>EduAI</h5>
+          <div className="d-flex align-items-center gap-3">
+            <h5
+              className="mb-0"
+              style={{
+                color: "#3a7bd5",
+                fontWeight: "700",
+                fontSize: "1.5rem",
+              }}
+            >
+              🤖 eduAI
+            </h5>
+            <Link to="/subjects" className="btn btn-outline-primary btn-sm">
+              📚 Subjects
+            </Link>
+          </div>
           <Dropdown align="end">
             <Dropdown.Toggle
               variant="outline-secondary"
@@ -651,7 +664,7 @@ const ChatPage = () => {
                   (msg.image.toLowerCase().endsWith(".pdf") ? (
                     <div className="d-flex flex-column align-items-start mb-2">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <span style={{ fontSize: 20 }}>PDF</span>
+                        <span style={{ fontSize: 20 }}>📄</span>
                         <a
                           href={msg.image}
                           target="_blank"
@@ -715,7 +728,7 @@ const ChatPage = () => {
             <div className="mb-2 d-flex align-items-center gap-3">
               {imageFile.type === "application/pdf" ? (
                 <>
-                  <span style={{ fontSize: 32 }}>PDF</span>
+                  <span style={{ fontSize: 32 }}>📄</span>
                   <span style={{ fontWeight: "bold" }}>{imageFile.name}</span>
                   <a
                     href={URL.createObjectURL(imageFile)}
@@ -742,6 +755,7 @@ const ChatPage = () => {
               </Button>
             </div>
           )}
+
           <InputGroup>
             <Form.Control
               placeholder="Type a message..."
@@ -751,6 +765,50 @@ const ChatPage = () => {
                 if (e.key === "Enter") handleSend();
               }}
             />
+
+            {/* Subject Selection Dropdown */}
+            <Form.Select
+              value={selectedSubject}
+              onChange={(e) => setSelectedSubject(e.target.value)}
+              size="sm"
+              style={{ maxWidth: "150px" }}
+            >
+              <option value="">Subject...</option>
+              <option value="General">General</option>
+              {subjects.map((subject) => (
+                <option key={subject._id} value={subject.name}>
+                  {subject.name}
+                </option>
+              ))}
+            </Form.Select>
+
+            {/* Resource context checkbox for students - inline with dropdown */}
+            {user?.role === "student" &&
+              selectedSubject &&
+              selectedSubject !== "General" && (
+                <div
+                  className="d-flex align-items-center"
+                  style={{ padding: "0 8px", whiteSpace: "nowrap" }}
+                >
+                  <Form.Check
+                    type="checkbox"
+                    id="use-resources-checkbox"
+                    checked={useResources}
+                    onChange={(e) => setUseResources(e.target.checked)}
+                    label={
+                      <span
+                        style={{
+                          fontSize: "0.85rem",
+                          color: "#adb5bd",
+                          fontWeight: "500",
+                        }}
+                      >
+                        📚 Use PDFs
+                      </span>
+                    }
+                  />
+                </div>
+              )}
 
             {/* Image Upload Button */}
             <input
@@ -769,15 +827,17 @@ const ChatPage = () => {
             >
               +
             </Button>
+
+            {/* Voice to Text Button */}
             <Button
-              variant={isRecording ? "danger" : "outline-secondary"}
+              variant="outline-secondary"
               onClick={micDictate}
               disabled={loading}
-              title={isRecording ? "Click to stop recording" : "Click to start recording"}
-              className={isRecording ? "pulse-animation" : ""}
+              title="Click to speak"
             >
-              {isRecording ? "🛑" : "🎤"}
+              🎤
             </Button>
+
             <Button
               onClick={handleSend}
               disabled={!currentMessage.trim() && !imageFile}
@@ -789,7 +849,10 @@ const ChatPage = () => {
       </div>
       <Modal
         show={showNewTopicModal}
-        onHide={() => setShowNewTopicModal(false)}
+        onHide={() => {
+          setNewTopicName("");
+          setShowNewTopicModal(false);
+        }}
         centered
       >
         <Modal.Header closeButton>
@@ -802,18 +865,32 @@ const ChatPage = () => {
               type="text"
               value={newTopicName}
               onChange={(e) => setNewTopicName(e.target.value)}
-              placeholder="e.g. React Tips"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  addTopic();
+                }
+              }}
+              placeholder="e.g. React Tips, Math Problems, Science Queries"
+              autoFocus
             />
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
           <Button
             variant="secondary"
-            onClick={() => setShowNewTopicModal(false)}
+            onClick={() => {
+              setNewTopicName("");
+              setShowNewTopicModal(false);
+            }}
           >
             Cancel
           </Button>
-          <Button variant="primary" onClick={addTopic}>
+          <Button
+            variant="primary"
+            onClick={addTopic}
+            disabled={!newTopicName.trim()}
+          >
             Create
           </Button>
         </Modal.Footer>

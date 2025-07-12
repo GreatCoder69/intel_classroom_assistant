@@ -2153,3 +2153,34 @@
 2025-07-12 19:43:48 [INFO] [w8otlhjqe] GET /api/auth/me - 🟢 200 (8ms)
 2025-07-12 19:43:48 [INFO] [il7kfq76t] GET /chat - 🟢 200 (8ms)
 2025-07-12 19:43:48 [INFO] [sw8rvz5lx] GET /1752301732722-intellogo.jpg - 🟢 304 (1ms)
+2025-07-12 19:46:12 [INFO] [l68srovv8] POST /api/auth/signin - Request started
+2025-07-12 19:46:12 [INFO] [l68srovv8] POST /api/auth/signin - 🟢 200 (22ms)
+2025-07-12 19:46:22 [INFO] [kwpymw1he] POST /api/auth/signin - Request started
+2025-07-12 19:46:22 [INFO] [kwpymw1he] POST /api/auth/signin - 🟢 200 (30ms)
+2025-07-12 19:46:22 [INFO] [uwpk908oi] GET /api/auth/me - Request started
+2025-07-12 19:46:22 [INFO] [uwpk908oi] GET /api/auth/me - 🟢 200 (4ms)
+2025-07-12 19:46:22 [INFO] [8ugakvjxu] GET /api/subjects - Request started
+2025-07-12 19:46:22 [INFO] [g298kli2p] GET /api/chat - Request started
+2025-07-12 19:46:22 [INFO] [8ugakvjxu] GET /api/subjects - 🟢 200 (8ms)
+2025-07-12 19:46:22 [INFO] [g298kli2p] GET /chat - 🟢 200 (14ms)
+2025-07-12 19:46:22 [INFO] [0rvteyyqd] GET /1751695216090-1_kSOvoHiZvF_jNJL4zF06ug.png - 🟢 304 (1ms)
+2025-07-12 19:46:31 [INFO] [rpdo8kh0f] POST /api/auth/signin - Request started
+2025-07-12 19:46:31 [INFO] [rpdo8kh0f] POST /api/auth/signin - 🟢 200 (27ms)
+2025-07-12 19:46:31 [INFO] [mjdihhvyl] GET /api/subject-statistics - Request started
+2025-07-12 19:46:31 [WARN] [mjdihhvyl] GET /subject-statistics - 🟡 401 (3ms)
+2025-07-12 19:46:31 [INFO] [xnpoi4tkc] GET /api/subject-statistics - Request started
+2025-07-12 19:46:31 [WARN] [xnpoi4tkc] GET /subject-statistics - 🟡 401 (2ms)
+2025-07-12 19:46:34 [INFO] [3ocxc838h] GET /api/subjects/user - Request started
+2025-07-12 19:46:34 [INFO] [3ocxc838h] GET /api/subjects/user - 🟢 200 (8ms)
+2025-07-12 19:46:36 [INFO] [7nv4si4w1] GET /api/subject-statistics - Request started
+2025-07-12 19:46:36 [WARN] [7nv4si4w1] GET /subject-statistics - 🟡 401 (2ms)
+2025-07-12 19:46:36 [INFO] [9o19exedy] GET /api/subject-statistics - Request started
+2025-07-12 19:46:36 [WARN] [9o19exedy] GET /subject-statistics - 🟡 401 (1ms)
+2025-07-12 19:46:38 [INFO] [c1plecc6q] GET /api/subject-statistics - Request started
+2025-07-12 19:46:38 [INFO] [c1plecc6q] GET /subject-statistics - 🟢 200 (17ms)
+2025-07-12 19:46:38 [INFO] [f0vb3n7yc] GET /api/subject-statistics - Request started
+2025-07-12 19:46:38 [INFO] [f0vb3n7yc] GET /subject-statistics - 🟢 200 (12ms)
+2025-07-12 19:46:41 [INFO] [3wahwafp5] GET /api/subject-statistics - Request started
+2025-07-12 19:46:41 [INFO] [3wahwafp5] GET /subject-statistics - 🟢 200 (10ms)
+2025-07-12 19:46:41 [INFO] [p29q0y8f8] GET /api/subject-statistics - Request started
+2025-07-12 19:46:41 [INFO] [p29q0y8f8] GET /subject-statistics - 🟢 200 (12ms)

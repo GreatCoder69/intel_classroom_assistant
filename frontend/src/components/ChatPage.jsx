@@ -5,7 +5,6 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "react-toastify";
 import "./ChatPage.css";
 
-const apiBase = import.meta.env.VITE_API_URL;
 const ChatPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
