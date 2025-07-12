@@ -3,13 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import LoginPage from "./components/LoginPage";
 import SignupPage from "./components/SignupPage";
 import ChatPage from "./components/ChatPage";
-import AdminPage from "./components/AdminPage";
-import ChatHistory from "./components/ChatHistory";
-import EditProfile from "./components/EditProfile";
-import EditUser from "./components/EditUser";
-import GeneralChat from "./components/GeneralChat";
-import ChatDetail from "./components/ChatDetail";
-import AdminErrorLogs from "./components/AdminErrorLogs";
 import Dashboard from "./pages/Dashboard";
 import Subjects from "./pages/Subjects";
 import Resources from "./pages/Resources";
@@ -37,9 +30,8 @@ const App = () => (
     <Route path="/subjects" element={<Subjects />} />
     <Route path="/subjects/:subjectId/resources" element={<Resources />} />
     <Route path="/chat" element={<ChatPage />} />
-    <Route path="/general-chat" element={<GeneralChat />} />
-    <Route path="/history" element={<ChatHistory />} />
-    <Route path="/chat-detail" element={<ChatDetail />} />
+    
+    
     <Route path="/suggestions" element={<SuggestionsPage />} />
     <Route path="/teacher-suggestions" element={<TeacherSuggestion />} />
     <Route path="/teacher-chat" element={
@@ -48,11 +40,6 @@ const App = () => (
       </ProtectedRoute>
     } />
 
-    {/* Admin routes */}
-    <Route path="/admin" element={<AdminPage />} />
-    <Route path="/manage-user" element={<EditProfile />} />
-    <Route path="/edit-user/:email" element={<EditUser />} />
-    <Route path="/error-logs" element={<AdminErrorLogs />} />
 
     {/* Default redirect */}
     <Route path="*" element={<Navigate to="/login" replace />} />

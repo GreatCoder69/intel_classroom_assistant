@@ -1640,3 +1640,415 @@
     at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
 2025-07-12 16:59:11 [WARN] [h6wdvyaqq] POST /api/chat - 🔴 500 (15994ms)
 2025-07-12 17:02:17 [INFO] 🛑 SIGINT received, shutting down gracefully...
+2025-07-12 17:02:21 [INFO] 🔌 Connecting to MongoDB...
+2025-07-12 17:02:21 [INFO] 🛣️  Loading routes...
+2025-07-12 17:02:21 [INFO] All routes loaded successfully
+2025-07-12 17:02:21 [INFO] 🔄 Starting server...
+2025-07-12 17:02:21 [INFO] 🚀 Intel Classroom Assistant Backend Server started
+2025-07-12 17:02:21 [INFO] 📍 Server running on port 8080
+2025-07-12 17:02:21 [INFO] 🌍 Environment: development
+2025-07-12 17:02:21 [INFO] 🔧 Log level: info
+2025-07-12 17:02:21 [INFO] 📂 Upload directory: uploads
+2025-07-12 17:02:21 [INFO] 🐍 Python server URL: http://localhost:8000
+2025-07-12 17:02:21 [INFO] 🔗 Mongoose connected to MongoDB
+2025-07-12 17:02:21 [INFO] MongoDB connected successfully
+2025-07-12 17:02:34 [INFO] [jyinujbvc] POST /api/chat - Request started
+2025-07-12 17:02:50 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:02:50 [WARN] [jyinujbvc] POST /api/chat - 🔴 500 (15835ms)
+2025-07-12 17:03:26 [INFO] [jmaivq2hn] POST /api/auth/signin - Request started
+2025-07-12 17:03:27 [INFO] [jmaivq2hn] POST /api/auth/signin - 🟢 200 (52ms)
+2025-07-12 17:03:27 [INFO] [j3h920fhn] GET /api/auth/me - Request started
+2025-07-12 17:03:27 [INFO] [j3h920fhn] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 17:03:27 [INFO] [cj8r9fbna] GET /api/subjects - Request started
+2025-07-12 17:03:27 [INFO] [cj8r9fbna] GET /api/subjects - 🟢 200 (8ms)
+2025-07-12 17:03:27 [INFO] [tw73psefm] GET /api/chat - Request started
+2025-07-12 17:03:27 [INFO] [tw73psefm] GET /chat - 🟢 200 (15ms)
+2025-07-12 17:03:46 [INFO] [xrolp3eid] POST /api/chat - Request started
+2025-07-12 17:03:52 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:03:52 [WARN] [xrolp3eid] POST /api/chat - 🔴 500 (6309ms)
+2025-07-12 17:04:07 [INFO] [z7jjf8gap] GET /api/auth/me - Request started
+2025-07-12 17:04:07 [INFO] [otxmbd8b4] GET /api/chat - Request started
+2025-07-12 17:04:07 [INFO] [xu14djs0u] GET /api/subjects - Request started
+2025-07-12 17:04:07 [INFO] [z7jjf8gap] GET /api/auth/me - 🟢 200 (8ms)
+2025-07-12 17:04:07 [INFO] [xu14djs0u] GET /api/subjects - 🟢 200 (12ms)
+2025-07-12 17:04:07 [INFO] [otxmbd8b4] GET /chat - 🟢 200 (16ms)
+2025-07-12 17:04:07 [INFO] [9wknma8ce] GET /1752316171970-904553895.jpg - 🟢 304 (5ms)
+2025-07-12 17:04:07 [INFO] [9nqnow425] GET /1751695216090-1_kSOvoHiZvF_jNJL4zF06ug.png - 🟢 304 (6ms)
+2025-07-12 17:04:07 [INFO] [z02jvkg4d] GET /1752316727118-946071401.jpg - 🟢 304 (6ms)
+2025-07-12 17:04:07 [INFO] [f9n870vdq] GET /1752316807874-608588062.jpg - 🟢 304 (6ms)
+2025-07-12 17:04:07 [INFO] [8h77nga11] GET /1752316917532-916887706.jpg - 🟢 304 (8ms)
+2025-07-12 17:04:07 [INFO] [97xw0s1pq] GET /1752317123427-824518922.jpg - 🟢 304 (2ms)
+2025-07-12 17:04:07 [INFO] [x9fsudvte] GET /1752317897282-151271018.jpg - 🟢 304 (1ms)
+2025-07-12 17:04:07 [INFO] [x1upp381v] GET /1752318525274-122834183.png - 🟢 304 (2ms)
+2025-07-12 17:04:07 [INFO] [md4y7m4hx] GET /1752318616739-703514740.webp - 🟢 304 (1ms)
+2025-07-12 17:04:07 [INFO] [8x6jqmkwe] GET /1752318667522-771931688.webp - 🟢 304 (2ms)
+2025-07-12 17:04:07 [INFO] [05794nlqn] GET /1752318702943-24379226.webp - 🟢 304 (1ms)
+2025-07-12 17:04:07 [INFO] [8ma2chq8v] GET /1752318771148-965315108.png - 🟢 304 (2ms)
+2025-07-12 17:04:07 [INFO] [5aui72heq] GET /1752318843372-762828723.png - 🟢 304 (2ms)
+2025-07-12 17:04:07 [INFO] [8n42kaock] GET /1752320026021-546003543.png - 🟢 200 (8ms)
+2025-07-12 17:04:21 [INFO] [zjbqeljl7] POST /api/chat - Request started
+2025-07-12 17:04:27 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:04:27 [WARN] [zjbqeljl7] POST /api/chat - 🔴 500 (6474ms)
+2025-07-12 17:05:15 [INFO] [0wq1iuhr9] POST /api/chat - Request started
+2025-07-12 17:05:21 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:05:21 [WARN] [0wq1iuhr9] POST /api/chat - 🔴 500 (6523ms)
+2025-07-12 17:05:43 [INFO] [odgiouwvx] POST /api/chat - Request started
+2025-07-12 17:05:56 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:05:56 [WARN] [odgiouwvx] POST /api/chat - 🔴 500 (13252ms)
+2025-07-12 17:07:01 [INFO] [myfj4l6it] POST /api/auth/signin - Request started
+2025-07-12 17:07:01 [INFO] [myfj4l6it] POST /api/auth/signin - 🟢 200 (25ms)
+2025-07-12 17:07:01 [INFO] [n7cvg7cuq] GET /api/subject-statistics - Request started
+2025-07-12 17:07:01 [INFO] [n7cvg7cuq] GET /subject-statistics - 🟢 200 (11ms)
+2025-07-12 17:07:01 [INFO] [lsqi6zl0e] GET /api/subject-statistics - Request started
+2025-07-12 17:07:01 [INFO] [lsqi6zl0e] GET /subject-statistics - 🟢 200 (9ms)
+2025-07-12 17:07:05 [INFO] [x1mn2woel] GET /api/auth/me - Request started
+2025-07-12 17:07:05 [INFO] [x1mn2woel] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 17:07:05 [INFO] [9paptifci] GET /api/chat - Request started
+2025-07-12 17:07:05 [INFO] [9paptifci] GET /chat - 🟢 200 (8ms)
+2025-07-12 17:07:05 [INFO] [l9jw2onev] GET /1752301732722-intellogo.jpg - 🟢 304 (0ms)
+2025-07-12 17:07:06 [INFO] [l6haskkoq] GET /api/subject-statistics - Request started
+2025-07-12 17:07:06 [INFO] [l6haskkoq] GET /subject-statistics - 🟢 200 (11ms)
+2025-07-12 17:07:06 [INFO] [oh34najj0] GET /api/subject-statistics - Request started
+2025-07-12 17:07:06 [INFO] [oh34najj0] GET /subject-statistics - 🟢 200 (13ms)
+2025-07-12 17:07:13 [INFO] [4uqhfpo1k] GET /api/subjects/user - Request started
+2025-07-12 17:07:13 [INFO] [4uqhfpo1k] GET /api/subjects/user - 🟢 200 (9ms)
+2025-07-12 17:07:24 [INFO] [mpg1x43kd] DELETE /api/subjects/687216637859807ac0bf20e7 - Request started
+2025-07-12 17:07:24 [WARN] [mpg1x43kd] DELETE /api/subjects/687216637859807ac0bf20e7 - 🟡 400 (9ms)
+2025-07-12 17:07:26 [INFO] [hchh80b54] DELETE /api/subjects/687216637859807ac0bf20e7 - Request started
+2025-07-12 17:07:26 [WARN] [hchh80b54] DELETE /api/subjects/687216637859807ac0bf20e7 - 🟡 400 (4ms)
+2025-07-12 17:07:27 [INFO] [0dvpuy0rd] GET /api/subjects/user - Request started
+2025-07-12 17:07:27 [INFO] [0dvpuy0rd] GET /api/subjects/user - 🟢 200 (4ms)
+2025-07-12 17:07:30 [INFO] [43yhr4fr3] DELETE /api/subjects/687216637859807ac0bf20e7 - Request started
+2025-07-12 17:07:30 [WARN] [43yhr4fr3] DELETE /api/subjects/687216637859807ac0bf20e7 - 🟡 400 (5ms)
+2025-07-12 17:07:44 [INFO] [n1770fo11] DELETE /api/subjects/686871b405185ccd8b574e32 - Request started
+2025-07-12 17:07:44 [INFO] [n1770fo11] DELETE /api/subjects/686871b405185ccd8b574e32 - 🟢 200 (19ms)
+2025-07-12 17:07:44 [INFO] [ac75g2vdp] GET /api/subjects/user - Request started
+2025-07-12 17:07:44 [INFO] [ac75g2vdp] GET /api/subjects/user - 🟢 200 (4ms)
+2025-07-12 17:07:54 [INFO] [zx8a61c9o] GET /api/subjects/user - Request started
+2025-07-12 17:07:54 [INFO] [zx8a61c9o] GET /api/subjects/user - 🟢 200 (9ms)
+2025-07-12 17:08:05 [INFO] [bfya55qn5] GET /api/subject-statistics - Request started
+2025-07-12 17:08:05 [INFO] [bfya55qn5] GET /subject-statistics - 🟢 200 (19ms)
+2025-07-12 17:08:05 [INFO] [ol65a2tj7] GET /api/subject-statistics - Request started
+2025-07-12 17:08:05 [INFO] [ol65a2tj7] GET /subject-statistics - 🟢 200 (15ms)
+2025-07-12 17:13:18 [INFO] [bz7wnqhv6] POST /api/auth/signup - Request started
+2025-07-12 17:13:18 [INFO] [bz7wnqhv6] POST /api/auth/signup - 🟢 201 (34ms)
+2025-07-12 17:13:31 [INFO] [xktkzhdtu] POST /api/auth/signin - Request started
+2025-07-12 17:13:31 [INFO] [xktkzhdtu] POST /api/auth/signin - 🟢 200 (30ms)
+2025-07-12 17:13:35 [INFO] [dqe98r7kk] POST /api/auth/signin - Request started
+2025-07-12 17:13:35 [INFO] [dqe98r7kk] POST /api/auth/signin - 🟢 200 (28ms)
+2025-07-12 17:13:35 [INFO] [e1lkmt9wc] GET /api/subject-statistics - Request started
+2025-07-12 17:13:35 [INFO] [e1lkmt9wc] GET /subject-statistics - 🟢 200 (13ms)
+2025-07-12 17:13:35 [INFO] [gblx0m075] GET /api/subject-statistics - Request started
+2025-07-12 17:13:35 [INFO] [gblx0m075] GET /subject-statistics - 🟢 200 (13ms)
+2025-07-12 17:14:02 [INFO] [v4f942zx0] GET /api/subjects/user - Request started
+2025-07-12 17:14:02 [INFO] [v4f942zx0] GET /api/subjects/user - 🟢 200 (10ms)
+2025-07-12 17:14:14 [INFO] [dex4ag18n] DELETE /api/subjects/687216637859807ac0bf20e7 - Request started
+2025-07-12 17:14:14 [WARN] [dex4ag18n] DELETE /api/subjects/687216637859807ac0bf20e7 - 🟡 400 (7ms)
+2025-07-12 17:14:22 [INFO] [xnu19ahof] GET /api/subjects/user - Request started
+2025-07-12 17:14:22 [INFO] [xnu19ahof] GET /api/subjects/user - 🟢 200 (11ms)
+2025-07-12 17:14:22 [INFO] [bkf32gq9l] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 17:14:22 [INFO] [bkf32gq9l] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (19ms)
+2025-07-12 17:14:25 [INFO] [tasqxhqdi] DELETE /api/resources/68721d0839c5ded63396ebd5 - Request started
+2025-07-12 17:14:25 [INFO] [tasqxhqdi] DELETE /api/resources/68721d0839c5ded63396ebd5 - 🟢 200 (10ms)
+2025-07-12 17:14:25 [INFO] [j414xqeuc] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 17:14:25 [INFO] [j414xqeuc] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (9ms)
+2025-07-12 17:14:27 [INFO] [iy4k1p2cd] GET /api/subjects/user - Request started
+2025-07-12 17:14:27 [INFO] [iy4k1p2cd] GET /api/subjects/user - 🟢 200 (9ms)
+2025-07-12 17:14:30 [INFO] [dcv867ajd] DELETE /api/subjects/687216637859807ac0bf20e7 - Request started
+2025-07-12 17:14:30 [INFO] [dcv867ajd] DELETE /api/subjects/687216637859807ac0bf20e7 - 🟢 200 (9ms)
+2025-07-12 17:14:30 [INFO] [5bp4t45yu] GET /api/subjects/user - Request started
+2025-07-12 17:14:30 [INFO] [5bp4t45yu] GET /api/subjects/user - 🟢 200 (5ms)
+2025-07-12 17:14:43 [INFO] [abxnwo1o9] POST /api/subjects - Request started
+2025-07-12 17:14:43 [INFO] [abxnwo1o9] POST /api/subjects - 🟢 201 (9ms)
+2025-07-12 17:14:43 [INFO] [1k4uqgg53] GET /api/subjects/user - Request started
+2025-07-12 17:14:43 [INFO] [1k4uqgg53] GET /api/subjects/user - 🟢 200 (7ms)
+2025-07-12 17:14:52 [INFO] [ihmpx7wds] PUT /api/subjects/68724aab6dc1d8f52321a3aa - Request started
+2025-07-12 17:14:52 [INFO] [ihmpx7wds] PUT /api/subjects/68724aab6dc1d8f52321a3aa - 🟢 200 (11ms)
+2025-07-12 17:14:52 [INFO] [v3vgm96zu] GET /api/subjects/user - Request started
+2025-07-12 17:14:52 [INFO] [v3vgm96zu] GET /api/subjects/user - 🟢 200 (7ms)
+2025-07-12 17:14:56 [INFO] [e9zsd6z5h] GET /api/subjects/user - Request started
+2025-07-12 17:14:56 [INFO] [e9zsd6z5h] GET /api/subjects/user - 🟢 200 (11ms)
+2025-07-12 17:14:56 [INFO] [4m6z1ro5k] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - Request started
+2025-07-12 17:14:56 [INFO] [4m6z1ro5k] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - 🟢 200 (9ms)
+2025-07-12 17:15:20 [INFO] [iisrmueaw] POST /api/subjects/68724aab6dc1d8f52321a3aa/resources - Request started
+2025-07-12 17:15:20 [INFO] [iisrmueaw] POST /api/subjects/68724aab6dc1d8f52321a3aa/resources - 🟢 201 (29ms)
+2025-07-12 17:15:20 [INFO] [lyh0pi4uv] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - Request started
+2025-07-12 17:15:20 [INFO] [lyh0pi4uv] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - 🟢 200 (10ms)
+2025-07-12 17:15:25 [INFO] [7beieywgp] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - Request started
+2025-07-12 17:15:25 [INFO] [7beieywgp] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - 🟢 200 (13ms)
+2025-07-12 17:15:40 [INFO] [h9i48exg2] GET /api/resources/68724ad06dc1d8f52321a3b3/download - Request started
+2025-07-12 17:15:40 [INFO] [h9i48exg2] GET /api/resources/68724ad06dc1d8f52321a3b3/download - 🟢 200 (6ms)
+2025-07-12 17:15:55 [INFO] [f5yn9zybd] GET /api/subjects/user - Request started
+2025-07-12 17:15:55 [INFO] [f5yn9zybd] GET /api/subjects/user - 🟢 200 (9ms)
+2025-07-12 17:16:05 [INFO] [v1wn1bk87] POST /api/subjects - Request started
+2025-07-12 17:16:05 [INFO] [v1wn1bk87] POST /api/subjects - 🟢 201 (8ms)
+2025-07-12 17:16:05 [INFO] [58i4nl8tv] GET /api/subjects/user - Request started
+2025-07-12 17:16:05 [INFO] [58i4nl8tv] GET /api/subjects/user - 🟢 200 (9ms)
+2025-07-12 17:16:10 [INFO] [j6cssuaeo] DELETE /api/subjects/68724afd6dc1d8f52321a3c2 - Request started
+2025-07-12 17:16:10 [INFO] [j6cssuaeo] DELETE /api/subjects/68724afd6dc1d8f52321a3c2 - 🟢 200 (10ms)
+2025-07-12 17:16:10 [INFO] [0fuzbiqjz] GET /api/subjects/user - Request started
+2025-07-12 17:16:10 [INFO] [0fuzbiqjz] GET /api/subjects/user - 🟢 200 (8ms)
+2025-07-12 17:16:11 [INFO] [cb11k6nhm] GET /api/subject-statistics - Request started
+2025-07-12 17:16:11 [INFO] [cb11k6nhm] GET /subject-statistics - 🟢 200 (12ms)
+2025-07-12 17:16:11 [INFO] [edvm1bv3m] GET /api/subject-statistics - Request started
+2025-07-12 17:16:11 [INFO] [edvm1bv3m] GET /subject-statistics - 🟢 200 (15ms)
+2025-07-12 17:16:13 [INFO] [hzrjpufj1] GET /api/auth/me - Request started
+2025-07-12 17:16:13 [INFO] [yx843jq5x] GET /api/chat - Request started
+2025-07-12 17:16:13 [INFO] [hzrjpufj1] GET /api/auth/me - 🟢 200 (12ms)
+2025-07-12 17:16:13 [INFO] [yx843jq5x] GET /chat - 🟢 200 (10ms)
+2025-07-12 17:16:24 [INFO] [0a9gi7g09] GET /api/subject-statistics - Request started
+2025-07-12 17:16:24 [INFO] [0a9gi7g09] GET /subject-statistics - 🟢 200 (16ms)
+2025-07-12 17:16:24 [INFO] [9av4tpwki] GET /api/subject-statistics - Request started
+2025-07-12 17:16:24 [INFO] [9av4tpwki] GET /subject-statistics - 🟢 200 (16ms)
+2025-07-12 17:16:27 [INFO] [4ph379tst] GET /api/subjects - Request started
+2025-07-12 17:16:27 [INFO] [4ph379tst] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 17:16:27 [INFO] [ctfg4m35a] GET /api/suggestions - Request started
+2025-07-12 17:16:27 [INFO] [ctfg4m35a] GET /suggestions - 🟢 200 (7ms)
+2025-07-12 17:16:31 [INFO] [ik3mkrmob] GET /api/subject-statistics - Request started
+2025-07-12 17:16:31 [INFO] [ik3mkrmob] GET /subject-statistics - 🟢 200 (12ms)
+2025-07-12 17:16:31 [INFO] [qupcqlm6k] GET /api/subject-statistics - Request started
+2025-07-12 17:16:31 [INFO] [qupcqlm6k] GET /subject-statistics - 🟢 200 (11ms)
+2025-07-12 17:17:00 [INFO] [uchz4ceji] POST /api/auth/signup - Request started
+2025-07-12 17:17:00 [WARN] [uchz4ceji] POST /api/auth/signup - 🟡 400 (4ms)
+2025-07-12 17:17:11 [INFO] [dem83j18n] POST /api/auth/signup - Request started
+2025-07-12 17:17:11 [INFO] [dem83j18n] POST /api/auth/signup - 🟢 201 (32ms)
+2025-07-12 17:17:22 [INFO] [v01ufhhq5] POST /api/auth/signin - Request started
+2025-07-12 17:17:22 [INFO] [v01ufhhq5] POST /api/auth/signin - 🟢 200 (28ms)
+2025-07-12 17:17:22 [INFO] [v7vs3114r] GET /api/auth/me - Request started
+2025-07-12 17:17:22 [INFO] [v7vs3114r] GET /api/auth/me - 🟢 200 (5ms)
+2025-07-12 17:17:22 [INFO] [b8khfi3zs] GET /api/subjects - Request started
+2025-07-12 17:17:22 [INFO] [e4botoieu] GET /api/chat - Request started
+2025-07-12 17:17:22 [INFO] [b8khfi3zs] GET /api/subjects - 🟢 200 (13ms)
+2025-07-12 17:17:22 [INFO] [e4botoieu] GET /chat - 🟢 200 (11ms)
+2025-07-12 17:17:37 [INFO] [qlyd6qn9s] GET /api/subjects - Request started
+2025-07-12 17:17:37 [INFO] [qlyd6qn9s] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 17:17:37 [INFO] [jqotp9exc] GET /api/suggestions - Request started
+2025-07-12 17:17:37 [INFO] [jqotp9exc] GET /suggestions - 🟢 200 (8ms)
+2025-07-12 17:17:52 [INFO] [gjytzvjtk] POST /api/suggestions - Request started
+2025-07-12 17:17:53 [INFO] [gjytzvjtk] POST /suggestions - 🟢 200 (990ms)
+2025-07-12 17:18:02 [INFO] [4fglgvnyd] GET /api/subjects - Request started
+2025-07-12 17:18:02 [INFO] [4fglgvnyd] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 17:18:02 [INFO] [kxaxx9twr] GET /api/suggestions - Request started
+2025-07-12 17:18:02 [INFO] [kxaxx9twr] GET /suggestions - 🟢 200 (11ms)
+2025-07-12 17:18:09 [INFO] [aqbdg0zcr] GET /api/auth/me - Request started
+2025-07-12 17:18:09 [INFO] [uwpioi6qz] GET /api/subjects - Request started
+2025-07-12 17:18:09 [INFO] [aqbdg0zcr] GET /api/auth/me - 🟢 200 (9ms)
+2025-07-12 17:18:09 [INFO] [uwpioi6qz] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 17:18:09 [INFO] [jlyjcd5n9] GET /api/chat - Request started
+2025-07-12 17:18:09 [INFO] [jlyjcd5n9] GET /chat - 🟢 200 (7ms)
+2025-07-12 17:18:55 [INFO] [b5wvb94sl] POST /api/chat - Request started
+2025-07-12 17:19:07 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:19:07 [WARN] [b5wvb94sl] POST /api/chat - 🔴 500 (11660ms)
+2025-07-12 17:19:19 [INFO] [bh39fp56o] GET /api/subjects/user - Request started
+2025-07-12 17:19:19 [INFO] [bh39fp56o] GET /api/subjects/user - 🟢 200 (7ms)
+2025-07-12 17:19:26 [INFO] [aiy94q9fb] GET /api/subjects/user - Request started
+2025-07-12 17:19:26 [INFO] [vkunrjkvu] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - Request started
+2025-07-12 17:19:26 [INFO] [aiy94q9fb] GET /api/subjects/user - 🟢 200 (18ms)
+2025-07-12 17:19:26 [INFO] [vkunrjkvu] GET /api/subjects/68724aab6dc1d8f52321a3aa/resources - 🟢 200 (22ms)
+2025-07-12 17:19:35 [INFO] [zcnkxthvs] GET /api/subjects/user - Request started
+2025-07-12 17:19:35 [INFO] [zcnkxthvs] GET /api/subjects/user - 🟢 200 (6ms)
+2025-07-12 17:19:36 [INFO] [w0scutzlq] GET /api/auth/me - Request started
+2025-07-12 17:19:36 [INFO] [w0scutzlq] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 17:19:36 [INFO] [sh6yx2xnq] GET /api/subjects - Request started
+2025-07-12 17:19:36 [INFO] [4n5kc9y3h] GET /api/chat - Request started
+2025-07-12 17:19:36 [INFO] [sh6yx2xnq] GET /api/subjects - 🟢 200 (14ms)
+2025-07-12 17:19:36 [INFO] [4n5kc9y3h] GET /chat - 🟢 200 (11ms)
+2025-07-12 17:20:02 [INFO] [p6z17u3m6] POST /api/chat - Request started
+2025-07-12 17:20:02 [INFO] [oekkbj6qx] GET /api/subjects/user - Request started
+2025-07-12 17:20:02 [INFO] [oekkbj6qx] GET /api/subjects/user - 🟢 200 (4ms)
+2025-07-12 17:20:11 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:20:11 [WARN] [p6z17u3m6] POST /api/chat - 🔴 500 (9435ms)
+2025-07-12 17:20:59 [INFO] [ttpavopvz] POST /api/chat - Request started
+2025-07-12 17:21:06 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:21:06 [WARN] [ttpavopvz] POST /api/chat - 🔴 500 (6682ms)
+2025-07-12 17:21:39 [INFO] [q7d8qhitd] PUT /api/auth/update - Request started
+2025-07-12 17:21:39 [INFO] [q7d8qhitd] PUT /api/auth/update - 🟢 200 (15ms)
+2025-07-12 17:26:14 [INFO] [zjotexkil] POST /api/auth/signin - Request started
+2025-07-12 17:26:14 [INFO] [zjotexkil] POST /api/auth/signin - 🟢 200 (28ms)
+2025-07-12 17:26:30 [INFO] [vbpsqftry] POST /api/auth/signin - Request started
+2025-07-12 17:26:30 [INFO] [vbpsqftry] POST /api/auth/signin - 🟢 200 (26ms)
+2025-07-12 17:26:30 [INFO] [gewcefgky] GET /api/auth/me - Request started
+2025-07-12 17:26:30 [INFO] [gewcefgky] GET /api/auth/me - 🟢 200 (5ms)
+2025-07-12 17:26:30 [INFO] [alimj6eep] GET /api/subjects - Request started
+2025-07-12 17:26:30 [INFO] [alimj6eep] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 17:26:30 [INFO] [o90iq26s7] GET /api/chat - Request started
+2025-07-12 17:26:30 [INFO] [o90iq26s7] GET /chat - 🟢 200 (7ms)
+2025-07-12 17:26:30 [INFO] [hs1chaud3] GET /1752321099642-intellogo.jpg - 🟢 200 (9ms)
+2025-07-12 17:26:33 [INFO] [120vciwo7] GET /1752321059330-266782313.jpg - 🟢 200 (4ms)
+2025-07-12 17:27:09 [INFO] [o72jfoq74] POST /api/chat - Request started
+2025-07-12 17:27:20 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:27:20 [WARN] [o72jfoq74] POST /api/chat - 🔴 500 (10432ms)
+2025-07-12 17:27:39 [INFO] [i53zlnt4s] GET /api/auth/me - Request started
+2025-07-12 17:27:39 [INFO] [lybzq50gi] GET /api/chat - Request started
+2025-07-12 17:27:39 [INFO] [n2krf73oa] GET /api/subjects - Request started
+2025-07-12 17:27:39 [INFO] [i53zlnt4s] GET /api/auth/me - 🟢 200 (11ms)
+2025-07-12 17:27:39 [INFO] [n2krf73oa] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 17:27:39 [INFO] [lybzq50gi] GET /chat - 🟢 200 (13ms)
+2025-07-12 17:27:39 [INFO] [emh0h21ex] GET /1752321099642-intellogo.jpg - 🟢 304 (2ms)
+2025-07-12 17:27:39 [INFO] [0l6t0enu4] GET /1752321059330-266782313.jpg - 🟢 304 (2ms)
+2025-07-12 17:27:39 [INFO] [bkq987rbf] GET /1752321429704-396712399.jpg - 🟢 200 (7ms)
+2025-07-12 17:28:01 [INFO] [pqzpz6evy] POST /api/chat - Request started
+2025-07-12 17:28:26 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:28:26 [INFO] [681iv9jqs] POST /api/chat - Request started
+2025-07-12 17:28:53 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:32:05 [INFO] [23yakk06r] POST /api/chat - Request started
+2025-07-12 17:32:21 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:32:21 [WARN] [23yakk06r] POST /api/chat - 🔴 500 (16410ms)
+2025-07-12 17:33:09 [INFO] [kp5s11vnb] GET /api/auth/me - Request started
+2025-07-12 17:33:09 [INFO] [uhzrqfk92] GET /api/subjects - Request started
+2025-07-12 17:33:09 [INFO] [ks93plum4] GET /api/chat - Request started
+2025-07-12 17:33:09 [INFO] [kp5s11vnb] GET /api/auth/me - 🟢 200 (10ms)
+2025-07-12 17:33:09 [INFO] [uhzrqfk92] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 17:33:09 [INFO] [ks93plum4] GET /chat - 🟢 200 (8ms)
+2025-07-12 17:33:09 [INFO] [d53rkg0a6] GET /1752321099642-intellogo.jpg - 🟢 304 (2ms)
+2025-07-12 17:33:49 [INFO] [ktf2ptyas] GET /api/auth/me - Request started
+2025-07-12 17:33:49 [INFO] [lsw5d4tr3] GET /api/subjects - Request started
+2025-07-12 17:33:49 [INFO] [8c035v4mv] GET /api/chat - Request started
+2025-07-12 17:33:49 [INFO] [ktf2ptyas] GET /api/auth/me - 🟢 200 (15ms)
+2025-07-12 17:33:49 [INFO] [lsw5d4tr3] GET /api/subjects - 🟢 200 (15ms)
+2025-07-12 17:33:49 [INFO] [8c035v4mv] GET /chat - 🟢 200 (19ms)
+2025-07-12 17:33:49 [INFO] [crp0570pb] GET /1752321099642-intellogo.jpg - 🟢 304 (1ms)
+2025-07-12 17:34:09 [INFO] [mp9frkqfv] POST /api/chat - Request started
+2025-07-12 17:34:24 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:34:24 [WARN] [mp9frkqfv] POST /api/chat - 🔴 500 (15598ms)
+2025-07-12 17:35:18 [INFO] [6n0yydgl5] POST /api/chat - Request started
+2025-07-12 17:35:25 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:35:25 [WARN] [6n0yydgl5] POST /api/chat - 🔴 500 (6878ms)
+2025-07-12 17:35:35 [INFO] [e2wd2m6mg] POST /api/deletechat - Request started
+2025-07-12 17:35:35 [INFO] [e2wd2m6mg] POST /deletechat - 🟢 200 (19ms)
+2025-07-12 17:36:33 [INFO] [qpt1dx3vw] GET /1752321059330-266782313.jpg - 🟢 304 (1ms)
+2025-07-12 17:36:33 [INFO] [om3vogi1u] GET /1752321429704-396712399.jpg - 🟢 304 (2ms)
+2025-07-12 17:36:33 [INFO] [mby4yu43a] GET /1752321725276-16372154.png - 🟢 200 (4ms)
+2025-07-12 17:36:33 [INFO] [lky650dol] GET /1752321481140-635237702.jpg - 🟢 200 (8ms)
+2025-07-12 17:36:33 [INFO] [37h4u0kdr] GET /1752321506513-187106539.jpg - 🟢 200 (9ms)
+2025-07-12 17:37:06 [INFO] [k7haxelef] GET /api/auth/me - Request started
+2025-07-12 17:37:06 [INFO] [bji1n0vzk] GET /api/chat - Request started
+2025-07-12 17:37:06 [INFO] [iuw0f8lqv] GET /api/subjects - Request started
+2025-07-12 17:37:06 [INFO] [k7haxelef] GET /api/auth/me - 🟢 200 (9ms)
+2025-07-12 17:37:06 [INFO] [iuw0f8lqv] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 17:37:06 [INFO] [bji1n0vzk] GET /chat - 🟢 200 (12ms)
+2025-07-12 17:37:06 [INFO] [5kq5sql0r] GET /1752321099642-intellogo.jpg - 🟢 304 (2ms)
+2025-07-12 17:37:34 [INFO] [lkr5g4p3y] POST /api/auth/signin - Request started
+2025-07-12 17:37:34 [INFO] [lkr5g4p3y] POST /api/auth/signin - 🟢 200 (23ms)
+2025-07-12 17:37:34 [INFO] [819fj148j] GET /api/auth/me - Request started
+2025-07-12 17:37:34 [INFO] [819fj148j] GET /api/auth/me - 🟢 200 (5ms)
+2025-07-12 17:37:34 [INFO] [7tkwwvvlk] GET /api/subjects - Request started
+2025-07-12 17:37:34 [INFO] [7tkwwvvlk] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 17:37:34 [INFO] [d20ywz9ko] GET /api/chat - Request started
+2025-07-12 17:37:34 [INFO] [d20ywz9ko] GET /chat - 🟢 200 (9ms)
+2025-07-12 17:37:34 [INFO] [61acgsjj6] GET /1752321099642-intellogo.jpg - 🟢 304 (1ms)
+2025-07-12 17:38:19 [INFO] [k6fqg57po] POST /api/chat - Request started
+2025-07-12 17:38:27 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:38:27 [WARN] [k6fqg57po] POST /api/chat - 🔴 500 (7500ms)
+2025-07-12 17:38:53 [INFO] [p2p0338y6] GET /api/auth/me - Request started
+2025-07-12 17:38:53 [INFO] [20n35zmev] GET /api/subjects - Request started
+2025-07-12 17:38:53 [INFO] [x6v20zbwq] GET /api/chat - Request started
+2025-07-12 17:38:53 [INFO] [p2p0338y6] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 17:38:53 [INFO] [20n35zmev] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 17:38:53 [INFO] [x6v20zbwq] GET /chat - 🟢 200 (9ms)
+2025-07-12 17:38:53 [INFO] [b4dqzglbu] GET /1752321099642-intellogo.jpg - 🟢 304 (2ms)
+2025-07-12 17:38:53 [INFO] [s0yep49ls] GET /1752322099504-90660536.png - 🟢 200 (1ms)
+2025-07-12 17:39:05 [INFO] [8ks5p31t2] POST /api/chat - Request started
+2025-07-12 17:39:12 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:39:12 [WARN] [8ks5p31t2] POST /api/chat - 🔴 500 (6841ms)
+2025-07-12 17:39:17 [INFO] [45dxthv5n] POST /api/deletechat - Request started
+2025-07-12 17:39:17 [INFO] [45dxthv5n] POST /deletechat - 🟢 200 (6ms)
+2025-07-12 17:39:18 [INFO] [aqojplpvr] GET /api/subjects - Request started
+2025-07-12 17:39:18 [INFO] [aqojplpvr] GET /api/subjects - 🟢 200 (4ms)
+2025-07-12 17:39:18 [INFO] [03ckjqw1t] GET /api/suggestions - Request started
+2025-07-12 17:39:18 [INFO] [03ckjqw1t] GET /suggestions - 🟢 200 (5ms)
+2025-07-12 17:39:20 [INFO] [hhkrehf5c] GET /api/subjects - Request started
+2025-07-12 17:39:20 [INFO] [hhkrehf5c] GET /api/subjects - 🟢 200 (4ms)
+2025-07-12 17:39:20 [INFO] [2d3sa9ldr] GET /api/auth/me - Request started
+2025-07-12 17:39:20 [INFO] [2d3sa9ldr] GET /api/auth/me - 🟢 200 (5ms)
+2025-07-12 17:39:20 [INFO] [4tqjtgw33] GET /api/chat - Request started
+2025-07-12 17:39:20 [INFO] [4tqjtgw33] GET /chat - 🟢 200 (6ms)
+2025-07-12 17:40:08 [INFO] [b7soxtlw2] POST /api/chat - Request started
+2025-07-12 17:40:15 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:40:15 [WARN] [b7soxtlw2] POST /api/chat - 🔴 500 (7621ms)
+2025-07-12 17:40:43 [INFO] [ar1erkndq] POST /api/deletechat - Request started
+2025-07-12 17:40:43 [INFO] [ar1erkndq] POST /deletechat - 🟢 200 (5ms)
+2025-07-12 17:41:26 [INFO] [slqcbp655] GET /api/chat - Request started
+2025-07-12 17:41:26 [INFO] [gvoro9ot1] GET /api/auth/me - Request started
+2025-07-12 17:41:26 [INFO] [6jkv9yu3d] GET /api/subjects - Request started
+2025-07-12 17:41:26 [INFO] [gvoro9ot1] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 17:41:26 [INFO] [6jkv9yu3d] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 17:41:26 [INFO] [slqcbp655] GET /chat - 🟢 200 (12ms)
+2025-07-12 17:41:26 [INFO] [klkg4huun] GET /1752321099642-intellogo.jpg - 🟢 304 (2ms)
+2025-07-12 17:41:28 [INFO] [ob6a2vn6x] GET /api/auth/me - Request started
+2025-07-12 17:41:28 [INFO] [vngxrrell] GET /api/subjects - Request started
+2025-07-12 17:41:28 [INFO] [hb6srxaw8] GET /api/chat - Request started
+2025-07-12 17:41:28 [INFO] [ob6a2vn6x] GET /api/auth/me - 🟢 200 (8ms)
+2025-07-12 17:41:28 [INFO] [vngxrrell] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 17:41:28 [INFO] [hb6srxaw8] GET /chat - 🟢 200 (10ms)
+2025-07-12 17:41:28 [INFO] [4wxbymxg2] GET /1752321099642-intellogo.jpg - 🟢 304 (1ms)
+2025-07-12 17:42:07 [INFO] [krsi0y9o1] POST /api/chat - Request started
+2025-07-12 17:42:15 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:42:15 [WARN] [krsi0y9o1] POST /api/chat - 🔴 500 (7332ms)
+2025-07-12 17:42:57 [INFO] [2p39tilgw] POST /api/deletechat - Request started
+2025-07-12 17:42:57 [INFO] [2p39tilgw] POST /deletechat - 🟢 200 (5ms)
+2025-07-12 17:43:47 [INFO] [d2n3kvb51] GET /api/auth/me - Request started
+2025-07-12 17:43:47 [INFO] [1v2fhitcd] GET /api/subjects - Request started
+2025-07-12 17:43:47 [INFO] [0aqf5lm91] GET /api/chat - Request started
+2025-07-12 17:43:47 [INFO] [d2n3kvb51] GET /api/auth/me - 🟢 200 (9ms)
+2025-07-12 17:43:47 [INFO] [1v2fhitcd] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 17:43:47 [INFO] [0aqf5lm91] GET /chat - 🟢 200 (11ms)
+2025-07-12 17:43:47 [INFO] [llv8qyvv7] GET /1752321099642-intellogo.jpg - 🟢 304 (1ms)
+2025-07-12 17:44:52 [INFO] [z9ta756o3] POST /api/chat - Request started
+2025-07-12 17:44:58 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:44:58 [WARN] [z9ta756o3] POST /api/chat - 🔴 500 (6737ms)
+2025-07-12 17:45:15 [INFO] [6p7deuunu] GET /api/auth/me - Request started
+2025-07-12 17:45:15 [INFO] [7qoyrjab9] GET /api/subjects - Request started
+2025-07-12 17:45:15 [INFO] [6p7deuunu] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 17:45:15 [INFO] [m2rznhb89] GET /api/chat - Request started
+2025-07-12 17:45:15 [INFO] [7qoyrjab9] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 17:45:15 [INFO] [m2rznhb89] GET /chat - 🟢 200 (11ms)
+2025-07-12 17:45:15 [INFO] [smsi7o2xf] GET /1752321099642-intellogo.jpg - 🟢 304 (1ms)
+2025-07-12 17:45:15 [INFO] [6iwn2bcrh] GET /1752322492198-921925254.png - 🟢 200 (1ms)
+2025-07-12 17:45:20 [INFO] [drl0ifl3j] POST /api/deletechat - Request started
+2025-07-12 17:45:20 [INFO] [drl0ifl3j] POST /deletechat - 🟢 200 (4ms)
+2025-07-12 17:46:19 [INFO] [m9rex6aru] POST /api/chat - Request started
+2025-07-12 17:46:27 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:272:5)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 17:46:27 [WARN] [m9rex6aru] POST /api/chat - 🔴 500 (7332ms)
+2025-07-12 17:46:51 [INFO] [djmadwa4p] PUT /api/auth/update - Request started
+2025-07-12 17:46:51 [INFO] [djmadwa4p] PUT /api/auth/update - 🟢 200 (8ms)
