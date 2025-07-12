@@ -758,3 +758,105 @@
 2025-07-12 13:20:55 [INFO] [zyrubh2q3] GET /api/subjects/68715defcbb3bfc54c40e0d7/resources - Request started
 2025-07-12 13:20:55 [INFO] [zyrubh2q3] GET /api/subjects/68715defcbb3bfc54c40e0d7/resources - 🟢 200 (4ms)
 2025-07-12 13:22:43 [INFO] 🛑 SIGINT received, shutting down gracefully...
+2025-07-12 13:25:07 [INFO] 🔌 Connecting to MongoDB...
+2025-07-12 13:25:07 [INFO] 🛣️  Loading routes...
+2025-07-12 13:25:07 [INFO] All routes loaded successfully
+2025-07-12 13:25:07 [INFO] 🔄 Starting server...
+2025-07-12 13:25:07 [INFO] 🚀 Intel Classroom Assistant Backend Server started
+2025-07-12 13:25:07 [INFO] 📍 Server running on port 8080
+2025-07-12 13:25:07 [INFO] 🌍 Environment: development
+2025-07-12 13:25:07 [INFO] 🔧 Log level: info
+2025-07-12 13:25:07 [INFO] 📂 Upload directory: uploads
+2025-07-12 13:25:07 [INFO] 🐍 Python server URL: http://localhost:8000
+2025-07-12 13:25:07 [INFO] 🔗 Mongoose connected to MongoDB
+2025-07-12 13:25:07 [INFO] MongoDB connected successfully
+2025-07-12 13:29:28 [INFO] [b5ovexw8k] GET /api/subject-statistics - Request started
+2025-07-12 13:29:28 [INFO] [b5ovexw8k] GET /subject-statistics - 🟢 200 (32ms)
+2025-07-12 13:29:28 [INFO] [wfwiz4bq0] GET /api/subject-statistics - Request started
+2025-07-12 13:29:28 [INFO] [wfwiz4bq0] GET /subject-statistics - 🟢 200 (13ms)
+2025-07-12 13:29:35 [INFO] [r8qr27r3w] POST /api/auth/signin - Request started
+2025-07-12 13:29:35 [INFO] [r8qr27r3w] POST /api/auth/signin - 🟢 200 (80ms)
+2025-07-12 13:29:35 [INFO] [5zb1j3m3e] GET /api/auth/me - Request started
+2025-07-12 13:29:35 [INFO] [jhugl1r0u] GET /api/subjects - Request started
+2025-07-12 13:29:35 [INFO] [5zb1j3m3e] GET /api/auth/me - 🟢 200 (12ms)
+2025-07-12 13:29:35 [INFO] [jhugl1r0u] GET /api/subjects - 🟢 200 (12ms)
+2025-07-12 13:29:35 [INFO] [m0jtxw7dy] GET /api/chat - Request started
+2025-07-12 13:29:35 [INFO] [m0jtxw7dy] GET /chat - 🟢 200 (21ms)
+2025-07-12 13:29:35 [INFO] [6n19uktvp] GET /1751695216090-1_kSOvoHiZvF_jNJL4zF06ug.png - 🟢 304 (4ms)
+2025-07-12 13:29:45 [INFO] [41rbspa06] GET /api/subjects/686871b405185ccd8b574e33/resources - Request started
+2025-07-12 13:29:45 [INFO] [41rbspa06] GET /api/subjects/686871b405185ccd8b574e33/resources - 🟢 200 (8ms)
+2025-07-12 13:29:47 [INFO] [zwa7bs7qs] POST /api/chat - Request started
+2025-07-12 13:30:17 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:319:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 13:30:17 [INFO] [15ul9es77] POST /api/chat - Request started
+2025-07-12 13:30:30 [INFO] [jj44ts0si] GET /api/auth/me - Request started
+2025-07-12 13:30:30 [INFO] [6gg9oarc3] GET /api/subjects - Request started
+2025-07-12 13:30:30 [INFO] [uaps7vhn4] GET /api/chat - Request started
+2025-07-12 13:30:30 [INFO] [jj44ts0si] GET /api/auth/me - 🟢 200 (16ms)
+2025-07-12 13:30:30 [INFO] [6gg9oarc3] GET /api/subjects - 🟢 200 (15ms)
+2025-07-12 13:30:30 [INFO] [uaps7vhn4] GET /chat - 🟢 200 (20ms)
+2025-07-12 13:30:30 [INFO] [c21s76dju] GET /1751695216090-1_kSOvoHiZvF_jNJL4zF06ug.png - 🟢 304 (2ms)
+2025-07-12 13:30:48 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:319:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 13:31:22 [INFO] [ghxeydwnc] POST /api/auth/signin - Request started
+2025-07-12 13:31:22 [INFO] [ghxeydwnc] POST /api/auth/signin - 🟢 200 (31ms)
+2025-07-12 13:31:22 [INFO] [njwyj0ft7] GET /api/subject-statistics - Request started
+2025-07-12 13:31:22 [INFO] [njwyj0ft7] GET /subject-statistics - 🟢 200 (11ms)
+2025-07-12 13:31:22 [INFO] [a1g520hxj] GET /api/subject-statistics - Request started
+2025-07-12 13:31:22 [INFO] [a1g520hxj] GET /subject-statistics - 🟢 200 (10ms)
+2025-07-12 13:31:24 [INFO] [lqrvwdw2g] GET /api/auth/me - Request started
+2025-07-12 13:31:24 [INFO] [lqrvwdw2g] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:31:24 [INFO] [ii9zsgp49] GET /api/chat - Request started
+2025-07-12 13:31:24 [INFO] [ii9zsgp49] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:31:24 [INFO] [wob314fqp] GET /1752301732722-intellogo.jpg - 🟢 200 (10ms)
+2025-07-12 13:31:26 [INFO] [7b2e00lt2] GET /api/subject-statistics - Request started
+2025-07-12 13:31:26 [INFO] [7b2e00lt2] GET /subject-statistics - 🟢 200 (12ms)
+2025-07-12 13:31:26 [INFO] [gfg59vc25] GET /api/subject-statistics - Request started
+2025-07-12 13:31:26 [INFO] [gfg59vc25] GET /subject-statistics - 🟢 200 (10ms)
+2025-07-12 13:31:26 [INFO] [5z0q6pswu] GET /api/subjects/user - Request started
+2025-07-12 13:31:26 [INFO] [5z0q6pswu] GET /api/subjects/user - 🟢 200 (11ms)
+2025-07-12 13:31:39 [INFO] [e5gjxqolr] POST /api/subjects - Request started
+2025-07-12 13:31:39 [INFO] [e5gjxqolr] POST /api/subjects - 🟢 201 (28ms)
+2025-07-12 13:31:39 [INFO] [wnlv5d7ip] GET /api/subjects/user - Request started
+2025-07-12 13:31:39 [INFO] [wnlv5d7ip] GET /api/subjects/user - 🟢 200 (7ms)
+2025-07-12 13:31:43 [INFO] [wgoos8dxo] GET /api/subjects/user - Request started
+2025-07-12 13:31:43 [INFO] [wgoos8dxo] GET /api/subjects/user - 🟢 200 (8ms)
+2025-07-12 13:31:43 [INFO] [tshzh4svq] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 13:31:43 [INFO] [tshzh4svq] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (6ms)
+2025-07-12 13:32:08 [INFO] [0q67w817n] POST /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 13:32:08 [INFO] [0q67w817n] POST /api/subjects/687216637859807ac0bf20e7/resources - 🟢 201 (27ms)
+2025-07-12 13:32:08 [INFO] [6saq8fssu] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 13:32:08 [INFO] [6saq8fssu] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (14ms)
+2025-07-12 13:32:13 [INFO] [vdy0d3thc] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 13:32:13 [INFO] [vdy0d3thc] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (19ms)
+2025-07-12 13:32:19 [INFO] [co7kzx5ct] GET /api/resources/687216807859807ac0bf20ed/json - Request started
+2025-07-12 13:32:19 [INFO] [co7kzx5ct] GET /api/resources/687216807859807ac0bf20ed/json - 🟢 200 (9ms)
+2025-07-12 13:33:03 [INFO] [de8h2fvzl] PUT /api/resources/687216807859807ac0bf20ed - Request started
+2025-07-12 13:33:03 [INFO] [de8h2fvzl] PUT /api/resources/687216807859807ac0bf20ed - 🟢 200 (7ms)
+2025-07-12 13:33:03 [INFO] [5fziwo6id] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 13:33:03 [INFO] [5fziwo6id] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (5ms)
+2025-07-12 13:33:06 [INFO] [tcwctx6e1] GET /api/resources/687216807859807ac0bf20ed/download - Request started
+2025-07-12 13:33:06 [INFO] [tcwctx6e1] GET /api/resources/687216807859807ac0bf20ed/download - 🟢 200 (5ms)
+2025-07-12 13:33:30 [INFO] [q1uyrb9el] GET /api/subjects/user - Request started
+2025-07-12 13:33:30 [INFO] [gvqejz8d1] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 13:33:30 [INFO] [q1uyrb9el] GET /api/subjects/user - 🟢 200 (12ms)
+2025-07-12 13:33:30 [INFO] [gvqejz8d1] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (12ms)
+2025-07-12 13:33:35 [INFO] [6l33549x2] GET /api/subjects/687216637859807ac0bf20e7/resources - Request started
+2025-07-12 13:33:35 [INFO] [6l33549x2] GET /api/subjects/687216637859807ac0bf20e7/resources - 🟢 200 (7ms)
+2025-07-12 13:33:37 [INFO] [nnw5191vq] GET /api/subjects/user - Request started
+2025-07-12 13:33:37 [INFO] [nnw5191vq] GET /api/subjects/user - 🟢 200 (8ms)
+2025-07-12 13:33:38 [INFO] [j5bttm5ha] GET /api/subject-statistics - Request started
+2025-07-12 13:33:38 [INFO] [j5bttm5ha] GET /subject-statistics - 🟢 200 (13ms)
+2025-07-12 13:33:38 [INFO] [3b8qjl5rw] GET /api/subject-statistics - Request started
+2025-07-12 13:33:38 [INFO] [3b8qjl5rw] GET /subject-statistics - 🟢 200 (11ms)
+2025-07-12 13:33:42 [INFO] [5b8rahl34] GET /api/subjects - Request started
+2025-07-12 13:33:42 [INFO] [5b8rahl34] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:33:42 [INFO] [599tvtj0r] GET /api/suggestions - Request started
+2025-07-12 13:33:42 [INFO] [599tvtj0r] GET /suggestions - 🟢 200 (7ms)
+2025-07-12 13:33:50 [INFO] [i7droxlt5] GET /api/subject-statistics - Request started
+2025-07-12 13:33:50 [INFO] [i7droxlt5] GET /subject-statistics - 🟢 200 (13ms)
+2025-07-12 13:33:50 [INFO] [xc65dpj02] GET /api/subject-statistics - Request started
+2025-07-12 13:33:50 [INFO] [xc65dpj02] GET /subject-statistics - 🟢 200 (10ms)
+2025-07-12 13:34:16 [INFO] 🛑 SIGINT received, shutting down gracefully...

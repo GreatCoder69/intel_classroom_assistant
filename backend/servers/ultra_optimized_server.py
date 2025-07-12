@@ -787,7 +787,7 @@ class UltraModelManager:
         self.optimization_enabled = True
         self._lock = threading.RLock()
         
-    def load_model(self, model_id: str = "OpenVINO/DeepSeek-R1-Distill-Qwen-1.5B-int4-ov"):
+    def load_model(self, model_id: str = "OpenVINO/phi-2-int4-ov"):
         """Load model with ultra optimizations."""
         if not ML_AVAILABLE:
             raise RuntimeError("ML dependencies not available")
@@ -817,7 +817,9 @@ class UltraModelManager:
                     padding_side="left",
                     trust_remote_code=True
                 )
-                
+                if tokenizer.pad_token is None:
+                    tokenizer.pad_token = tokenizer.eos_token
+
                 # Load model with advanced optimizations
                 model = OVModelForCausalLM.from_pretrained(
                     model_id,
@@ -951,6 +953,7 @@ model_manager = UltraModelManager()
 # System prompts (same as before but cached)
 STUDENT_SYSTEM_PROMPT = """You are EduAI, a knowledgeable and friendly classroom assistant designed to help students with academic questions.
 You accept text input and provide accurate, concise answers that are easy to understand.
+Important: Do not give any incomplete sentences.
 Purpose:
 To support students in learning by offering clear explanations, step-by-step problem solving, and reinforcing concepts across subjects.
 Subjects Covered:
@@ -970,6 +973,7 @@ Guidelines:
 - Avoid technical jargon unless the student is at an advanced level
 - Keep explanations concise, focused, and supportive
 - Maintain a respectful, professional, and educational tone
+- Important: Do not give any incomplete sentences.
 - Focus strictly on the subject matter
 - Use correct terminology and logic when explaining academic processes (e.g. algorithms, equations, etc.)
 - Do not use filler phrases like "I think" or "I believe"

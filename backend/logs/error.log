@@ -1,3 +1,9 @@
 2025-07-12 01:09:53 [ERROR] [dc6vum814] ⏱️ Request timeout - Python server took too long
 2025-07-12 01:11:10 [ERROR] [nhhxpfj9o] ⏱️ Request timeout - Python server took too long
 2025-07-12 01:20:42 [ERROR] [hv1pqjuw3] ⏱️ Request timeout - Python server took too long
+2025-07-12 13:30:17 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:319:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-07-12 13:30:48 [ERROR] ReferenceError: logger is not defined
+    at exports.addChat (C:\Users\arsha\OneDrive - Manipal Academy of Higher Education\Documents\Intel_Assistant\backend\app\controllers\chat.controller.js:319:7)
+    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
