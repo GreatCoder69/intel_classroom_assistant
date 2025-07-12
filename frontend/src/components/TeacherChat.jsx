@@ -89,7 +89,7 @@ const ChatPage = () => {
               sender: "user",
               message: entry.question || "",
               image: entry.imageURL
-                ? `https://storage.cognito.karmickinfosystem.com${entry.imageURL}`
+                ? `http://localhost:8080${entry.imageURL}`
                 : null,
               timestamp: entry.timestamp,
             });
@@ -102,7 +102,7 @@ const ChatPage = () => {
               timestamp: entry.timestamp,
               _id: entry._id,
               image: entry.imageURL
-                ? `https://storage.cognito.karmickinfosystem.com${entry.imageURL}`
+                ? `http://localhost:8080${entry.imageURL}`
                 : null,
               downloadCount: entry.downloadCount || 0,
             });
@@ -195,7 +195,7 @@ const ChatPage = () => {
           const idx = updatedChat.length - 1 - lastTempIndex;
           updatedChat[idx] = {
             ...updatedChat[idx],
-            image: `https://storage.cognito.karmickinfosystem.com${data.imageUrl}`,
+            image: `http://localhost:8080${data.imageUrl}`,
             message: data.question, // update with backend's question if needed
             temp: false,
           };

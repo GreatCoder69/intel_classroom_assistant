@@ -12,7 +12,7 @@ urllib3==2.0.7
 
 # PDF Processing and OCR
 PyMuPDF>=1.23.0
-pdf2image>=3.1.0
+pdf2image>=1.16.0
 pytesseract>=0.3.10
 Pillow>=10.0.0
 

@@ -1,4 +1,4 @@
-require('dotenv').config(); // Load .env
+require("dotenv").config(); // Load .env
 const fs = require("fs");
 const path = require("path");
 const Chat = require("../models/chat.model");
@@ -8,33 +8,33 @@ const pdfParse = require("pdf-parse");
 const LogEvent = require("../utils/logEvent");
 const LogLLMError = require("../utils/logError");
 
-const axios   = require("axios");
+const axios = require("axios");
 const FLASK_SERVER = process.env.FLASK_SERVER || "http://localhost:8000";
 
 // Enhanced logging for chat operations
 const createChatLogger = () => {
-  const winston = require('winston');
-  const path = require('path');
-  
+  const winston = require("winston");
+  const path = require("path");
+
   return winston.createLogger({
-    level: 'info',
+    level: "info",
     format: winston.format.combine(
       winston.format.timestamp(),
       winston.format.json()
     ),
     transports: [
-      new winston.transports.File({ 
-        filename: path.join(__dirname, '../../logs/chat.log'),
+      new winston.transports.File({
+        filename: path.join(__dirname, "../../logs/chat.log"),
         maxsize: 10485760, // 10MB
-        maxFiles: 3
+        maxFiles: 3,
       }),
       new winston.transports.Console({
         format: winston.format.combine(
           winston.format.colorize(),
           winston.format.simple()
-        )
-      })
-    ]
+        ),
+      }),
+    ],
   });
 };
 
@@ -42,7 +42,7 @@ let chatLogger;
 try {
   chatLogger = createChatLogger();
 } catch (error) {
-  console.warn('Could not initialize Winston logger, falling back to console');
+  console.warn("Could not initialize Winston logger, falling back to console");
   chatLogger = console;
 }
 
@@ -79,21 +79,23 @@ exports.getAllUsersWithChats = async (req, res) => {
 
 const MESSAGES_PER_PAGE = 5;
 
-
 exports.addChat = async (req, res) => {
-  const { subject, question, chatSubject, useResources, resourceContents } = req.body;
+  const { subject, question, chatSubject, useResources, resourceContents } =
+    req.body;
   const email = req.userEmail;
-  const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  const requestId = `req_${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}`;
 
   // Enhanced logging with emojis and context
   chatLogger.info(`[${requestId}] Chat request started`, {
-    userEmail: email?.substring(0, 3) + '***',
+    userEmail: email?.substring(0, 3) + "***",
     subject: subject?.substring(0, 30),
     hasQuestion: !!question,
     hasFile: !!req.file,
     chatSubject,
     useResources,
-    questionLength: question?.length || 0
+    questionLength: question?.length || 0,
   });
 
   if (!subject || (!question && !req.file) || !email) {
@@ -101,7 +103,7 @@ exports.addChat = async (req, res) => {
       hasSubject: !!subject,
       hasQuestion: !!question,
       hasFile: !!req.file,
-      hasEmail: !!email
+      hasEmail: !!email,
     });
     return res
       .status(400)
@@ -112,34 +114,34 @@ exports.addChat = async (req, res) => {
     /* ------------------------------------------------------------------ */
     /* 1️⃣  Prepare payload for the Flask LLM                             */
     /* ------------------------------------------------------------------ */
-    const role = req.userRole || "student";       // default role
+    const role = req.userRole || "student"; // default role
     const flaskPayload = { subject, question, role };
-    
+
     // Add chatSubject context if provided
     if (chatSubject) {
       flaskPayload.chatSubject = chatSubject;
       // Enhance the question with subject context
-      flaskPayload.question = question ? 
-        `[Context: This question is about ${chatSubject}] ${question}` : 
-        `Please provide information about ${chatSubject}`;
+      flaskPayload.question = question
+        ? `[Context: This question is about ${chatSubject}] ${question}`
+        : `Please provide information about ${chatSubject}`;
     }
-    
+
     // Add useResources parameter for student context enhancement
-    if (useResources === 'true' || useResources === true) {
+    if (useResources === "true" || useResources === true) {
       flaskPayload.useResources = true;
     }
-    
+
     // Forward resourceContents if provided
     if (resourceContents) {
       flaskPayload.resourceContents = resourceContents;
       chatLogger.info(`📄 [${requestId}] Forwarding resource contents`, {
         contentLength: resourceContents.length,
-        isString: typeof resourceContents === 'string'
+        isString: typeof resourceContents === "string",
       });
     }
-    
-    let imageUrl   = null;                        // for DB
-    let mimeType   = null;
+
+    let imageUrl = null; // for DB
+    let mimeType = null;
     let base64Body = null;
 
     if (req.file) {
@@ -159,13 +161,14 @@ exports.addChat = async (req, res) => {
       if (mimeType === "application/pdf") {
         // read PDF text and append to question, same logic as before
         const pdfText = (await pdfParse(fs.readFileSync(req.file.path))).text;
+        console.log("📄 Extracted PDF content preview:", pdfText.slice(0, 300));
         flaskPayload.question = question
-          ? `${question}\n\nAlso consider this PDF content:\n${pdfText}`
-          : `Please analyse this PDF content:\n${pdfText}`;
+          ? `${question}\n\nThe user also uploaded the following document. Please analyze it:\n\n${pdfText}`
+          : `The user uploaded a document. Analyze the content:\n\n${pdfText}`;
       } else {
         // image → base64
         base64Body = fs.readFileSync(req.file.path).toString("base64");
-        flaskPayload.mimeType   = mimeType;
+        flaskPayload.mimeType = mimeType;
         flaskPayload.base64Image = base64Body;
       }
     }
@@ -177,50 +180,50 @@ exports.addChat = async (req, res) => {
       flaskServer: FLASK_SERVER,
       hasImage: !!base64Body,
       questionLength: question?.length || 0,
-      payloadSize: JSON.stringify(flaskPayload).length
+      payloadSize: JSON.stringify(flaskPayload).length,
     });
 
     const t0 = Date.now();
     const flaskRes = await axios.post(
       `${FLASK_SERVER}/api/chat`,
       flaskPayload,
-      { 
-        headers: { 
+      {
+        headers: {
           "Content-Type": "application/json",
-          "x-access-token": req.headers["x-access-token"] || req.token || "" // Forward the authentication token
+          "x-access-token": req.headers["x-access-token"] || req.token || "", // Forward the authentication token
         },
         timeout: 45000, // 45 second timeout (150% increase)
         // Add keep-alive configuration
-        httpAgent: new (require('http').Agent)({ 
+        httpAgent: new (require("http").Agent)({
           keepAlive: true,
-          maxSockets: 5
-        })
+          maxSockets: 5,
+        }),
       }
     );
     const responseTime = Date.now() - t0;
-    
+
     chatLogger.info(`[${requestId}] AI response generated`, {
-      responseTime: responseTime + 'ms',
+      responseTime: responseTime + "ms",
       statusCode: flaskRes.status,
       answerLength: flaskRes.data.answer?.length || 0,
-      answerPreview: flaskRes.data.answer?.substring(0, 100) + '...'
+      answerPreview: flaskRes.data.answer?.substring(0, 100) + "...",
     });
 
-    const answer       = flaskRes.data.answer || "No answer";
+    const answer = flaskRes.data.answer || "No answer";
     const chatCategory = flaskRes.data.chatCategory || "general";
 
     /* ------------------------------------------------------------------ */
     /* 3️⃣  Persist in MongoDB exactly like before                        */
     /* ------------------------------------------------------------------ */
     const existing = await Chat.findOne({ _id: subject, email });
-    const count    = existing ? existing.chat.length : 0;
+    const count = existing ? existing.chat.length : 0;
 
     const chatEntry = {
-      question   : question || null,
-      imageUrl   : imageUrl  || null,
+      question: question || null,
+      imageUrl: imageUrl || null,
       answer,
-      timestamp  : new Date(),
-      pageNumber : Math.floor(count / MESSAGES_PER_PAGE) + 1,
+      timestamp: new Date(),
+      pageNumber: Math.floor(count / MESSAGES_PER_PAGE) + 1,
       entryNumber: (count % MESSAGES_PER_PAGE) + 1,
       responseTime,
       chatCategory,
@@ -245,17 +248,17 @@ exports.addChat = async (req, res) => {
         userRole: role,
         message: question || "Image/File uploaded",
         response: answer,
-        chatSubject: chatSubject || 'General',
+        chatSubject: chatSubject || "General",
         subject: subject,
         imageUrl: imageUrl,
         mimeType: mimeType,
         responseTime: responseTime,
-        modelUsed: "OpenVINO-DeepSeek-R1"
+        modelUsed: "OpenVINO-DeepSeek-R1",
       });
-      
+
       await newChatMessage.save();
     } catch (saveError) {
-      console.error('Error saving chat message for statistics:', saveError);
+      console.error("Error saving chat message for statistics:", saveError);
       // Don't fail the main request if statistics save fails
     }
 
@@ -264,72 +267,87 @@ exports.addChat = async (req, res) => {
     /* ------------------------------------------------------------------ */
     await LogEvent({
       email,
-      action : "create_chat",
+      action: "create_chat",
       message: `Message added to '${subject}'`,
-      meta   : { chatCategory },
+      meta: { chatCategory },
     });
 
     // Set headers to prevent response buffering
     res.set({
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
-      'X-Accel-Buffering': 'no' // Disable nginx buffering if present
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+      "X-Accel-Buffering": "no", // Disable nginx buffering if present
     });
 
     res.status(200).json({ answer, file: imageUrl, chatCategory });
-    
+
     logger.info(`[${requestId}] Chat request completed successfully`, {
-      responseTime: responseTime + 'ms',
+      responseTime: responseTime + "ms",
       answerLength: answer?.length || 0,
-      chatCategory
+      chatCategory,
     });
   } catch (err) {
     const responseTime = Date.now() - (req.startTime || Date.now());
-    
+
     // Enhanced error logging with context
-    if (err.code === 'ECONNREFUSED') {
-      logger.error(`[${requestId}] 🔌 Connection refused - Python server not accessible`, {
-        error: err.message,
-        flaskServer: FLASK_SERVER,
-        responseTime: responseTime + 'ms'
-      });
-    } else if (err.code === 'ECONNRESET') {
-      logger.error(`[${requestId}] 🔌 Connection reset - Python server dropped connection`, {
-        error: err.message,
-        responseTime: responseTime + 'ms'
-      });
-    } else if (err.code === 'ENOTFOUND') {
-      logger.error(`[${requestId}] 🌐 DNS resolution failed - Check Flask server URL`, {
-        error: err.message,
-        flaskServer: FLASK_SERVER
-      });
-    } else if (err.message?.includes('timeout')) {
-      logger.error(`[${requestId}] ⏱️ Request timeout - Python server took too long`, {
-        error: err.message,
-        timeoutMs: 45000,
-        responseTime: responseTime + 'ms'
-      });
+    if (err.code === "ECONNREFUSED") {
+      logger.error(
+        `[${requestId}] 🔌 Connection refused - Python server not accessible`,
+        {
+          error: err.message,
+          flaskServer: FLASK_SERVER,
+          responseTime: responseTime + "ms",
+        }
+      );
+    } else if (err.code === "ECONNRESET") {
+      logger.error(
+        `[${requestId}] 🔌 Connection reset - Python server dropped connection`,
+        {
+          error: err.message,
+          responseTime: responseTime + "ms",
+        }
+      );
+    } else if (err.code === "ENOTFOUND") {
+      logger.error(
+        `[${requestId}] 🌐 DNS resolution failed - Check Flask server URL`,
+        {
+          error: err.message,
+          flaskServer: FLASK_SERVER,
+        }
+      );
+    } else if (err.message?.includes("timeout")) {
+      logger.error(
+        `[${requestId}] ⏱️ Request timeout - Python server took too long`,
+        {
+          error: err.message,
+          timeoutMs: 45000,
+          responseTime: responseTime + "ms",
+        }
+      );
     } else if (err.response?.status === 503) {
-      logger.error(`[${requestId}] 🚫 Service unavailable - Python server overloaded`, {
-        status: err.response.status,
-        statusText: err.response.statusText,
-        responseTime: responseTime + 'ms'
-      });
+      logger.error(
+        `[${requestId}] 🚫 Service unavailable - Python server overloaded`,
+        {
+          status: err.response.status,
+          statusText: err.response.statusText,
+          responseTime: responseTime + "ms",
+        }
+      );
     } else {
       logger.error(`[${requestId}] 💥 Unexpected LLM/Flask error`, {
         error: err.message,
         status: err.response?.status,
-        stack: err.stack?.split('\n').slice(0, 3).join('\n'),
-        responseTime: responseTime + 'ms'
+        stack: err.stack?.split("\n").slice(0, 3).join("\n"),
+        responseTime: responseTime + "ms",
       });
     }
 
     console.error("LLM / Flask error:", err.message);
     await LogLLMError({ email, subject, prompt: question, error: err });
-    res.status(500).json({ 
-      message: "LLM failure", 
+    res.status(500).json({
+      message: "LLM failure",
       detail: err.message,
-      requestId: requestId
+      requestId: requestId,
     });
   }
 };
@@ -520,53 +538,45 @@ exports.getSubjectStatistics = async (req, res) => {
   try {
     const email = req.userEmail;
     const user = await User.findOne({ email });
-    const userRole = user ? user.role : 'student';
-    
-    let matchFilter = {};
-    
-    if (userRole === 'teacher') {
-      // For teachers, show aggregated statistics from all students only
-      matchFilter = { userRole: 'student' };
+    const userRole = user ? user.role : "student";
 
+    let matchFilter = {};
+
+    if (userRole === "teacher") {
+      // For teachers, show aggregated statistics from all students only
+      matchFilter = { userRole: "student" };
     } else {
       // For students, show only their own statistics
       matchFilter = { userEmail: email };
-
     }
-    
 
-    
     // Use the new ChatMessage model for statistics
     const messageCount = await ChatMessage.countDocuments(matchFilter);
 
-    
     if (messageCount === 0) {
       return res.status(200).json([]);
     }
-    
+
     // Aggregate by chatSubject
     const pipeline = [
       { $match: matchFilter },
-      { 
-        $group: { 
-          _id: '$chatSubject', 
-          count: { $sum: 1 } 
-        } 
+      {
+        $group: {
+          _id: "$chatSubject",
+          count: { $sum: 1 },
+        },
       },
-      { 
+      {
         $project: {
-          subject: '$_id',
+          subject: "$_id",
           count: 1,
-          _id: 0
-        }
+          _id: 0,
+        },
       },
-      { $sort: { count: -1 } }
+      { $sort: { count: -1 } },
     ];
-    
 
-    
     const statsArray = await ChatMessage.aggregate(pipeline);
-
 
     res.status(200).json(statsArray);
   } catch (err) {
@@ -574,5 +584,3 @@ exports.getSubjectStatistics = async (req, res) => {
     res.status(500).json({ message: "Error fetching subject statistics" });
   }
 };
-
-
