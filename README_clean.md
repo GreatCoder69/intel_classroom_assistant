@@ -2,6 +2,9 @@
 
 AI-powered educational platform for enhanced classroom learning and teaching experiences.
 
+## Demo for the project
+[View Project](https://drive.google.com/file/d/11sRZqKlo8bDoo9KVdPb2S3LApgh75vHY/view?usp=sharing)
+
 ## Features
 
 ### Core Functionality
