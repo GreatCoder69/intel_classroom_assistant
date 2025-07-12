@@ -537,3 +537,187 @@
 2025-07-12 12:49:58 [INFO] [rexpnrde9] ✅ Flask response received
 2025-07-12 12:49:58 [INFO] [rexpnrde9] 🎯 Chat request completed successfully
 2025-07-12 12:49:58 [INFO] [rexpnrde9] POST /chat - 🟢 200 (43878ms)
+2025-07-12 12:58:25 [INFO] [ljp0tnam6] POST /api/auth/signin - Request started
+2025-07-12 12:58:25 [INFO] [ljp0tnam6] POST /api/auth/signin - 🟢 200 (38ms)
+2025-07-12 12:58:25 [INFO] [j3c17khon] GET /api/auth/me - Request started
+2025-07-12 12:58:25 [INFO] [j3c17khon] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 12:58:25 [INFO] [tid31r2vm] GET /api/chat - Request started
+2025-07-12 12:58:25 [INFO] [64s9tquwa] GET /api/subjects - Request started
+2025-07-12 12:58:25 [INFO] [64s9tquwa] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 12:58:25 [INFO] [tid31r2vm] GET /chat - 🟢 200 (16ms)
+2025-07-12 12:58:26 [INFO] [ip1e3jxj7] GET /api/subjects/user - Request started
+2025-07-12 12:58:26 [INFO] [ip1e3jxj7] GET /api/subjects/user - 🟢 200 (11ms)
+2025-07-12 12:58:28 [INFO] [wxg2nks4a] GET /api/subjects/user - Request started
+2025-07-12 12:58:28 [INFO] [wxg2nks4a] GET /api/subjects/user - 🟢 200 (6ms)
+2025-07-12 12:58:28 [INFO] [lc4p6y7lh] GET /api/subjects/68683880e8ffc87f6a747c15/resources - Request started
+2025-07-12 12:58:28 [INFO] [lc4p6y7lh] GET /api/subjects/68683880e8ffc87f6a747c15/resources - 🟢 200 (12ms)
+2025-07-12 12:58:30 [INFO] [5nligys2t] GET /api/subjects/user - Request started
+2025-07-12 12:58:30 [INFO] [5nligys2t] GET /api/subjects/user - 🟢 200 (13ms)
+2025-07-12 12:58:31 [INFO] [oqv9mcet7] GET /api/auth/me - Request started
+2025-07-12 12:58:31 [INFO] [mp0s3dts0] GET /api/subjects - Request started
+2025-07-12 12:58:31 [INFO] [oqv9mcet7] GET /api/auth/me - 🟢 200 (8ms)
+2025-07-12 12:58:31 [INFO] [mp0s3dts0] GET /api/subjects - 🟢 200 (9ms)
+2025-07-12 12:58:31 [INFO] [eoj21oot0] GET /api/chat - Request started
+2025-07-12 12:58:31 [INFO] [eoj21oot0] GET /chat - 🟢 200 (11ms)
+2025-07-12 12:58:33 [INFO] [a2m4cshf8] GET /api/subjects - Request started
+2025-07-12 12:58:33 [INFO] [a2m4cshf8] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 12:58:33 [INFO] [efs2mu05x] GET /api/suggestions - Request started
+2025-07-12 12:58:33 [INFO] [efs2mu05x] GET /suggestions - 🟢 200 (12ms)
+2025-07-12 12:58:35 [INFO] [pkfe4qb88] GET /api/auth/me - Request started
+2025-07-12 12:58:35 [INFO] [pkfe4qb88] GET /api/auth/me - 🟢 200 (8ms)
+2025-07-12 12:58:35 [INFO] [ys2ptm0v4] GET /api/subjects - Request started
+2025-07-12 12:58:35 [INFO] [jq3k4snnz] GET /api/chat - Request started
+2025-07-12 12:58:35 [INFO] [ys2ptm0v4] GET /api/subjects - 🟢 200 (13ms)
+2025-07-12 12:58:35 [INFO] [jq3k4snnz] GET /chat - 🟢 200 (16ms)
+2025-07-12 13:09:32 [INFO] [cm9m1ij3z] GET /api/auth/me - Request started
+2025-07-12 13:09:32 [INFO] [y43ls2ens] GET /api/subjects - Request started
+2025-07-12 13:09:32 [INFO] [szvjxy10v] GET /api/chat - Request started
+2025-07-12 13:09:32 [INFO] [cm9m1ij3z] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 13:09:32 [INFO] [y43ls2ens] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:09:32 [INFO] [szvjxy10v] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:09:39 [INFO] [nmyrea5su] GET /api/auth/me - Request started
+2025-07-12 13:09:39 [INFO] [kdmt5z0le] GET /api/subjects - Request started
+2025-07-12 13:09:39 [INFO] [71182nyon] GET /api/chat - Request started
+2025-07-12 13:09:39 [INFO] [nmyrea5su] GET /api/auth/me - 🟢 200 (8ms)
+2025-07-12 13:09:39 [INFO] [kdmt5z0le] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 13:09:39 [INFO] [71182nyon] GET /chat - 🟢 200 (11ms)
+2025-07-12 13:09:46 [INFO] [shnpinord] GET /api/auth/me - Request started
+2025-07-12 13:09:46 [INFO] [gkkrceibn] GET /api/subjects - Request started
+2025-07-12 13:09:46 [INFO] [e810teyoo] GET /api/chat - Request started
+2025-07-12 13:09:46 [INFO] [shnpinord] GET /api/auth/me - 🟢 200 (8ms)
+2025-07-12 13:09:46 [INFO] [gkkrceibn] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:09:46 [INFO] [e810teyoo] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:09:52 [INFO] [nljpy8vqu] GET /api/auth/me - Request started
+2025-07-12 13:09:52 [INFO] [gkl06p9jw] GET /api/subjects - Request started
+2025-07-12 13:09:52 [INFO] [98bwhqbp1] GET /api/chat - Request started
+2025-07-12 13:09:52 [INFO] [nljpy8vqu] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:09:52 [INFO] [gkl06p9jw] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:09:52 [INFO] [98bwhqbp1] GET /chat - 🟢 200 (9ms)
+2025-07-12 13:09:59 [INFO] [d86443yox] GET /api/auth/me - Request started
+2025-07-12 13:09:59 [INFO] [xwn88kune] GET /api/subjects - Request started
+2025-07-12 13:09:59 [INFO] [nd4s44wr1] GET /api/chat - Request started
+2025-07-12 13:09:59 [INFO] [d86443yox] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:09:59 [INFO] [xwn88kune] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 13:09:59 [INFO] [nd4s44wr1] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:10:09 [INFO] [joeya77o0] GET /api/auth/me - Request started
+2025-07-12 13:10:09 [INFO] [n508xqfrq] GET /api/subjects - Request started
+2025-07-12 13:10:09 [INFO] [zxou6psy8] GET /api/chat - Request started
+2025-07-12 13:10:09 [INFO] [joeya77o0] GET /api/auth/me - 🟢 200 (8ms)
+2025-07-12 13:10:09 [INFO] [n508xqfrq] GET /api/subjects - 🟢 200 (8ms)
+2025-07-12 13:10:09 [INFO] [zxou6psy8] GET /chat - 🟢 200 (10ms)
+2025-07-12 13:10:17 [INFO] [r80gmstuk] GET /api/auth/me - Request started
+2025-07-12 13:10:17 [INFO] [var56m582] GET /api/subjects - Request started
+2025-07-12 13:10:17 [INFO] [y5q1i9oei] GET /api/chat - Request started
+2025-07-12 13:10:17 [INFO] [r80gmstuk] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:10:17 [INFO] [var56m582] GET /api/subjects - 🟢 200 (4ms)
+2025-07-12 13:10:17 [INFO] [y5q1i9oei] GET /chat - 🟢 200 (5ms)
+2025-07-12 13:10:23 [INFO] [hb777try4] GET /api/auth/me - Request started
+2025-07-12 13:10:23 [INFO] [kxci7mw96] GET /api/subjects - Request started
+2025-07-12 13:10:23 [INFO] [pekpxkl6y] GET /api/chat - Request started
+2025-07-12 13:10:23 [INFO] [hb777try4] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:10:23 [INFO] [kxci7mw96] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 13:10:23 [INFO] [pekpxkl6y] GET /chat - 🟢 200 (7ms)
+2025-07-12 13:10:29 [INFO] [n9pq0jkd4] GET /api/auth/me - Request started
+2025-07-12 13:10:29 [INFO] [9gsoezudu] GET /api/subjects - Request started
+2025-07-12 13:10:29 [INFO] [g4kocvgo1] GET /api/chat - Request started
+2025-07-12 13:10:29 [INFO] [n9pq0jkd4] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:10:29 [INFO] [9gsoezudu] GET /api/subjects - 🟢 200 (4ms)
+2025-07-12 13:10:29 [INFO] [g4kocvgo1] GET /chat - 🟢 200 (7ms)
+2025-07-12 13:10:35 [INFO] [coiq961te] GET /api/auth/me - Request started
+2025-07-12 13:10:35 [INFO] [l56red0j4] GET /api/subjects - Request started
+2025-07-12 13:10:35 [INFO] [diu0yc6du] GET /api/chat - Request started
+2025-07-12 13:10:35 [INFO] [coiq961te] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 13:10:35 [INFO] [l56red0j4] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 13:10:35 [INFO] [diu0yc6du] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:10:43 [INFO] [0t45ck8xd] GET /api/auth/me - Request started
+2025-07-12 13:10:43 [INFO] [cdvs7ho2v] GET /api/subjects - Request started
+2025-07-12 13:10:43 [INFO] [50xmkpjkd] GET /api/chat - Request started
+2025-07-12 13:10:43 [INFO] [0t45ck8xd] GET /api/auth/me - 🟢 200 (5ms)
+2025-07-12 13:10:43 [INFO] [cdvs7ho2v] GET /api/subjects - 🟢 200 (4ms)
+2025-07-12 13:10:43 [INFO] [50xmkpjkd] GET /chat - 🟢 200 (6ms)
+2025-07-12 13:10:49 [INFO] [c72k8kh0a] GET /api/auth/me - Request started
+2025-07-12 13:10:49 [INFO] [psdw776j8] GET /api/subjects - Request started
+2025-07-12 13:10:49 [INFO] [o5q1curkd] GET /api/chat - Request started
+2025-07-12 13:10:49 [INFO] [c72k8kh0a] GET /api/auth/me - 🟢 200 (9ms)
+2025-07-12 13:10:49 [INFO] [psdw776j8] GET /api/subjects - 🟢 200 (7ms)
+2025-07-12 13:10:49 [INFO] [o5q1curkd] GET /chat - 🟢 200 (11ms)
+2025-07-12 13:10:55 [INFO] [c8r9q63ye] GET /api/auth/me - Request started
+2025-07-12 13:10:55 [INFO] [0zjyd898b] GET /api/subjects - Request started
+2025-07-12 13:10:55 [INFO] [vhygneedf] GET /api/chat - Request started
+2025-07-12 13:10:55 [INFO] [c8r9q63ye] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:10:55 [INFO] [0zjyd898b] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 13:10:55 [INFO] [vhygneedf] GET /chat - 🟢 200 (7ms)
+2025-07-12 13:11:01 [INFO] [g6e4fm34e] GET /api/auth/me - Request started
+2025-07-12 13:11:01 [INFO] [6d6bakd1v] GET /api/subjects - Request started
+2025-07-12 13:11:01 [INFO] [6fkmscqr9] GET /api/chat - Request started
+2025-07-12 13:11:01 [INFO] [g6e4fm34e] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 13:11:01 [INFO] [6d6bakd1v] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:11:01 [INFO] [6fkmscqr9] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:11:08 [INFO] [fne6ez6pv] GET /api/auth/me - Request started
+2025-07-12 13:11:08 [INFO] [up08jeac6] GET /api/subjects - Request started
+2025-07-12 13:11:08 [INFO] [jjq2av67u] GET /api/chat - Request started
+2025-07-12 13:11:08 [INFO] [fne6ez6pv] GET /api/auth/me - 🟢 200 (5ms)
+2025-07-12 13:11:08 [INFO] [up08jeac6] GET /api/subjects - 🟢 200 (4ms)
+2025-07-12 13:11:08 [INFO] [jjq2av67u] GET /chat - 🟢 200 (7ms)
+2025-07-12 13:11:15 [INFO] [4mepbz5y3] GET /api/auth/me - Request started
+2025-07-12 13:11:15 [INFO] [shk3ypjrh] GET /api/subjects - Request started
+2025-07-12 13:11:15 [INFO] [herxou6jz] GET /api/chat - Request started
+2025-07-12 13:11:15 [INFO] [4mepbz5y3] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 13:11:15 [INFO] [shk3ypjrh] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:11:15 [INFO] [herxou6jz] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:11:24 [INFO] [hdfikh0ud] GET /api/auth/me - Request started
+2025-07-12 13:11:24 [INFO] [uz641p7ps] GET /api/subjects - Request started
+2025-07-12 13:11:24 [INFO] [lz3071nid] GET /api/chat - Request started
+2025-07-12 13:11:24 [INFO] [hdfikh0ud] GET /api/auth/me - 🟢 200 (10ms)
+2025-07-12 13:11:24 [INFO] [uz641p7ps] GET /api/subjects - 🟢 200 (10ms)
+2025-07-12 13:11:24 [INFO] [lz3071nid] GET /chat - 🟢 200 (12ms)
+2025-07-12 13:11:30 [INFO] [a3izdu0cv] GET /api/auth/me - Request started
+2025-07-12 13:11:30 [INFO] [sc6qnfcns] GET /api/subjects - Request started
+2025-07-12 13:11:30 [INFO] [3uo57r7aw] GET /api/chat - Request started
+2025-07-12 13:11:30 [INFO] [a3izdu0cv] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 13:11:30 [INFO] [sc6qnfcns] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:11:30 [INFO] [3uo57r7aw] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:11:37 [INFO] [nwgt2c9x3] GET /api/auth/me - Request started
+2025-07-12 13:11:37 [INFO] [ok5i0h7xi] GET /api/subjects - Request started
+2025-07-12 13:11:37 [INFO] [s1591p6jf] GET /api/chat - Request started
+2025-07-12 13:11:37 [INFO] [nwgt2c9x3] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:11:37 [INFO] [ok5i0h7xi] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 13:11:37 [INFO] [s1591p6jf] GET /chat - 🟢 200 (6ms)
+2025-07-12 13:11:43 [INFO] [rg2xu9bd0] GET /api/auth/me - Request started
+2025-07-12 13:11:43 [INFO] [g8c6u58pb] GET /api/chat - Request started
+2025-07-12 13:11:43 [INFO] [wizq52ja3] GET /api/subjects - Request started
+2025-07-12 13:11:43 [INFO] [rg2xu9bd0] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:11:43 [INFO] [wizq52ja3] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:11:43 [INFO] [g8c6u58pb] GET /chat - 🟢 200 (9ms)
+2025-07-12 13:11:50 [INFO] [8du3xud0c] GET /api/auth/me - Request started
+2025-07-12 13:11:50 [INFO] [9dtx52vu7] GET /api/subjects - Request started
+2025-07-12 13:11:50 [INFO] [g4p4tybul] GET /api/chat - Request started
+2025-07-12 13:11:50 [INFO] [8du3xud0c] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 13:11:50 [INFO] [9dtx52vu7] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 13:11:50 [INFO] [g4p4tybul] GET /chat - 🟢 200 (7ms)
+2025-07-12 13:11:56 [INFO] [kdbsunuzf] GET /api/auth/me - Request started
+2025-07-12 13:11:56 [INFO] [mnbk8b1n1] GET /api/subjects - Request started
+2025-07-12 13:11:56 [INFO] [87c6b9xzz] GET /api/chat - Request started
+2025-07-12 13:11:56 [INFO] [kdbsunuzf] GET /api/auth/me - 🟢 200 (7ms)
+2025-07-12 13:11:56 [INFO] [mnbk8b1n1] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:11:56 [INFO] [87c6b9xzz] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:19:43 [INFO] [mbmaoegza] GET /api/auth/me - Request started
+2025-07-12 13:19:43 [INFO] [r3wfs3m38] GET /api/subjects - Request started
+2025-07-12 13:19:43 [INFO] [v796lha7f] GET /api/chat - Request started
+2025-07-12 13:19:43 [INFO] [mbmaoegza] GET /api/auth/me - 🟢 200 (6ms)
+2025-07-12 13:19:43 [INFO] [r3wfs3m38] GET /api/subjects - 🟢 200 (5ms)
+2025-07-12 13:19:43 [INFO] [v796lha7f] GET /chat - 🟢 200 (6ms)
+2025-07-12 13:19:56 [INFO] [myz2rdw5q] GET /api/auth/me - Request started
+2025-07-12 13:19:56 [INFO] [xhoswhysc] GET /api/subjects - Request started
+2025-07-12 13:19:56 [INFO] [bp4a6o47q] GET /api/chat - Request started
+2025-07-12 13:19:56 [INFO] [myz2rdw5q] GET /api/auth/me - 🟢 200 (9ms)
+2025-07-12 13:19:56 [INFO] [xhoswhysc] GET /api/subjects - 🟢 200 (8ms)
+2025-07-12 13:19:56 [INFO] [bp4a6o47q] GET /chat - 🟢 200 (10ms)
+2025-07-12 13:20:03 [INFO] [xzr824ocm] POST /api/auth/signin - Request started
+2025-07-12 13:20:03 [INFO] [xzr824ocm] POST /api/auth/signin - 🟢 200 (26ms)
+2025-07-12 13:20:03 [INFO] [c9vwwrj36] GET /api/subject-statistics - Request started
+2025-07-12 13:20:03 [INFO] [c9vwwrj36] GET /subject-statistics - 🟢 200 (9ms)
+2025-07-12 13:20:03 [INFO] [qms4we3by] GET /api/subject-statistics - Request started
+2025-07-12 13:20:03 [INFO] [qms4we3by] GET /subject-statistics - 🟢 200 (7ms)
+2025-07-12 13:20:06 [INFO] [dkn4yysm9] GET /api/subjects/user - Request started
+2025-07-12 13:20:06 [INFO] [dkn4yysm9] GET /api/subjects/user - 🟢 200 (4ms)

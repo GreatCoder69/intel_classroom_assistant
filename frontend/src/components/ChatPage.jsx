@@ -218,14 +218,14 @@ const ChatPage = () => {
       
       // Add resource content as JSON if resources are being used
       if (user?.role === "student" && useResources && subjectResources.length > 0) {
-        console.log("🔄 Starting resource content fetch for", subjectResources.length, "resources");
+        console.log("Starting resource content fetch for", subjectResources.length, "resources");
         formData.append("useResources", "true");
         
         // Fetch and include JSON content for each resource
         const resourceContents = await Promise.all(
           subjectResources.map(async (resource) => {
             try {
-              console.log(`🔄 Fetching content for resource: ${resource.name} (ID: ${resource._id})`);
+              console.log(`Fetching content for resource: ${resource.name} (ID: ${resource._id})`);
               const res = await fetch(`${import.meta.env.VITE_API_URL}/api/resources/${resource._id}/content`, {
                 headers: {
                   "Content-Type": "application/json",
@@ -237,7 +237,7 @@ const ChatPage = () => {
               
               if (res.ok) {
                 const content = await res.json();
-                console.log(`✅ Resource ${resource.name} content:`, {
+                console.log(`Resource ${resource.name} content:`, {
                   hasExtractedText: !!content.extractedText,
                   hasTextChunks: !!content.textChunks,
                   wordCount: content.wordCount,
@@ -254,7 +254,7 @@ const ChatPage = () => {
                   wordCount: content.wordCount
                 };
               } else {
-                console.error(`❌ Failed to fetch resource ${resource.name}:`, res.status, res.statusText);
+                console.error(`Failed to fetch resource ${resource.name}:`, res.status, res.statusText);
               }
               return null;
             } catch (error) {
@@ -269,8 +269,8 @@ const ChatPage = () => {
         if (validContents.length > 0) {
           const resourcesJson = JSON.stringify(validContents);
           formData.append("resourceContents", resourcesJson);
-          console.log("✅ Sending JSON resource contents:", validContents.length, "resources");
-          console.log("📊 Resource details:", validContents.map(r => ({
+          console.log("Sending JSON resource contents:", validContents.length, "resources");
+          console.log("Resource details:", validContents.map(r => ({
             name: r.name,
             fileName: r.fileName,
             wordCount: r.wordCount,
@@ -279,7 +279,7 @@ const ChatPage = () => {
           console.log("📦 Total word count:", validContents.reduce((sum, r) => sum + (r.wordCount || 0), 0));
           console.log("📋 FormData resourceContents length:", resourcesJson.length, "characters");
         } else {
-          console.log("❌ No valid resource contents to send");
+          console.log("No valid resource contents to send");
         }
       } else {
         console.log("🚫 Resource conditions not met:", {
@@ -524,7 +524,7 @@ const ChatPage = () => {
           method: "PUT",
           headers: {
             "x-access-token": token,
-            // ❌ Do NOT set Content-Type manually here
+            // Do NOT set Content-Type manually here
           },
           body: formData,
         }
@@ -924,7 +924,7 @@ const ChatPage = () => {
                 fontSize: "1.5rem",
               }}
             >
-              🤖 eduAI
+              eduAI
             </h5>
             <Link to="/subjects" className="btn btn-outline-primary btn-sm">
               Subjects
@@ -980,7 +980,7 @@ const ChatPage = () => {
                   (msg.image.toLowerCase().endsWith(".pdf") ? (
                     <div className="d-flex flex-column align-items-start mb-2">
                       <div className="d-flex align-items-center gap-2 mb-2">
-                        <span style={{ fontSize: 20 }}>📄</span>
+                        <span style={{ fontSize: 20 }}>File</span>
                         <a
                           href={msg.image}
                           target="_blank"
@@ -1178,7 +1178,7 @@ const ChatPage = () => {
           {useResources && subjectResources && subjectResources.length > 0 && (
             <div className="enhanced-resources-display mt-3">
               <div className="text-muted fw-bold mb-2">
-                📄 Using {subjectResources.length} JSON resource{subjectResources.length !== 1 ? 's' : ''} from {selectedSubject}
+                Using {subjectResources.length} JSON resource{subjectResources.length !== 1 ? 's' : ''} from {selectedSubject}
               </div>
               <div className="row g-2">
                 {subjectResources.map(resource => (

@@ -3,7 +3,18 @@ const config = require("../config/auth.config.js");
 const db = require("../models/index.js");
 const User = db.user;
 
-verifyToken = (req, res, next) => {
+const jwt = require("jsonwebtoken");
+const config = require("../config/auth.config.js");
+const db = require("../models/index.js");
+const User = db.user;
+
+/**
+ * Token verification middleware
+ * @param {Object} req Express request object
+ * @param {Object} res Express response object
+ * @param {Function} next Express next function
+ */
+const VerifyToken = (req, res, next) => {
   const token = req.headers["x-access-token"];
 
   if (!token) {
@@ -18,13 +29,11 @@ verifyToken = (req, res, next) => {
     try {
       req.userId = decoded.id;
       
-      // If email and role are in the token, use them (new tokens)
       if (decoded.email && decoded.role) {
         req.userEmail = decoded.email;
         req.userRole = decoded.role;
         next();
       } else {
-        // If not in token, fetch from database (older tokens)
         const user = await User.findById(decoded.id);
         if (!user) {
           return res.status(401).send({ message: "User not found!" });
@@ -39,7 +48,13 @@ verifyToken = (req, res, next) => {
   });
 };
 
-isTeacher = (req, res, next) => {
+/**
+ * Teacher role verification middleware
+ * @param {Object} req Express request object
+ * @param {Object} res Express response object
+ * @param {Function} next Express next function
+ */
+const IsTeacher = (req, res, next) => {
   if (req.userRole !== 'teacher') {
     return res.status(403).send({ message: "Require Teacher Role!" });
   }
@@ -47,8 +62,8 @@ isTeacher = (req, res, next) => {
 };
 
 const authJwt = {
-  verifyToken,
-  isTeacher
+  verifyToken: VerifyToken,
+  isTeacher: IsTeacher
 };
 
 module.exports = authJwt;

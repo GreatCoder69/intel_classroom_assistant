@@ -115,10 +115,10 @@ const db = require("./app/models");
 logger.info("🔌 Connecting to MongoDB...");
 db.mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    logger.info("✅ MongoDB connected successfully");
+    logger.info("MongoDB connected successfully");
   })
   .catch((err) => {
-    logger.error("❌ MongoDB connection failed:", err);
+    logger.error("MongoDB connection failed:", err);
     process.exit(1);
   });
 
@@ -138,78 +138,78 @@ logger.info("🛣️  Loading routes...");
 
 try {
   require('./app/routes/auth.routes')(app);
-  logger.debug("✅ Auth routes loaded");
+  logger.debug("Auth routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load auth routes:", err.message);
+  logger.error("Failed to load auth routes:", err.message);
   throw err;
 }
 
 try {
   require('./app/routes/user.routes')(app);
-  logger.debug("✅ User routes loaded");
+  logger.debug("User routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load user routes:", err.message);
+  logger.error("Failed to load user routes:", err.message);
   throw err;
 }
 
 try {
   require("./app/routes/chat.routes")(app);
-  logger.debug("✅ Chat routes loaded");
+  logger.debug("Chat routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load chat routes:", err.message);
+  logger.error("Failed to load chat routes:", err.message);
   throw err;
 }
 
 try {
   require("./app/routes/admin.routes")(app);
-  logger.debug("✅ Admin routes loaded");
+  logger.debug("Admin routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load admin routes:", err.message);
+  logger.error("Failed to load admin routes:", err.message);
   throw err;
 }
 
 try {
   require("./app/routes/log.routes")(app);
-  logger.debug("✅ Log routes loaded");
+  logger.debug("Log routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load log routes:", err.message);
+  logger.error("Failed to load log routes:", err.message);
   throw err;
 }
 
 try {
   require("./app/routes/subjects.routes")(app);
-  logger.debug("✅ Subjects routes loaded");
+  logger.debug("Subjects routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load subjects routes:", err.message);
+  logger.error("Failed to load subjects routes:", err.message);
   throw err;
 }
 
 try {
   require("./app/routes/resources.routes")(app);
-  logger.debug("✅ Resources routes loaded");
+  logger.debug("Resources routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load resources routes:", err.message);
+  logger.error("Failed to load resources routes:", err.message);
   throw err;
 }
 
 try {
   require("./app/routes/suggestion.routes")(app);
-  logger.debug("✅ Suggestion routes loaded");
+  logger.debug("Suggestion routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load suggestion routes:", err.message);
+  logger.error("Failed to load suggestion routes:", err.message);
   throw err;
 }
 
 try {
   const uploadRoutes = require("./app/routes/upload.routes");
   app.use("/api", uploadRoutes);
-  logger.debug("✅ Upload routes loaded");
+  logger.debug("Upload routes loaded");
 } catch (err) {
-  logger.error("❌ Failed to load upload routes:", err.message);
+  logger.error("Failed to load upload routes:", err.message);
   throw err;
 }
 
-logger.info("✅ All routes loaded successfully");
+logger.info("All routes loaded successfully");
 
 // Global error handler
 app.use((err, req, res, next) => {

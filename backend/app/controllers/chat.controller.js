@@ -86,7 +86,7 @@ exports.addChat = async (req, res) => {
   const requestId = `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
   // Enhanced logging with emojis and context
-  chatLogger.info(`💬 [${requestId}] Chat request started`, {
+  chatLogger.info(`[${requestId}] Chat request started`, {
     userEmail: email?.substring(0, 3) + '***',
     subject: subject?.substring(0, 30),
     hasQuestion: !!question,
@@ -97,7 +97,7 @@ exports.addChat = async (req, res) => {
   });
 
   if (!subject || (!question && !req.file) || !email) {
-    chatLogger.warn(`❌ [${requestId}] Missing required fields`, {
+    chatLogger.warn(`[${requestId}] Missing required fields`, {
       hasSubject: !!subject,
       hasQuestion: !!question,
       hasFile: !!req.file,
@@ -199,7 +199,7 @@ exports.addChat = async (req, res) => {
     );
     const responseTime = Date.now() - t0;
     
-    chatLogger.info(`✅ [${requestId}] AI response generated`, {
+    chatLogger.info(`[${requestId}] AI response generated`, {
       responseTime: responseTime + 'ms',
       statusCode: flaskRes.status,
       answerLength: flaskRes.data.answer?.length || 0,
@@ -278,7 +278,7 @@ exports.addChat = async (req, res) => {
 
     res.status(200).json({ answer, file: imageUrl, chatCategory });
     
-    logger.info(`[${requestId}] 🎯 Chat request completed successfully`, {
+    logger.info(`[${requestId}] Chat request completed successfully`, {
       responseTime: responseTime + 'ms',
       answerLength: answer?.length || 0,
       chatCategory

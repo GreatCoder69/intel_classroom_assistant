@@ -407,11 +407,11 @@ warnings.filterwarnings("ignore", message="The following generation flags are no
 warnings.filterwarnings("ignore", message=".*temperature.*")
 
 logger = logging.getLogger('intel_classroom_assistant')
-logger.info("🚀 Intel Classroom Assistant server starting...")
+logger.info("Intel Classroom Assistant server starting...")
 
 def log_chat_activity(user_info, question_length, response_length, processing_time, success=True):
     """Log chat activity with balanced detail"""
-    status = "✅" if success else "❌"
+    status = "SUCCESS" if success else "FAILED"
     chat_logger.info(f"{status} Chat: user={user_info}, q_len={question_length}, "
                      f"resp_len={response_length}, time={processing_time:.2f}s")
 
@@ -1277,11 +1277,11 @@ def ultra_chat():
         user_token = request.headers.get('x-access-token', '')
         user_info = user_token[:8] + '***' if user_token else 'anonymous'
         
-        logger.info(f"💬 [{request_id}] Chat request started - role: {user_role}, subject: {subject[:20]}")
+        logger.info(f"[{request_id}] Chat request started - role: {user_role}, subject: {subject[:20]}")
         log_chat_activity(user_info, len(question), 0, 0.0, False)  # Log start
         
         if not question:
-            logger.warning(f"❌ [{request_id}] No question provided")
+            logger.warning(f"[{request_id}] No question provided")
             return jsonify({"error": "No question provided"}), 400
         
         if user_role not in ["student", "teacher"]:
@@ -1374,7 +1374,7 @@ def ultra_chat():
         # Submit for batch processing or process directly if model available
         if available_models > 0:
             try:
-                logger.info(f"🤖 [{request_id}] Starting AI response generation...")
+                logger.info(f"[{request_id}] Starting AI response generation...")
                 generation_start = time.time()
                 
                 # Direct processing for now
@@ -1382,10 +1382,10 @@ def ultra_chat():
                 answer = extract_assistant_response(response)
                 
                 generation_time = time.time() - generation_start
-                logger.info(f"✅ [{request_id}] AI response generated in {generation_time:.2f}s - length: {len(answer)} chars")
+                logger.info(f"[{request_id}] AI response generated in {generation_time:.2f}s - length: {len(answer)} chars")
                 
             except Exception as e:
-                logger.error(f"❌ [{request_id}] Model error: {e}", exc_info=True)
+                logger.error(f"[{request_id}] Model error: {e}", exc_info=True)
                 answer = "I'm experiencing technical difficulties. Please try again."
         else:
             logger.error(f"[{request_id}] No models available")
@@ -1400,7 +1400,7 @@ def ultra_chat():
         if process_time > 45:  # Increased threshold from 30 to 45 seconds (150%)
             logger.warning(f"🐌 [{request_id}] Slow response: {process_time}s")
         else:
-            logger.info(f"⚡ [{request_id}] Chat completed in {process_time}s")
+            logger.info(f"[{request_id}] Chat completed in {process_time}s")
         
         response_data = {
             "answer": answer,

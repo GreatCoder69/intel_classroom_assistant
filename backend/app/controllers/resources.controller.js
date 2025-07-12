@@ -213,7 +213,7 @@ function extractKeywords(text) {
 async function extractPDFTextEnhanced(filePath) {
   return new Promise((resolve) => {
     try {
-      console.log('🔄 Starting enhanced PDF extraction for:', filePath);
+      console.log('Starting enhanced PDF extraction for:', filePath);
       
       // Path to Python processor
       const pythonScript = path.join(__dirname, '../../content/pdf_processor.py');
@@ -238,7 +238,7 @@ async function extractPDFTextEnhanced(filePath) {
           try {
             // Read the enhanced JSON output
             const enhancedData = JSON.parse(fs.readFileSync(outputPath, 'utf8'));
-            console.log('✅ Enhanced PDF extraction completed successfully');
+            console.log('Enhanced PDF extraction completed successfully');
             
             // Convert to format expected by existing code
             const chunks = enhancedData.chunks.map(chunk => ({
@@ -262,7 +262,7 @@ async function extractPDFTextEnhanced(filePath) {
             });
             
           } catch (parseError) {
-            console.error('❌ Error parsing enhanced extraction results:', parseError);
+            console.error('Error parsing enhanced extraction results:', parseError);
             // Fall back to basic extraction
             resolve(await extractPDFTextBasic(filePath));
           }
@@ -282,7 +282,7 @@ async function extractPDFTextEnhanced(filePath) {
       });
       
     } catch (error) {
-      console.error('❌ Error in enhanced PDF extraction:', error);
+      console.error('Error in enhanced PDF extraction:', error);
       // Fall back to basic extraction
       resolve(extractPDFTextBasic(filePath));
     }
@@ -294,7 +294,7 @@ async function extractPDFTextEnhanced(filePath) {
  */
 async function extractPDFTextBasic(filePath) {
   try {
-    console.log('🔄 Starting basic PDF extraction for:', filePath);
+    console.log('Starting basic PDF extraction for:', filePath);
     
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdfParse(dataBuffer);
@@ -306,7 +306,7 @@ async function extractPDFTextBasic(filePath) {
     const textChunks = createIntelligentChunks(fullText, pageCount);
     const wordCount = fullText.split(/\s+/).length;
     
-    console.log(`✅ Basic PDF extraction completed: ${pageCount} pages, ${wordCount} words`);
+    console.log(`Basic PDF extraction completed: ${pageCount} pages, ${wordCount} words`);
     
     return {
       extractedText: fullText,
@@ -317,7 +317,7 @@ async function extractPDFTextBasic(filePath) {
       processingMethod: 'basic'
     };
   } catch (error) {
-    console.error('❌ Error in basic PDF extraction:', error);
+    console.error('Error in basic PDF extraction:', error);
     return {
       extractedText: '',
       textChunks: [],
@@ -422,12 +422,12 @@ exports.uploadResource = async (req, res) => {
     // Extract PDF text in background (don't block response)
     setImmediate(async () => {
       try {
-        console.log('🔄 Starting background PDF extraction for resource:', resource._id);
+        console.log('Starting background PDF extraction for resource:', resource._id);
         console.log('📁 File path:', req.file.path);
-        console.log('📊 File size:', req.file.size, 'bytes');
+        console.log('File size:', req.file.size, 'bytes');
         
         const extractionResult = await extractPDFText(req.file.path);
-        console.log('✅ PDF extraction result:', {
+        console.log('PDF extraction result:', {
           pageCount: extractionResult.pageCount,
           wordCount: extractionResult.wordCount,
           status: extractionResult.status
@@ -443,12 +443,12 @@ exports.uploadResource = async (req, res) => {
           extractionDate: new Date()
         });
         
-        console.log('📝 PDF extraction database update completed for resource:', resource._id);
-        console.log('🔄 Update result:', updateResult ? 'Success' : 'Failed');
+        console.log('PDF extraction database update completed for resource:', resource._id);
+        console.log('Update result:', updateResult ? 'Success' : 'Failed');
         
         // Save extracted content as JSON file for easy access
         const jsonFilePath = req.file.path.replace('.pdf', '_content.json');
-        console.log('💾 Creating JSON file at:', jsonFilePath);
+        console.log('Creating JSON file at:', jsonFilePath);
         
         let contentData;
         
@@ -508,7 +508,7 @@ exports.uploadResource = async (req, res) => {
         }
         
         fs.writeFileSync(jsonFilePath, JSON.stringify(contentData, null, 2));
-        console.log('💾 JSON content file saved:', jsonFilePath);
+        console.log('JSON content file saved:', jsonFilePath);
         
         // Update resource with JSON file status
         const jsonUpdateResult = await Resource.findByIdAndUpdate(resource._id, {
@@ -517,11 +517,11 @@ exports.uploadResource = async (req, res) => {
         });
         
         console.log('📄 JSON file status update completed for resource:', resource._id);
-        console.log('🔄 JSON update result:', jsonUpdateResult ? 'Success' : 'Failed');
+        console.log('JSON update result:', jsonUpdateResult ? 'Success' : 'Failed');
         
       } catch (extractionError) {
-        console.error('❌ Error during PDF extraction:', extractionError);
-        console.error('📊 Error details:', {
+        console.error('Error during PDF extraction:', extractionError);
+        console.error('Error details:', {
           message: extractionError.message,
           stack: extractionError.stack
         });
@@ -533,7 +533,7 @@ exports.uploadResource = async (req, res) => {
         });
         
         console.log('💥 Error status update completed for resource:', resource._id);
-        console.log('🔄 Error update result:', errorUpdateResult ? 'Success' : 'Failed');
+        console.log('Error update result:', errorUpdateResult ? 'Success' : 'Failed');
       }
     });
     

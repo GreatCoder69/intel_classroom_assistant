@@ -370,7 +370,7 @@ function Resources() {
         <div className="d-flex justify-content-between align-items-start mb-4">
           <div>
             <h2 className="resources-title">
-              📚 {subject?.name} Resources
+              {subject?.name} Resources
             </h2>
             <p className="resources-description">
               {user?.role === 'teacher' 
@@ -401,7 +401,7 @@ function Resources() {
                 Refreshing...
               </>
             ) : (
-              <>🔄 Refresh</>
+              <>Refresh</>
             )}
           </Button>
         </div>
@@ -418,7 +418,7 @@ function Resources() {
               <div>
                 <strong>AI Context Integration:</strong> When you upload PDFs, their content is automatically extracted and saved as JSON files. 
                 Students can choose to include this content as context when chatting with the AI assistant. 
-                You can download the JSON files using the <span style={{backgroundColor: "#28a745", padding: "2px 6px", borderRadius: "3px", fontSize: "0.8em"}}>📄 JSON</span> button.
+                You can download the JSON files using the <span style={{backgroundColor: "#28a745", padding: "2px 6px", borderRadius: "3px", fontSize: "0.8em"}}>JSON</span> button.
               </div>
             </div>
           </div>
@@ -446,7 +446,7 @@ function Resources() {
           {resources.length === 0 ? (
             <div className="no-resources">
               <div style={{ textAlign: "center", padding: "3rem" }}>
-                <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>📄</div>
+                <div style={{ fontSize: "4rem", marginBottom: "1rem" }}>File</div>
                 <p style={{ fontSize: "1.3rem", marginBottom: "1rem", color: "#ffffff" }}>
                   No resources available yet.
                 </p>
@@ -464,7 +464,7 @@ function Resources() {
                   <div className="d-flex justify-content-between align-items-start mb-3">
                     <div>
                       <h5 className="resource-name">{resource.name}</h5>
-                      <p className="resource-filename">📄 {resource.fileName}</p>
+                      <p className="resource-filename">{resource.fileName}</p>
                     </div>
                     <span className="resource-size">{formatFileSize(resource.fileSize)}</span>
                   </div>
@@ -484,8 +484,8 @@ function Resources() {
                           Content Extraction: 
                           <span className={`status-badge status-${resource.extractionStatus}`}>
                             {resource.extractionStatus === 'processing' && '⏳ Processing...'}
-                            {resource.extractionStatus === 'completed' && `✅ Complete (${resource.pageCount} pages, ${resource.wordCount} words)`}
-                            {resource.extractionStatus === 'failed' && '❌ Failed'}
+                            {resource.extractionStatus === 'completed' && `Complete (${resource.pageCount} pages, ${resource.wordCount} words)`}
+                            {resource.extractionStatus === 'failed' && 'Failed'}
                             {resource.extractionStatus === 'pending' && '⏸️ Pending'}
                           </span>
                         </small>
@@ -499,8 +499,8 @@ function Resources() {
                           JSON File: 
                           <span className={`status-badge status-${resource.jsonFileStatus || 'pending'}`}>
                             {(!resource.jsonFileStatus || resource.jsonFileStatus === 'pending') && '⏸️ Pending'}
-                            {resource.jsonFileStatus === 'created' && '✅ Created'}
-                            {resource.jsonFileStatus === 'failed' && '❌ Failed'}
+                            {resource.jsonFileStatus === 'created' && 'Created'}
+                            {resource.jsonFileStatus === 'failed' && 'Failed'}
                           </span>
                         </small>
                       </div>

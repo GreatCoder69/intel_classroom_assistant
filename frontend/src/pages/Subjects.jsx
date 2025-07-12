@@ -190,7 +190,7 @@ function Subjects() {
         <div className="d-flex justify-content-between align-items-start mb-4">
           <div>
             <h2 className="subjects-title">
-              {user?.role === 'teacher' ? '👨‍🏫 Manage Subjects' : '📚 My Subjects'}
+              {user?.role === 'teacher' ? 'Manage Subjects' : 'My Subjects'}
             </h2>
             <p className="subjects-description">
               {user?.role === 'teacher' 
@@ -278,7 +278,7 @@ function Subjects() {
                     className="btn btn-primary btn-sm"
                     style={{ textDecoration: 'none' }}
                   >
-                    📚 View Resources
+                    View Resources
                   </Link>
                   
                   {user?.role === 'teacher' && (

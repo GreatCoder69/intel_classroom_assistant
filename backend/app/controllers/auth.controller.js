@@ -10,8 +10,8 @@ const path = require("path");
 
 /**
  * User registration
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * @param {Object} req Express request object
+ * @param {Object} res Express response object
  */
 exports.SignUp = async (req, res) => {
   try {
@@ -40,8 +40,8 @@ exports.SignUp = async (req, res) => {
 
 /**
  * User authentication
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * @param {Object} req Express request object
+ * @param {Object} res Express response object
  */
 exports.SignIn = async (req, res) => {
   try {
@@ -82,8 +82,8 @@ exports.SignIn = async (req, res) => {
 
 /**
  * Get current user information
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * @param {Object} req Express request object
+ * @param {Object} res Express response object
  */
 exports.GetMe = async (req, res) => {
   try {
@@ -109,8 +109,8 @@ exports.GetMe = async (req, res) => {
 
 /**
  * Update user profile
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * @param {Object} req Express request object
+ * @param {Object} res Express response object
  */
 exports.UpdateProfile = async (req, res) => {
   try {
@@ -150,8 +150,8 @@ exports.UpdateProfile = async (req, res) => {
 
 /**
  * User logout
- * @param {Object} req - Express request object
- * @param {Object} res - Express response object
+ * @param {Object} req Express request object
+ * @param {Object} res Express response object
  */
 exports.SignOut = async (req, res) => {
   try {
