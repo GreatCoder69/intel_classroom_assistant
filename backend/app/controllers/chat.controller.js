@@ -238,13 +238,6 @@ exports.addChat = async (req, res) => {
       console.error("Error saving chat message for statistics:", saveError);
     }
 
-    await LogEvent({
-      email,
-      action: "create_chat",
-      message: `Message added to '${subject}'`,
-      meta: { chatCategory },
-    });
-
     res.set({
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
@@ -253,7 +246,19 @@ exports.addChat = async (req, res) => {
 
     res.status(200).json({ answer, file: imageUrl, chatCategory });
 
-    logger.info(`[${requestId}] Chat request completed successfully`, {
+    // Log events after response is sent to prevent any potential issues
+    try {
+      await LogEvent({
+        email,
+        action: "create_chat",
+        message: `Message added to '${subject}'`,
+        meta: { chatCategory },
+      });
+    } catch (logError) {
+      console.error("Error logging event:", logError);
+    }
+
+    chatLogger.info(`[${requestId}] Chat request completed successfully`, {
       responseTime: responseTime + "ms",
       answerLength: answer?.length || 0,
       chatCategory,
@@ -269,12 +274,16 @@ exports.addChat = async (req, res) => {
       });
     }
 
-    logger.error(`[${requestId}] Chat request failed`, {
+    chatLogger.error(`[${requestId}] Chat request failed`, {
       error: err.message,
       stack: err.stack?.split("\n").slice(0, 3).join("\n"),
     });
 
-    await LogLLMError({ email, subject, prompt: question, error: err });
+    try {
+      await LogLLMError({ email, subject, prompt: question, error: err });
+    } catch (logError) {
+      console.error("Error logging LLM error:", logError);
+    }
   }
 };
 

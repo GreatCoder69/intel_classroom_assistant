@@ -221,11 +221,13 @@ app.use((err, req, res, next) => {
     method: req.method
   });
   
-  res.status(500).json({
-    error: 'Internal Server Error',
-    requestId: requestId,
-    timestamp: new Date().toISOString()
-  });
+  if (!res.headersSent) {
+    res.status(500).json({
+      error: 'Internal Server Error',
+      requestId: requestId,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // 404 handler

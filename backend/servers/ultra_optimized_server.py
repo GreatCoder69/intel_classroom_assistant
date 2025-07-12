@@ -1097,15 +1097,33 @@ def fetch_subject_content_by_name(subject_name: str, use_resources: bool = False
         
         subjects_data = response.json()
         
-        # Find subject ID efficiently
-        subject_id = next(
-            (subject.get('_id') for subject in subjects_data 
-             if subject.get('name') == subject_name), 
-            None
-        )
+        # Enhanced subject matching - try multiple strategies
+        subject_id = None
+        
+        # Strategy 1: Exact match
+        for subject in subjects_data:
+            subject_name_db = subject.get('name', '')
+            # Handle both 'id' and '_id' keys from the API
+            subject_id_db = subject.get('_id') or subject.get('id')
+            if subject_name_db.lower() == subject_name.lower():
+                subject_id = subject_id_db
+                logger.info(f"Found exact match: '{subject_name}' -> ID: {subject_id}")
+                break
+        
+        # Strategy 2: Partial match (only if exact match fails)
+        if not subject_id:
+            for subject in subjects_data:
+                subject_name_db = subject.get('name', '')
+                if (subject_name.lower() in subject_name_db.lower() or 
+                    subject_name_db.lower() in subject_name.lower()):
+                    subject_id = subject.get('_id') or subject.get('id')
+                    if subject_id:
+                        logger.info(f"Found partial match: '{subject_name}' -> '{subject_name_db}'")
+                        break
         
         if not subject_id:
-            logger.warning(f"Subject '{subject_name}' not found")
+            available_subjects = [s.get('name', '') for s in subjects_data]
+            logger.warning(f"Subject '{subject_name}' not found. Available subjects: {available_subjects}")
             content_cache.set(cache_key, "")
             return ""
         

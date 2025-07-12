@@ -56,6 +56,7 @@ lerna-debug.log*
 pnpm-debug.log*
 
 # === Backend (Python/Node.js) ===
+backend/logs/
 backend/servers/logs/
 backend/servers/model_cache/
 backend/servers/voice_cache/
