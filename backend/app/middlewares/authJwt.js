@@ -3,11 +3,6 @@ const config = require("../config/auth.config.js");
 const db = require("../models/index.js");
 const User = db.user;
 
-const jwt = require("jsonwebtoken");
-const config = require("../config/auth.config.js");
-const db = require("../models/index.js");
-const User = db.user;
-
 /**
  * Token verification middleware
  * @param {Object} req Express request object

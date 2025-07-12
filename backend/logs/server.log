@@ -721,3 +721,40 @@
 2025-07-12 13:20:03 [INFO] [qms4we3by] GET /subject-statistics - 🟢 200 (7ms)
 2025-07-12 13:20:06 [INFO] [dkn4yysm9] GET /api/subjects/user - Request started
 2025-07-12 13:20:06 [INFO] [dkn4yysm9] GET /api/subjects/user - 🟢 200 (4ms)
+2025-07-12 13:20:08 [INFO] [sjp5u1o6x] GET /api/subject-statistics - Request started
+2025-07-12 13:20:08 [INFO] [sjp5u1o6x] GET /subject-statistics - 🟢 200 (7ms)
+2025-07-12 13:20:08 [INFO] [lrnkq8xnv] GET /api/subject-statistics - Request started
+2025-07-12 13:20:08 [INFO] [lrnkq8xnv] GET /subject-statistics - 🟢 200 (8ms)
+2025-07-12 13:20:10 [INFO] [qo038wx0t] GET /api/subjects - Request started
+2025-07-12 13:20:10 [INFO] [qo038wx0t] GET /api/subjects - 🟢 200 (4ms)
+2025-07-12 13:20:10 [INFO] [7zg4lfy1h] GET /api/suggestions - Request started
+2025-07-12 13:20:10 [INFO] [7zg4lfy1h] GET /suggestions - 🟢 200 (5ms)
+2025-07-12 13:20:33 [INFO] [kptazteer] POST /api/suggestions - Request started
+2025-07-12 13:20:34 [INFO] [kptazteer] POST /suggestions - 🟢 200 (889ms)
+2025-07-12 13:20:39 [INFO] [9oyvonjm5] GET /api/subject-statistics - Request started
+2025-07-12 13:20:39 [INFO] [9oyvonjm5] GET /subject-statistics - 🟢 200 (6ms)
+2025-07-12 13:20:39 [INFO] [4r63snm1k] GET /api/subject-statistics - Request started
+2025-07-12 13:20:39 [INFO] [4r63snm1k] GET /subject-statistics - 🟢 200 (7ms)
+2025-07-12 13:20:41 [INFO] [f53hlf4bn] GET /api/auth/me - Request started
+2025-07-12 13:20:41 [INFO] [abj72zm47] GET /api/chat - Request started
+2025-07-12 13:20:41 [INFO] [f53hlf4bn] GET /api/auth/me - 🟢 200 (5ms)
+2025-07-12 13:20:41 [INFO] [abj72zm47] GET /chat - 🟢 200 (6ms)
+2025-07-12 13:20:44 [INFO] [yhdyjgga1] GET /api/subject-statistics - Request started
+2025-07-12 13:20:44 [INFO] [yhdyjgga1] GET /subject-statistics - 🟢 200 (6ms)
+2025-07-12 13:20:44 [INFO] [co3shcokp] GET /api/subject-statistics - Request started
+2025-07-12 13:20:44 [INFO] [co3shcokp] GET /subject-statistics - 🟢 200 (9ms)
+2025-07-12 13:20:50 [INFO] [rd18jdtbp] POST /api/auth/signin - Request started
+2025-07-12 13:20:50 [INFO] [rd18jdtbp] POST /api/auth/signin - 🟢 200 (26ms)
+2025-07-12 13:20:50 [INFO] [80gye3gy1] GET /api/auth/me - Request started
+2025-07-12 13:20:50 [INFO] [80gye3gy1] GET /api/auth/me - 🟢 200 (4ms)
+2025-07-12 13:20:50 [INFO] [w2y71oj1h] GET /api/subjects - Request started
+2025-07-12 13:20:50 [INFO] [r31jt8vc2] GET /api/chat - Request started
+2025-07-12 13:20:50 [INFO] [w2y71oj1h] GET /api/subjects - 🟢 200 (6ms)
+2025-07-12 13:20:50 [INFO] [r31jt8vc2] GET /chat - 🟢 200 (8ms)
+2025-07-12 13:20:54 [INFO] [8k3g53ycx] GET /api/subjects/user - Request started
+2025-07-12 13:20:54 [INFO] [8k3g53ycx] GET /api/subjects/user - 🟢 200 (4ms)
+2025-07-12 13:20:55 [INFO] [ayaioq6p2] GET /api/subjects/user - Request started
+2025-07-12 13:20:55 [INFO] [ayaioq6p2] GET /api/subjects/user - 🟢 200 (3ms)
+2025-07-12 13:20:55 [INFO] [zyrubh2q3] GET /api/subjects/68715defcbb3bfc54c40e0d7/resources - Request started
+2025-07-12 13:20:55 [INFO] [zyrubh2q3] GET /api/subjects/68715defcbb3bfc54c40e0d7/resources - 🟢 200 (4ms)
+2025-07-12 13:22:43 [INFO] 🛑 SIGINT received, shutting down gracefully...
